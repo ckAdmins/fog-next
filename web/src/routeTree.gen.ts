@@ -8,353 +8,353 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as AuthRouteImport } from "./routes/_auth";
-import { Route as AuthDashboardRouteImport } from "./routes/_auth/dashboard";
-import { Route as AuthGroupsRouteImport } from "./routes/_auth/groups";
-import { Route as AuthHostsIdRouteImport } from "./routes/_auth/hosts/$id";
-import { Route as AuthHostsIndexRouteImport } from "./routes/_auth/hosts/index";
-import { Route as AuthImagesRouteImport } from "./routes/_auth/images";
-import { Route as AuthPendingMacsRouteImport } from "./routes/_auth/pending-macs";
-import { Route as AuthReportsRouteImport } from "./routes/_auth/reports";
-import { Route as AuthSettingsRouteImport } from "./routes/_auth/settings";
-import { Route as AuthSnapinsRouteImport } from "./routes/_auth/snapins";
-import { Route as AuthStorageRouteImport } from "./routes/_auth/storage";
-import { Route as AuthTasksRouteImport } from "./routes/_auth/tasks";
-import { Route as AuthUsersRouteImport } from "./routes/_auth/users";
-import { Route as IndexRouteImport } from "./routes/index";
-import { Route as LoginRouteImport } from "./routes/login";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AuthRouteImport } from './routes/_auth'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthUsersRouteImport } from './routes/_auth/users'
+import { Route as AuthTasksRouteImport } from './routes/_auth/tasks'
+import { Route as AuthStorageRouteImport } from './routes/_auth/storage'
+import { Route as AuthSnapinsRouteImport } from './routes/_auth/snapins'
+import { Route as AuthSettingsRouteImport } from './routes/_auth/settings'
+import { Route as AuthReportsRouteImport } from './routes/_auth/reports'
+import { Route as AuthPendingMacsRouteImport } from './routes/_auth/pending-macs'
+import { Route as AuthImagesRouteImport } from './routes/_auth/images'
+import { Route as AuthGroupsRouteImport } from './routes/_auth/groups'
+import { Route as AuthDashboardRouteImport } from './routes/_auth/dashboard'
+import { Route as AuthHostsIndexRouteImport } from './routes/_auth/hosts/index'
+import { Route as AuthHostsIdRouteImport } from './routes/_auth/hosts/$id'
 
 const LoginRoute = LoginRouteImport.update({
-	id: "/login",
-	path: "/login",
-	getParentRoute: () => rootRouteImport,
-} as any);
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
-	id: "/_auth",
-	getParentRoute: () => rootRouteImport,
-} as any);
+  id: '/_auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
-	id: "/",
-	path: "/",
-	getParentRoute: () => rootRouteImport,
-} as any);
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthUsersRoute = AuthUsersRouteImport.update({
-	id: "/users",
-	path: "/users",
-	getParentRoute: () => AuthRoute,
-} as any);
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AuthTasksRoute = AuthTasksRouteImport.update({
-	id: "/tasks",
-	path: "/tasks",
-	getParentRoute: () => AuthRoute,
-} as any);
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AuthStorageRoute = AuthStorageRouteImport.update({
-	id: "/storage",
-	path: "/storage",
-	getParentRoute: () => AuthRoute,
-} as any);
+  id: '/storage',
+  path: '/storage',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AuthSnapinsRoute = AuthSnapinsRouteImport.update({
-	id: "/snapins",
-	path: "/snapins",
-	getParentRoute: () => AuthRoute,
-} as any);
+  id: '/snapins',
+  path: '/snapins',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AuthSettingsRoute = AuthSettingsRouteImport.update({
-	id: "/settings",
-	path: "/settings",
-	getParentRoute: () => AuthRoute,
-} as any);
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AuthReportsRoute = AuthReportsRouteImport.update({
-	id: "/reports",
-	path: "/reports",
-	getParentRoute: () => AuthRoute,
-} as any);
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AuthPendingMacsRoute = AuthPendingMacsRouteImport.update({
-	id: "/pending-macs",
-	path: "/pending-macs",
-	getParentRoute: () => AuthRoute,
-} as any);
+  id: '/pending-macs',
+  path: '/pending-macs',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AuthImagesRoute = AuthImagesRouteImport.update({
-	id: "/images",
-	path: "/images",
-	getParentRoute: () => AuthRoute,
-} as any);
+  id: '/images',
+  path: '/images',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AuthGroupsRoute = AuthGroupsRouteImport.update({
-	id: "/groups",
-	path: "/groups",
-	getParentRoute: () => AuthRoute,
-} as any);
+  id: '/groups',
+  path: '/groups',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AuthDashboardRoute = AuthDashboardRouteImport.update({
-	id: "/dashboard",
-	path: "/dashboard",
-	getParentRoute: () => AuthRoute,
-} as any);
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AuthHostsIndexRoute = AuthHostsIndexRouteImport.update({
-	id: "/hosts/",
-	path: "/hosts/",
-	getParentRoute: () => AuthRoute,
-} as any);
+  id: '/hosts/',
+  path: '/hosts/',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AuthHostsIdRoute = AuthHostsIdRouteImport.update({
-	id: "/hosts/$id",
-	path: "/hosts/$id",
-	getParentRoute: () => AuthRoute,
-} as any);
+  id: '/hosts/$id',
+  path: '/hosts/$id',
+  getParentRoute: () => AuthRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
-	"/": typeof IndexRoute;
-	"/login": typeof LoginRoute;
-	"/dashboard": typeof AuthDashboardRoute;
-	"/groups": typeof AuthGroupsRoute;
-	"/images": typeof AuthImagesRoute;
-	"/pending-macs": typeof AuthPendingMacsRoute;
-	"/reports": typeof AuthReportsRoute;
-	"/settings": typeof AuthSettingsRoute;
-	"/snapins": typeof AuthSnapinsRoute;
-	"/storage": typeof AuthStorageRoute;
-	"/tasks": typeof AuthTasksRoute;
-	"/users": typeof AuthUsersRoute;
-	"/hosts/$id": typeof AuthHostsIdRoute;
-	"/hosts/": typeof AuthHostsIndexRoute;
+  '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/dashboard': typeof AuthDashboardRoute
+  '/groups': typeof AuthGroupsRoute
+  '/images': typeof AuthImagesRoute
+  '/pending-macs': typeof AuthPendingMacsRoute
+  '/reports': typeof AuthReportsRoute
+  '/settings': typeof AuthSettingsRoute
+  '/snapins': typeof AuthSnapinsRoute
+  '/storage': typeof AuthStorageRoute
+  '/tasks': typeof AuthTasksRoute
+  '/users': typeof AuthUsersRoute
+  '/hosts/$id': typeof AuthHostsIdRoute
+  '/hosts/': typeof AuthHostsIndexRoute
 }
 export interface FileRoutesByTo {
-	"/": typeof IndexRoute;
-	"/login": typeof LoginRoute;
-	"/dashboard": typeof AuthDashboardRoute;
-	"/groups": typeof AuthGroupsRoute;
-	"/images": typeof AuthImagesRoute;
-	"/pending-macs": typeof AuthPendingMacsRoute;
-	"/reports": typeof AuthReportsRoute;
-	"/settings": typeof AuthSettingsRoute;
-	"/snapins": typeof AuthSnapinsRoute;
-	"/storage": typeof AuthStorageRoute;
-	"/tasks": typeof AuthTasksRoute;
-	"/users": typeof AuthUsersRoute;
-	"/hosts/$id": typeof AuthHostsIdRoute;
-	"/hosts": typeof AuthHostsIndexRoute;
+  '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/dashboard': typeof AuthDashboardRoute
+  '/groups': typeof AuthGroupsRoute
+  '/images': typeof AuthImagesRoute
+  '/pending-macs': typeof AuthPendingMacsRoute
+  '/reports': typeof AuthReportsRoute
+  '/settings': typeof AuthSettingsRoute
+  '/snapins': typeof AuthSnapinsRoute
+  '/storage': typeof AuthStorageRoute
+  '/tasks': typeof AuthTasksRoute
+  '/users': typeof AuthUsersRoute
+  '/hosts/$id': typeof AuthHostsIdRoute
+  '/hosts': typeof AuthHostsIndexRoute
 }
 export interface FileRoutesById {
-	__root__: typeof rootRouteImport;
-	"/": typeof IndexRoute;
-	"/_auth": typeof AuthRouteWithChildren;
-	"/login": typeof LoginRoute;
-	"/_auth/dashboard": typeof AuthDashboardRoute;
-	"/_auth/groups": typeof AuthGroupsRoute;
-	"/_auth/images": typeof AuthImagesRoute;
-	"/_auth/pending-macs": typeof AuthPendingMacsRoute;
-	"/_auth/reports": typeof AuthReportsRoute;
-	"/_auth/settings": typeof AuthSettingsRoute;
-	"/_auth/snapins": typeof AuthSnapinsRoute;
-	"/_auth/storage": typeof AuthStorageRoute;
-	"/_auth/tasks": typeof AuthTasksRoute;
-	"/_auth/users": typeof AuthUsersRoute;
-	"/_auth/hosts/$id": typeof AuthHostsIdRoute;
-	"/_auth/hosts/": typeof AuthHostsIndexRoute;
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/_auth': typeof AuthRouteWithChildren
+  '/login': typeof LoginRoute
+  '/_auth/dashboard': typeof AuthDashboardRoute
+  '/_auth/groups': typeof AuthGroupsRoute
+  '/_auth/images': typeof AuthImagesRoute
+  '/_auth/pending-macs': typeof AuthPendingMacsRoute
+  '/_auth/reports': typeof AuthReportsRoute
+  '/_auth/settings': typeof AuthSettingsRoute
+  '/_auth/snapins': typeof AuthSnapinsRoute
+  '/_auth/storage': typeof AuthStorageRoute
+  '/_auth/tasks': typeof AuthTasksRoute
+  '/_auth/users': typeof AuthUsersRoute
+  '/_auth/hosts/$id': typeof AuthHostsIdRoute
+  '/_auth/hosts/': typeof AuthHostsIndexRoute
 }
 export interface FileRouteTypes {
-	fileRoutesByFullPath: FileRoutesByFullPath;
-	fullPaths:
-		| "/"
-		| "/login"
-		| "/dashboard"
-		| "/groups"
-		| "/images"
-		| "/pending-macs"
-		| "/reports"
-		| "/settings"
-		| "/snapins"
-		| "/storage"
-		| "/tasks"
-		| "/users"
-		| "/hosts/$id"
-		| "/hosts/";
-	fileRoutesByTo: FileRoutesByTo;
-	to:
-		| "/"
-		| "/login"
-		| "/dashboard"
-		| "/groups"
-		| "/images"
-		| "/pending-macs"
-		| "/reports"
-		| "/settings"
-		| "/snapins"
-		| "/storage"
-		| "/tasks"
-		| "/users"
-		| "/hosts/$id"
-		| "/hosts";
-	id:
-		| "__root__"
-		| "/"
-		| "/_auth"
-		| "/login"
-		| "/_auth/dashboard"
-		| "/_auth/groups"
-		| "/_auth/images"
-		| "/_auth/pending-macs"
-		| "/_auth/reports"
-		| "/_auth/settings"
-		| "/_auth/snapins"
-		| "/_auth/storage"
-		| "/_auth/tasks"
-		| "/_auth/users"
-		| "/_auth/hosts/$id"
-		| "/_auth/hosts/";
-	fileRoutesById: FileRoutesById;
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/dashboard'
+    | '/groups'
+    | '/images'
+    | '/pending-macs'
+    | '/reports'
+    | '/settings'
+    | '/snapins'
+    | '/storage'
+    | '/tasks'
+    | '/users'
+    | '/hosts/$id'
+    | '/hosts/'
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | '/'
+    | '/login'
+    | '/dashboard'
+    | '/groups'
+    | '/images'
+    | '/pending-macs'
+    | '/reports'
+    | '/settings'
+    | '/snapins'
+    | '/storage'
+    | '/tasks'
+    | '/users'
+    | '/hosts/$id'
+    | '/hosts'
+  id:
+    | '__root__'
+    | '/'
+    | '/_auth'
+    | '/login'
+    | '/_auth/dashboard'
+    | '/_auth/groups'
+    | '/_auth/images'
+    | '/_auth/pending-macs'
+    | '/_auth/reports'
+    | '/_auth/settings'
+    | '/_auth/snapins'
+    | '/_auth/storage'
+    | '/_auth/tasks'
+    | '/_auth/users'
+    | '/_auth/hosts/$id'
+    | '/_auth/hosts/'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-	IndexRoute: typeof IndexRoute;
-	AuthRoute: typeof AuthRouteWithChildren;
-	LoginRoute: typeof LoginRoute;
+  IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRouteWithChildren
+  LoginRoute: typeof LoginRoute
 }
 
-declare module "@tanstack/react-router" {
-	interface FileRoutesByPath {
-		"/login": {
-			id: "/login";
-			path: "/login";
-			fullPath: "/login";
-			preLoaderRoute: typeof LoginRouteImport;
-			parentRoute: typeof rootRouteImport;
-		};
-		"/_auth": {
-			id: "/_auth";
-			path: "";
-			fullPath: "/";
-			preLoaderRoute: typeof AuthRouteImport;
-			parentRoute: typeof rootRouteImport;
-		};
-		"/": {
-			id: "/";
-			path: "/";
-			fullPath: "/";
-			preLoaderRoute: typeof IndexRouteImport;
-			parentRoute: typeof rootRouteImport;
-		};
-		"/_auth/users": {
-			id: "/_auth/users";
-			path: "/users";
-			fullPath: "/users";
-			preLoaderRoute: typeof AuthUsersRouteImport;
-			parentRoute: typeof AuthRoute;
-		};
-		"/_auth/tasks": {
-			id: "/_auth/tasks";
-			path: "/tasks";
-			fullPath: "/tasks";
-			preLoaderRoute: typeof AuthTasksRouteImport;
-			parentRoute: typeof AuthRoute;
-		};
-		"/_auth/storage": {
-			id: "/_auth/storage";
-			path: "/storage";
-			fullPath: "/storage";
-			preLoaderRoute: typeof AuthStorageRouteImport;
-			parentRoute: typeof AuthRoute;
-		};
-		"/_auth/snapins": {
-			id: "/_auth/snapins";
-			path: "/snapins";
-			fullPath: "/snapins";
-			preLoaderRoute: typeof AuthSnapinsRouteImport;
-			parentRoute: typeof AuthRoute;
-		};
-		"/_auth/settings": {
-			id: "/_auth/settings";
-			path: "/settings";
-			fullPath: "/settings";
-			preLoaderRoute: typeof AuthSettingsRouteImport;
-			parentRoute: typeof AuthRoute;
-		};
-		"/_auth/reports": {
-			id: "/_auth/reports";
-			path: "/reports";
-			fullPath: "/reports";
-			preLoaderRoute: typeof AuthReportsRouteImport;
-			parentRoute: typeof AuthRoute;
-		};
-		"/_auth/pending-macs": {
-			id: "/_auth/pending-macs";
-			path: "/pending-macs";
-			fullPath: "/pending-macs";
-			preLoaderRoute: typeof AuthPendingMacsRouteImport;
-			parentRoute: typeof AuthRoute;
-		};
-		"/_auth/images": {
-			id: "/_auth/images";
-			path: "/images";
-			fullPath: "/images";
-			preLoaderRoute: typeof AuthImagesRouteImport;
-			parentRoute: typeof AuthRoute;
-		};
-		"/_auth/groups": {
-			id: "/_auth/groups";
-			path: "/groups";
-			fullPath: "/groups";
-			preLoaderRoute: typeof AuthGroupsRouteImport;
-			parentRoute: typeof AuthRoute;
-		};
-		"/_auth/dashboard": {
-			id: "/_auth/dashboard";
-			path: "/dashboard";
-			fullPath: "/dashboard";
-			preLoaderRoute: typeof AuthDashboardRouteImport;
-			parentRoute: typeof AuthRoute;
-		};
-		"/_auth/hosts/": {
-			id: "/_auth/hosts/";
-			path: "/hosts";
-			fullPath: "/hosts/";
-			preLoaderRoute: typeof AuthHostsIndexRouteImport;
-			parentRoute: typeof AuthRoute;
-		};
-		"/_auth/hosts/$id": {
-			id: "/_auth/hosts/$id";
-			path: "/hosts/$id";
-			fullPath: "/hosts/$id";
-			preLoaderRoute: typeof AuthHostsIdRouteImport;
-			parentRoute: typeof AuthRoute;
-		};
-	}
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_auth': {
+      id: '/_auth'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_auth/users': {
+      id: '/_auth/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof AuthUsersRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/tasks': {
+      id: '/_auth/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof AuthTasksRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/storage': {
+      id: '/_auth/storage'
+      path: '/storage'
+      fullPath: '/storage'
+      preLoaderRoute: typeof AuthStorageRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/snapins': {
+      id: '/_auth/snapins'
+      path: '/snapins'
+      fullPath: '/snapins'
+      preLoaderRoute: typeof AuthSnapinsRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/settings': {
+      id: '/_auth/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthSettingsRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/reports': {
+      id: '/_auth/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AuthReportsRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/pending-macs': {
+      id: '/_auth/pending-macs'
+      path: '/pending-macs'
+      fullPath: '/pending-macs'
+      preLoaderRoute: typeof AuthPendingMacsRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/images': {
+      id: '/_auth/images'
+      path: '/images'
+      fullPath: '/images'
+      preLoaderRoute: typeof AuthImagesRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/groups': {
+      id: '/_auth/groups'
+      path: '/groups'
+      fullPath: '/groups'
+      preLoaderRoute: typeof AuthGroupsRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/dashboard': {
+      id: '/_auth/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthDashboardRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/hosts/': {
+      id: '/_auth/hosts/'
+      path: '/hosts'
+      fullPath: '/hosts/'
+      preLoaderRoute: typeof AuthHostsIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/hosts/$id': {
+      id: '/_auth/hosts/$id'
+      path: '/hosts/$id'
+      fullPath: '/hosts/$id'
+      preLoaderRoute: typeof AuthHostsIdRouteImport
+      parentRoute: typeof AuthRoute
+    }
+  }
 }
 
 interface AuthRouteChildren {
-	AuthDashboardRoute: typeof AuthDashboardRoute;
-	AuthGroupsRoute: typeof AuthGroupsRoute;
-	AuthImagesRoute: typeof AuthImagesRoute;
-	AuthPendingMacsRoute: typeof AuthPendingMacsRoute;
-	AuthReportsRoute: typeof AuthReportsRoute;
-	AuthSettingsRoute: typeof AuthSettingsRoute;
-	AuthSnapinsRoute: typeof AuthSnapinsRoute;
-	AuthStorageRoute: typeof AuthStorageRoute;
-	AuthTasksRoute: typeof AuthTasksRoute;
-	AuthUsersRoute: typeof AuthUsersRoute;
-	AuthHostsIdRoute: typeof AuthHostsIdRoute;
-	AuthHostsIndexRoute: typeof AuthHostsIndexRoute;
+  AuthDashboardRoute: typeof AuthDashboardRoute
+  AuthGroupsRoute: typeof AuthGroupsRoute
+  AuthImagesRoute: typeof AuthImagesRoute
+  AuthPendingMacsRoute: typeof AuthPendingMacsRoute
+  AuthReportsRoute: typeof AuthReportsRoute
+  AuthSettingsRoute: typeof AuthSettingsRoute
+  AuthSnapinsRoute: typeof AuthSnapinsRoute
+  AuthStorageRoute: typeof AuthStorageRoute
+  AuthTasksRoute: typeof AuthTasksRoute
+  AuthUsersRoute: typeof AuthUsersRoute
+  AuthHostsIdRoute: typeof AuthHostsIdRoute
+  AuthHostsIndexRoute: typeof AuthHostsIndexRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
-	AuthDashboardRoute: AuthDashboardRoute,
-	AuthGroupsRoute: AuthGroupsRoute,
-	AuthImagesRoute: AuthImagesRoute,
-	AuthPendingMacsRoute: AuthPendingMacsRoute,
-	AuthReportsRoute: AuthReportsRoute,
-	AuthSettingsRoute: AuthSettingsRoute,
-	AuthSnapinsRoute: AuthSnapinsRoute,
-	AuthStorageRoute: AuthStorageRoute,
-	AuthTasksRoute: AuthTasksRoute,
-	AuthUsersRoute: AuthUsersRoute,
-	AuthHostsIdRoute: AuthHostsIdRoute,
-	AuthHostsIndexRoute: AuthHostsIndexRoute,
-};
+  AuthDashboardRoute: AuthDashboardRoute,
+  AuthGroupsRoute: AuthGroupsRoute,
+  AuthImagesRoute: AuthImagesRoute,
+  AuthPendingMacsRoute: AuthPendingMacsRoute,
+  AuthReportsRoute: AuthReportsRoute,
+  AuthSettingsRoute: AuthSettingsRoute,
+  AuthSnapinsRoute: AuthSnapinsRoute,
+  AuthStorageRoute: AuthStorageRoute,
+  AuthTasksRoute: AuthTasksRoute,
+  AuthUsersRoute: AuthUsersRoute,
+  AuthHostsIdRoute: AuthHostsIdRoute,
+  AuthHostsIndexRoute: AuthHostsIndexRoute,
+}
 
-const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren);
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
-	IndexRoute: IndexRoute,
-	AuthRoute: AuthRouteWithChildren,
-	LoginRoute: LoginRoute,
-};
+  IndexRoute: IndexRoute,
+  AuthRoute: AuthRouteWithChildren,
+  LoginRoute: LoginRoute,
+}
 export const routeTree = rootRouteImport
-	._addFileChildren(rootRouteChildren)
-	._addFileTypes<FileRouteTypes>();
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
