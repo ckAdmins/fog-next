@@ -45,6 +45,13 @@ func New(fosCfg config.FOSConfig, kernelPath string) *Downloader {
 func (d *Downloader) Download(ctx context.Context) error {
 	base := strings.TrimRight(d.cfg.ReleaseURL, "/")
 
+	// Best-effort version detection — follows the GitHub latest→tag redirect
+	// and extracts the release tag. Non-GitHub URLs or any error are silently
+	// ignored.
+	if tag := resolveTag(ctx, d.client, base+"/sha256sums"); tag != "" {
+		slog.Info("fos-next release", "version", tag)
+	}
+
 	slog.Info("fetching fos-next release checksums", "url", base+"/sha256sums")
 	sums, err := d.fetchChecksums(ctx, base+"/sha256sums")
 	if err != nil {
@@ -156,4 +163,29 @@ func (d *Downloader) get(ctx context.Context, url string) (*http.Response, error
 		return nil, fmt.Errorf("HTTP %s fetching %s", resp.Status, url)
 	}
 	return resp, nil
+}
+
+// resolveTag makes a lightweight HEAD request to url and, if the final URL
+// (after following redirects) matches the GitHub releases download pattern
+// /.../releases/download/<tag>/..., returns the tag. Returns "" on any
+// failure or non-GitHub URL.
+func resolveTag(ctx context.Context, client *http.Client, url string) string {
+	req, err := http.NewRequestWithContext(ctx, http.MethodHead, url, nil)
+	if err != nil {
+		return ""
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return ""
+	}
+	resp.Body.Close()
+
+	// Path after redirects: /owner/repo/releases/download/v1.2.3/sha256sums
+	parts := strings.Split(strings.Trim(resp.Request.URL.Path, "/"), "/")
+	for i, p := range parts {
+		if p == "download" && i+1 < len(parts) {
+			return parts[i+1]
+		}
+	}
+	return ""
 }

@@ -1,16 +1,3 @@
-import { Note, Plus, X } from "@phosphor-icons/react";
-import { useForm } from "@tanstack/react-form";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import {
-	createColumnHelper,
-	flexRender,
-	getCoreRowModel,
-	useReactTable,
-} from "@tanstack/react-table";
-import { useState } from "react";
-import { toast } from "sonner";
-import * as z from "zod";
 import { AgentLogViewer } from "@/components/agent-log-viewer";
 import {
 	AlertDialog,
@@ -59,6 +46,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useServerEvents } from "@/hooks/useServerEvents";
 import { api } from "@/lib/api";
 import type { Host, Image, Paginated, Task } from "@/types";
+import { Note, Plus, X } from "@phosphor-icons/react";
+import { useForm } from "@tanstack/react-form";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
+import {
+	createColumnHelper,
+	flexRender,
+	getCoreRowModel,
+	useReactTable,
+} from "@tanstack/react-table";
+import { useState } from "react";
+import { toast } from "sonner";
+import * as z from "zod";
 
 export const Route = createFileRoute("/_auth/tasks")({
 	component: TasksPage,
@@ -539,7 +539,7 @@ function TasksPage() {
 					if (!open) setLogDialogTaskId(null);
 				}}
 			>
-				<DialogContent className="max-w-3xl">
+				<DialogContent className="max-w-5xl">
 					<DialogHeader>
 						<DialogTitle>Task Logs</DialogTitle>
 					</DialogHeader>
