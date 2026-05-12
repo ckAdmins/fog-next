@@ -57,6 +57,17 @@ function authHeaders(token: string | null): Record<string, string> {
 	return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+// parseErrorBody extracts a human-readable message from a JSON error response.
+// The server returns RFC 7807 Problem Details like {"detail": "message"}.
+function parseErrorBody(text: string): string {
+	try {
+		const parsed = JSON.parse(text) as { detail?: string; error?: string; message?: string };
+		return parsed.detail || parsed.error || parsed.message || text;
+	} catch {
+		return text;
+	}
+}
+
 async function request<T>(
 	method: string,
 	path: string,
@@ -88,7 +99,7 @@ async function request<T>(
 		});
 		if (!retry.ok) {
 			const text = await retry.text().catch(() => retry.statusText);
-			throw new ApiError(retry.status, text || retry.statusText);
+			throw new ApiError(retry.status, parseErrorBody(text || retry.statusText));
 		}
 		if (retry.status === 204) return undefined as T;
 		return retry.json() as Promise<T>;
@@ -96,7 +107,7 @@ async function request<T>(
 
 	if (!res.ok) {
 		const text = await res.text().catch(() => res.statusText);
-		throw new ApiError(res.status, text || res.statusText);
+		throw new ApiError(res.status, parseErrorBody(text || res.statusText));
 	}
 
 	if (res.status === 204) return undefined as T;
@@ -124,7 +135,7 @@ async function upload<T>(path: string, formData: FormData): Promise<T> {
 		});
 		if (!retry.ok) {
 			const text = await retry.text().catch(() => retry.statusText);
-			throw new ApiError(retry.status, text || retry.statusText);
+			throw new ApiError(retry.status, parseErrorBody(text || retry.statusText));
 		}
 		if (retry.status === 204) return undefined as T;
 		return retry.json() as Promise<T>;
@@ -132,7 +143,7 @@ async function upload<T>(path: string, formData: FormData): Promise<T> {
 
 	if (!res.ok) {
 		const text = await res.text().catch(() => res.statusText);
-		throw new ApiError(res.status, text || res.statusText);
+		throw new ApiError(res.status, parseErrorBody(text || res.statusText));
 	}
 
 	if (res.status === 204) return undefined as T;

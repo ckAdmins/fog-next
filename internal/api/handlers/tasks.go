@@ -1,15 +1,16 @@
 package handlers
 
 import (
-"net/http"
+	"net/http"
 
-"github.com/go-chi/chi/v5"
-"github.com/google/uuid"
-"github.com/nemvince/fog-next/ent"
-enttask "github.com/nemvince/fog-next/ent/task"
-"github.com/nemvince/fog-next/internal/api/middleware"
-"github.com/nemvince/fog-next/internal/api/response"
-"github.com/nemvince/fog-next/internal/plugins"
+	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
+	"github.com/nemvince/fog-next/ent"
+	"github.com/nemvince/fog-next/ent/storagenode"
+	enttask "github.com/nemvince/fog-next/ent/task"
+	"github.com/nemvince/fog-next/internal/api/middleware"
+	"github.com/nemvince/fog-next/internal/api/response"
+	"github.com/nemvince/fog-next/internal/plugins"
 )
 
 type Tasks struct {
@@ -82,38 +83,64 @@ req.Type == enttask.TypeMulticast ||
 req.Type == enttask.TypeDebugDeploy ||
 req.Type == enttask.TypeDebugCapture
 
-if needsImage {
-host, err := h.db.Host.Get(r.Context(), req.HostID)
-if err != nil {
-if ent.IsNotFound(err) {
-response.NotFound(w, "host")
-} else {
-response.InternalError(w)
-}
-return
-}
-if req.ImageID == nil && host.ImageID != nil {
-req.ImageID = host.ImageID
-}
-if req.ImageID == nil {
-response.BadRequest(w, "host has no image assigned and no imageId provided")
-return
-}
-if req.StorageGroupID == nil {
-img, err := h.db.Image.Get(r.Context(), *req.ImageID)
-if err != nil {
-if ent.IsNotFound(err) {
-response.NotFound(w, "image")
-} else {
-response.InternalError(w)
-}
-return
-}
-req.StorageGroupID = img.StorageGroupID
-}
-}
+	if needsImage {
+		host, err := h.db.Host.Get(r.Context(), req.HostID)
+		if err != nil {
+			if ent.IsNotFound(err) {
+				response.NotFound(w, "host")
+			} else {
+				response.InternalError(w)
+			}
+			return
+		}
+		if req.ImageID == nil && host.ImageID != nil {
+			req.ImageID = host.ImageID
+		}
+		if req.ImageID == nil {
+			response.BadRequest(w, "host has no image assigned and no imageId provided")
+			return
+		}
+		if req.StorageGroupID == nil {
+			img, err := h.db.Image.Get(r.Context(), *req.ImageID)
+			if err != nil {
+				if ent.IsNotFound(err) {
+					response.NotFound(w, "image")
+				} else {
+					response.InternalError(w)
+				}
+				return
+			}
+			req.StorageGroupID = img.StorageGroupID
+		}
+	}
 
-var createdBy string
+	// Reject if host already has a queued or active task.
+	existing, err := h.db.Task.Query().Where(
+		enttask.HostIDEQ(req.HostID),
+		enttask.StateIn(enttask.StateQueued, enttask.StateActive),
+	).First(r.Context())
+	if err == nil {
+		response.Conflict(w, "host already has a "+string(existing.State)+" task ("+existing.ID.String()+")")
+		return
+	}
+	if !ent.IsNotFound(err) {
+		response.InternalError(w)
+		return
+	}
+
+	// Resolve storage node synchronously (was async in the scheduler).
+	var storageNodeID *uuid.UUID
+	if req.StorageGroupID != nil {
+		node, err := h.db.StorageNode.Query().Where(
+			storagenode.StorageGroupIDEQ(*req.StorageGroupID),
+			storagenode.IsMasterEQ(true),
+		).First(r.Context())
+		if err == nil {
+			storageNodeID = &node.ID
+		}
+	}
+
+	var createdBy string
 if claims != nil {
 createdBy = claims.Username
 }
@@ -135,17 +162,18 @@ response.Error(w, http.StatusUnprocessableEntity, "plugin rejected task", err.Er
 return
 }
 
-savedTask, err := h.db.Task.Create().
-SetName(tStruct.Name).
-SetType(tStruct.Type).
-SetState(enttask.StateQueued).
-SetHostID(tStruct.HostID).
-SetNillableImageID(tStruct.ImageID).
-SetNillableStorageGroupID(tStruct.StorageGroupID).
-SetIsGroup(tStruct.IsGroup).
-SetIsShutdown(tStruct.IsShutdown).
-SetCreatedBy(tStruct.CreatedBy).
-Save(r.Context())
+	savedTask, err := h.db.Task.Create().
+		SetName(tStruct.Name).
+		SetType(tStruct.Type).
+		SetState(enttask.StateQueued).
+		SetHostID(tStruct.HostID).
+		SetNillableImageID(tStruct.ImageID).
+		SetNillableStorageGroupID(tStruct.StorageGroupID).
+		SetNillableStorageNodeID(storageNodeID).
+		SetIsGroup(tStruct.IsGroup).
+		SetIsShutdown(tStruct.IsShutdown).
+		SetCreatedBy(tStruct.CreatedBy).
+		Save(r.Context())
 if err != nil {
 response.InternalError(w)
 return

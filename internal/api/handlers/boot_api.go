@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -337,27 +338,32 @@ response.BadRequest(w, "task ID mismatch")
 return
 }
 
-t, err := h.db.Task.Get(r.Context(), taskID)
-if err != nil {
-response.NotFound(w, "task")
-return
-}
+	t, err := h.db.Task.Get(r.Context(), taskID)
+	if err != nil {
+		response.NotFound(w, "task")
+		return
+	}
 
-now := time.Now()
-newState := enttask.StateFailed
-pct := t.PercentComplete
-if req.Success {
-newState = enttask.StateComplete
-pct = 100
-}
+	now := time.Now()
+	newState := enttask.StateFailed
+	pct := t.PercentComplete
+	if req.Success {
+		newState = enttask.StateComplete
+		pct = 100
+	}
 
-_ = h.db.Task.UpdateOneID(taskID).
-SetState(newState).
-SetPercentComplete(pct).
-SetCompletedAt(now).
-Exec(r.Context())
+	_ = h.db.Task.UpdateOneID(taskID).
+		SetState(newState).
+		SetPercentComplete(pct).
+		SetCompletedAt(now).
+		Exec(r.Context())
 
-// Record imaging log entry.
+	// On capture failure, clean up partial partition files.
+	if !req.Success && t.Type == enttask.TypeCapture && t.ImageID != nil {
+		h.cleanupImageParts(*t.ImageID)
+	}
+
+	// Record imaging log entry.
 var duration int64
 if t.StartedAt != nil {
 duration = int64(now.Sub(*t.StartedAt).Seconds())
@@ -611,41 +617,80 @@ http.ServeFile(w, r, rel)
 }
 
 func (h *BootAPI) uploadLocal(w http.ResponseWriter, r *http.Request, img *ent.Image, partNum int) {
-base := filepath.Clean(h.cfg.Storage.BasePath)
-dir := filepath.Join(base, filepath.FromSlash(img.Path))
-if !strings.HasPrefix(dir+string(filepath.Separator), base+string(filepath.Separator)) {
-response.BadRequest(w, "invalid image path")
-return
-}
-if err := os.MkdirAll(dir, 0o755); err != nil {
-slog.Error("upload local: mkdir", "dir", dir, "err", err)
-response.InternalError(w)
-return
-}
-dest := filepath.Join(dir, partFilename(partNum))
-tmp, err := os.CreateTemp(dir, ".upload-*")
-if err != nil {
-slog.Error("upload local: create temp", "dir", dir, "err", err)
-response.InternalError(w)
-return
-}
-tmpName := tmp.Name()
-defer func() { _ = os.Remove(tmpName) }()
+	base := filepath.Clean(h.cfg.Storage.BasePath)
+	dir := filepath.Join(base, filepath.FromSlash(img.Path))
+	if !strings.HasPrefix(dir+string(filepath.Separator), base+string(filepath.Separator)) {
+		response.BadRequest(w, "invalid image path")
+		return
+	}
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		slog.Error("upload local: mkdir", "dir", dir, "err", err)
+		response.InternalError(w)
+		return
+	}
+	dest := filepath.Join(dir, partFilename(partNum))
 
-if _, err := io.Copy(tmp, r.Body); err != nil {
-tmp.Close()
-slog.Warn("upload local: read body", "path", dest, "err", err)
-response.InternalError(w)
-return
-}
-tmp.Close()
+	// Resume support: if offset=N is provided, append to existing file.
+	offsetStr := r.URL.Query().Get("offset")
+	var offset int64
+	if offsetStr != "" {
+		var parseErr error
+		offset, parseErr = strconv.ParseInt(offsetStr, 10, 64)
+		if parseErr != nil || offset < 0 {
+			response.BadRequest(w, "invalid offset parameter")
+			return
+		}
+	}
 
-if err := os.Rename(tmpName, dest); err != nil {
-slog.Error("upload local: rename", "tmp", tmpName, "dest", dest, "err", err)
-response.InternalError(w)
-return
-}
-w.WriteHeader(http.StatusNoContent)
+	if offset > 0 {
+		fi, statErr := os.Stat(dest)
+		if statErr != nil {
+			response.BadRequest(w, "resume requested but target file does not exist")
+			return
+		}
+		if fi.Size() != offset {
+			response.BadRequest(w, fmt.Sprintf("resume offset %d does not match existing file size %d", offset, fi.Size()))
+			return
+		}
+		f, openErr := os.OpenFile(dest, os.O_WRONLY|os.O_APPEND, 0o644)
+		if openErr != nil {
+			slog.Error("upload local: open for append", "dest", dest, "err", openErr)
+			response.InternalError(w)
+			return
+		}
+		defer f.Close()
+		if _, copyErr := io.Copy(f, r.Body); copyErr != nil {
+			slog.Warn("upload local: append body", "path", dest, "err", copyErr)
+			response.InternalError(w)
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
+	tmp, err := os.CreateTemp(dir, ".upload-*")
+	if err != nil {
+		slog.Error("upload local: create temp", "dir", dir, "err", err)
+		response.InternalError(w)
+		return
+	}
+	tmpName := tmp.Name()
+	defer func() { _ = os.Remove(tmpName) }()
+
+	if _, err := io.Copy(tmp, r.Body); err != nil {
+		tmp.Close()
+		slog.Warn("upload local: read body", "path", dest, "err", err)
+		response.InternalError(w)
+		return
+	}
+	tmp.Close()
+
+	if err := os.Rename(tmpName, dest); err != nil {
+		slog.Error("upload local: rename", "tmp", tmpName, "dest", dest, "err", err)
+		response.InternalError(w)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h *BootAPI) resolveStorageNodeURL(r *http.Request, task *ent.Task, img *ent.Image) (string, error) {
@@ -684,15 +729,51 @@ return "part" + strconv.Itoa(part)
 }
 
 func parseImagePartitions(img *ent.Image) *imagePartitions {
-if len(img.Partitions) == 0 {
-return nil
+	if len(img.Partitions) == 0 {
+		return nil
+	}
+	var ip imagePartitions
+	if err := json.Unmarshal(img.Partitions, &ip); err != nil {
+		slog.Warn("parseImagePartitions: malformed JSONB", "imageId", img.ID, "err", err)
+		return nil
+	}
+	return &ip
 }
-var ip imagePartitions
-if err := json.Unmarshal(img.Partitions, &ip); err != nil {
-slog.Warn("parseImagePartitions: malformed JSONB", "imageId", img.ID, "err", err)
-return nil
-}
-return &ip
+
+// cleanupImageParts removes all partition files and the ptable for an image
+// directory. Used when a capture fails to avoid leaving incomplete data on disk.
+func (h *BootAPI) cleanupImageParts(imageID uuid.UUID) {
+	ctx := context.Background()
+	img, err := h.db.Image.Get(ctx, imageID)
+	if err != nil {
+		slog.Warn("cleanupImageParts: image not found", "imageId", imageID, "err", err)
+		return
+	}
+	base := filepath.Clean(h.cfg.Storage.BasePath)
+	dir := filepath.Join(base, filepath.FromSlash(img.Path))
+	if !strings.HasPrefix(dir+string(filepath.Separator), base+string(filepath.Separator)) {
+		slog.Warn("cleanupImageParts: path traversal attempt", "dir", dir)
+		return
+	}
+
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		slog.Warn("cleanupImageParts: readDir failed", "dir", dir, "err", err)
+		return
+	}
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		name := e.Name()
+		if name == "ptable" || strings.HasPrefix(name, "part") {
+			fp := filepath.Join(dir, name)
+			if rmErr := os.Remove(fp); rmErr != nil {
+				slog.Warn("cleanupImageParts: remove failed", "file", fp, "err", rmErr)
+			}
+		}
+	}
+	slog.Info("cleanupImageParts: cleaned up failed capture parts", "imageId", imageID, "dir", dir)
 }
 
 func normMAC(mac string) string {

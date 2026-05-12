@@ -93,6 +93,9 @@ type ServicesConfig struct {
 	ImageSizeInterval         time.Duration `mapstructure:"image_size_interval"`
 	SnapinHashInterval        time.Duration `mapstructure:"snapin_hash_interval"`
 	MulticastInterval         time.Duration `mapstructure:"multicast_interval"`
+	// TaskTimeout is how long a queued task waits for the host to handshake
+	// before being auto-cancelled. Zero disables (default 30 minutes).
+	TaskTimeout time.Duration `mapstructure:"task_timeout"`
 }
 
 type LDAPConfig struct {
@@ -190,6 +193,7 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("services.image_size_interval", 1*time.Hour)
 	v.SetDefault("services.snapin_hash_interval", 30*time.Minute)
 	v.SetDefault("services.multicast_interval", 10*time.Second)
+	v.SetDefault("services.task_timeout", 30*time.Minute)
 
 	v.SetDefault("log.level", "info")
 	v.SetDefault("log.format", "text")

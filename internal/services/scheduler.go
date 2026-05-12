@@ -1,19 +1,18 @@
 package services
 
 import (
-"context"
-"fmt"
-"log/slog"
-"net"
-"time"
+	"context"
+	"fmt"
+	"log/slog"
+	"net"
+	"time"
 
-"github.com/nemvince/fog-next/ent"
-"github.com/nemvince/fog-next/ent/hostmac"
-"github.com/nemvince/fog-next/ent/scheduledtask"
-"github.com/nemvince/fog-next/ent/storagenode"
-enttask "github.com/nemvince/fog-next/ent/task"
-"github.com/nemvince/fog-next/internal/config"
-"github.com/robfig/cron/v3"
+	"github.com/nemvince/fog-next/ent"
+	"github.com/nemvince/fog-next/ent/hostmac"
+	"github.com/nemvince/fog-next/ent/scheduledtask"
+	enttask "github.com/nemvince/fog-next/ent/task"
+	"github.com/nemvince/fog-next/internal/config"
+	"github.com/robfig/cron/v3"
 )
 
 // TaskScheduler polls for queued tasks, sends WOL packets, and runs cron-based
@@ -41,45 +40,59 @@ if err := s.registerScheduledTasks(ctx, cr); err != nil {
 slog.Warn("failed to register scheduled tasks on startup", "error", err)
 }
 
-for {
-select {
-case <-ctx.Done():
-return nil
-case <-ticker.C:
-s.processQueued(ctx)
-}
-}
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case <-ticker.C:
+			s.processQueued(ctx)
+			s.cancelStaleTasks(ctx)
+		}
+	}
 }
 
 func (s *TaskScheduler) processQueued(ctx context.Context) {
-tasks, err := s.db.Task.Query().Where(enttask.StateEQ(enttask.StateQueued)).All(ctx)
-if err != nil {
-slog.Error("scheduler: list queued tasks", "error", err)
-return
+	tasks, err := s.db.Task.Query().Where(enttask.StateEQ(enttask.StateQueued)).All(ctx)
+	if err != nil {
+		slog.Error("scheduler: list queued tasks", "error", err)
+		return
+	}
+
+	for _, task := range tasks {
+		macs, err := s.db.HostMAC.Query().Where(hostmac.HostIDEQ(task.HostID)).All(ctx)
+		if err == nil {
+			for _, m := range macs {
+				if m.IsPrimary {
+					if err := sendWOL(m.MAC); err != nil {
+						slog.Warn("scheduler: WOL failed", "mac", m.MAC, "error", err)
+					}
+				}
+			}
+		}
+	}
 }
 
-for _, task := range tasks {
-macs, err := s.db.HostMAC.Query().Where(hostmac.HostIDEQ(task.HostID)).All(ctx)
-if err == nil {
-for _, m := range macs {
-if m.IsPrimary {
-if err := sendWOL(m.MAC); err != nil {
-slog.Warn("scheduler: WOL failed", "mac", m.MAC, "error", err)
-}
-}
-}
-}
-
-if task.StorageNodeID == nil && task.StorageGroupID != nil {
-node, err := s.db.StorageNode.Query().Where(
-storagenode.StorageGroupIDEQ(*task.StorageGroupID),
-storagenode.IsMasterEQ(true),
-).First(ctx)
-if err == nil {
-_ = s.db.Task.UpdateOneID(task.ID).SetStorageNodeID(node.ID).Exec(ctx)
-}
-}
-}
+// cancelStaleTasks cancels queued tasks that have exceeded the TaskTimeout
+// without the host ever handshaking.
+func (s *TaskScheduler) cancelStaleTasks(ctx context.Context) {
+	if s.cfg.Services.TaskTimeout <= 0 {
+		return
+	}
+	deadline := time.Now().Add(-s.cfg.Services.TaskTimeout)
+	n, err := s.db.Task.Update().
+		Where(
+			enttask.StateEQ(enttask.StateQueued),
+			enttask.CreatedAtLT(deadline),
+		).
+		SetState(enttask.StateCanceled).
+		Save(ctx)
+	if err != nil {
+		slog.Warn("scheduler: cancel stale tasks failed", "error", err)
+		return
+	}
+	if n > 0 {
+		slog.Info("scheduler: cancelled stale queued tasks", "count", n)
+	}
 }
 
 func (s *TaskScheduler) registerScheduledTasks(ctx context.Context, cr *cron.Cron) error {

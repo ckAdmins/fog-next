@@ -57,6 +57,11 @@ func NotFound(w http.ResponseWriter, resource string) {
 	Error(w, http.StatusNotFound, "Not Found", resource+" not found")
 }
 
+// Conflict writes a 409 error.
+func Conflict(w http.ResponseWriter, detail string) {
+	Error(w, http.StatusConflict, "Conflict", detail)
+}
+
 // InternalError writes a 500 error without leaking internal details.
 func InternalError(w http.ResponseWriter) {
 	Error(w, http.StatusInternalServerError, "Internal Server Error", "An unexpected error occurred")
