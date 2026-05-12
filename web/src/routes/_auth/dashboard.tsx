@@ -22,26 +22,39 @@ function StatCard({
 	value,
 	icon: Icon,
 	isLoading,
+	index,
 }: {
 	title: string;
 	description: string;
 	value: number | undefined;
 	icon: React.ElementType;
 	isLoading: boolean;
+	index: number;
 }) {
 	return (
-		<Card>
+		<Card
+			className="card-stat animate-card-enter border-border/60"
+			style={{ animationDelay: `${index * 80}ms` }}
+		>
 			<CardHeader className="flex flex-row items-center justify-between pb-2">
-				<CardTitle className="text-sm font-medium">{title}</CardTitle>
-				<Icon className="size-4 text-muted-foreground" />
+				<CardTitle className="text-sm font-heading font-medium tracking-tight">
+					{title}
+				</CardTitle>
+				<div className="rounded-md bg-primary/10 p-1.5">
+					<Icon className="size-3.5 text-primary" weight="duotone" />
+				</div>
 			</CardHeader>
 			<CardContent>
 				{isLoading ? (
-					<Skeleton className="h-8 w-16" />
+					<Skeleton className="h-9 w-20" />
 				) : (
-					<div className="text-2xl font-bold">{value ?? 0}</div>
+					<div className="text-3xl font-heading font-bold tabular-nums tracking-tight">
+						{value ?? 0}
+					</div>
 				)}
-				<CardDescription>{description}</CardDescription>
+				<CardDescription className="text-xs mt-0.5">
+					{description}
+				</CardDescription>
 			</CardContent>
 		</Card>
 	);
@@ -64,10 +77,10 @@ function DashboardPage() {
 	});
 
 	return (
-		<div className="flex flex-col gap-6">
+		<div className="flex flex-col gap-6 animate-page-enter">
 			<div>
-				<h1 className="text-2xl font-bold">Dashboard</h1>
-				<p className="text-muted-foreground">
+				<h1 className="text-2xl font-heading font-bold">Dashboard</h1>
+				<p className="text-sm text-muted-foreground mt-0.5">
 					Overview of your FOG environment
 				</p>
 			</div>
@@ -79,6 +92,7 @@ function DashboardPage() {
 					value={hostsQuery.data?.total}
 					icon={Cpu}
 					isLoading={hostsQuery.isLoading}
+					index={0}
 				/>
 				<StatCard
 					title="Disk Images"
@@ -86,6 +100,7 @@ function DashboardPage() {
 					value={imagesQuery.data?.total}
 					icon={HardDrive}
 					isLoading={imagesQuery.isLoading}
+					index={1}
 				/>
 				<StatCard
 					title="Active Tasks"
@@ -93,7 +108,23 @@ function DashboardPage() {
 					value={activeTasksQuery.data?.total}
 					icon={ListChecks}
 					isLoading={activeTasksQuery.isLoading}
+					index={2}
 				/>
+			</div>
+
+			{/* Keyboard shortcut hint */}
+			<div className="mt-2">
+				<p className="text-[11px] text-muted-foreground/60">
+					Press{" "}
+					<kbd className="inline-flex h-4.5 select-none items-center rounded border bg-muted/50 px-1 font-mono text-[10px] font-medium text-muted-foreground">
+						⌘K
+					</kbd>{" "}
+					to open command palette ·{" "}
+					<kbd className="inline-flex h-4.5 select-none items-center rounded border bg-muted/50 px-1 font-mono text-[10px] font-medium text-muted-foreground">
+						g d
+					</kbd>{" "}
+					for quick nav
+				</p>
 			</div>
 		</div>
 	);

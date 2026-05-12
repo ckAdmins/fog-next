@@ -9,10 +9,12 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -39,19 +41,69 @@ func New(fosCfg config.FOSConfig, kernelPath string) *Downloader {
 	}
 }
 
+// githubRelease is the relevant subset of the GitHub Releases API response.
+type githubRelease struct {
+	TagName string        `json:"tag_name"`
+	Assets  []githubAsset `json:"assets"`
+}
+
+type githubAsset struct {
+	Name               string `json:"name"`
+	BrowserDownloadURL string `json:"browser_download_url"`
+}
+
 // Download fetches bzImage and init.xz (or whatever is configured), verifies
-// checksums, and installs them into kernel_path. It prints progress to stdout.
-// If any step fails the destination files are not touched.
+// checksums, and installs them into kernel_path.
+//
+// When ReleaseURL points to a GitHub repository the GitHub Releases API is
+// queried first to obtain the release tag (for display) and the exact
+// download URLs of every asset.  If the API is unreachable the downloader
+// falls back to the legacy URL-concatenation behaviour.
 func (d *Downloader) Download(ctx context.Context) error {
 	base := strings.TrimRight(d.cfg.ReleaseURL, "/")
 
-	// Best-effort version detection — follows the GitHub latest→tag redirect
-	// and extracts the release tag. Non-GitHub URLs or any error are silently
-	// ignored.
-	if tag := resolveTag(ctx, d.client, base+"/sha256sums"); tag != "" {
+	// Try the GitHub Releases API for version info and asset URLs.
+	if assets, tag, ok := d.fetchRelease(ctx); ok {
 		slog.Info("fos-next release", "version", tag)
+
+		// Build a map of asset name → download URL from the API response.
+		assetURLs := make(map[string]string, len(assets))
+		for _, a := range assets {
+			assetURLs[a.Name] = a.BrowserDownloadURL
+		}
+
+		// Download sha256sums first so we can verify the other assets.
+		sumsURL, ok := assetURLs["sha256sums"]
+		if !ok {
+			return fmt.Errorf("sha256sums not found in release assets")
+		}
+		slog.Info("fetching fos-next release checksums", "url", sumsURL)
+		sums, err := d.fetchChecksums(ctx, sumsURL)
+		if err != nil {
+			return fmt.Errorf("fetch sha256sums: %w", err)
+		}
+
+		files := []string{d.cfg.KernelFile, d.cfg.InitFile}
+		for _, name := range files {
+			expected, ok := sums[name]
+			if !ok {
+				return fmt.Errorf("sha256sums has no entry for %q", name)
+			}
+			dlURL, ok := assetURLs[name]
+			if !ok {
+				return fmt.Errorf("asset %q not found in release", name)
+			}
+			slog.Info("downloading", "file", name, "url", dlURL)
+			if err := d.fetchAndVerify(ctx, dlURL, name, expected); err != nil {
+				return fmt.Errorf("download %s: %w", name, err)
+			}
+			slog.Info("installed", "file", name, "dest", filepath.Join(d.dest, name))
+		}
+		return nil
 	}
 
+	// Fallback: legacy URL-concatenation behaviour for non-GitHub or
+	// API-unreachable scenarios.
 	slog.Info("fetching fos-next release checksums", "url", base+"/sha256sums")
 	sums, err := d.fetchChecksums(ctx, base+"/sha256sums")
 	if err != nil {
@@ -64,14 +116,69 @@ func (d *Downloader) Download(ctx context.Context) error {
 		if !ok {
 			return fmt.Errorf("sha256sums has no entry for %q", name)
 		}
-		url := base + "/" + name
-		slog.Info("downloading", "file", name, "url", url)
-		if err := d.fetchAndVerify(ctx, url, name, expected); err != nil {
+		dlURL := base + "/" + name
+		slog.Info("downloading", "file", name, "url", dlURL)
+		if err := d.fetchAndVerify(ctx, dlURL, name, expected); err != nil {
 			return fmt.Errorf("download %s: %w", name, err)
 		}
 		slog.Info("installed", "file", name, "dest", filepath.Join(d.dest, name))
 	}
 	return nil
+}
+
+// fetchRelease calls the GitHub Releases API for the latest release.  On
+// success it returns the asset list and the release tag.  The boolean
+// indicates whether the API call succeeded — callers must fall back to
+// legacy URL behaviour when false.
+func (d *Downloader) fetchRelease(ctx context.Context) ([]githubAsset, string, bool) {
+	owner, repo := parseGitHubRepo(d.cfg.ReleaseURL)
+	if owner == "" {
+		return nil, "", false
+	}
+
+	apiURL := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/latest", owner, repo)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiURL, nil)
+	if err != nil {
+		return nil, "", false
+	}
+	req.Header.Set("Accept", "application/vnd.github+json")
+
+	resp, err := d.client.Do(req)
+	if err != nil {
+		return nil, "", false
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, "", false
+	}
+
+	var rel githubRelease
+	if err := json.NewDecoder(resp.Body).Decode(&rel); err != nil {
+		return nil, "", false
+	}
+	if rel.TagName == "" {
+		return nil, "", false
+	}
+	return rel.Assets, rel.TagName, true
+}
+
+// parseGitHubRepo extracts "owner/repo" from a GitHub releases URL.
+// Returns empty strings if the URL does not match the expected pattern.
+func parseGitHubRepo(rawURL string) (owner, repo string) {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return "", ""
+	}
+	if u.Host != "github.com" {
+		return "", ""
+	}
+	// Expected path: /{owner}/{repo}/releases/...
+	parts := strings.Split(strings.Trim(u.Path, "/"), "/")
+	if len(parts) < 2 {
+		return "", ""
+	}
+	return parts[0], parts[1]
 }
 
 // fetchChecksums downloads and parses a sha256sums file into a map of
@@ -163,29 +270,4 @@ func (d *Downloader) get(ctx context.Context, url string) (*http.Response, error
 		return nil, fmt.Errorf("HTTP %s fetching %s", resp.Status, url)
 	}
 	return resp, nil
-}
-
-// resolveTag makes a lightweight HEAD request to url and, if the final URL
-// (after following redirects) matches the GitHub releases download pattern
-// /.../releases/download/<tag>/..., returns the tag. Returns "" on any
-// failure or non-GitHub URL.
-func resolveTag(ctx context.Context, client *http.Client, url string) string {
-	req, err := http.NewRequestWithContext(ctx, http.MethodHead, url, nil)
-	if err != nil {
-		return ""
-	}
-	resp, err := client.Do(req)
-	if err != nil {
-		return ""
-	}
-	resp.Body.Close()
-
-	// Path after redirects: /owner/repo/releases/download/v1.2.3/sha256sums
-	parts := strings.Split(strings.Trim(resp.Request.URL.Path, "/"), "/")
-	for i, p := range parts {
-		if p == "download" && i+1 < len(parts) {
-			return parts[i+1]
-		}
-	}
-	return ""
 }
