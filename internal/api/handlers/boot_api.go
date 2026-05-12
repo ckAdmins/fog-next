@@ -30,9 +30,10 @@ import (
 
 // imagePartitions is the JSONB shape stored in Image.Partitions.
 type imagePartitions struct {
-PartCount           int    `json:"partCount"`
-ImageType           string `json:"imageType"`
-FixedSizePartitions []int  `json:"fixedSizePartitions"`
+	PartCount           int      `json:"partCount"`
+	ImageType           string   `json:"imageType"`
+	FixedSizePartitions []int    `json:"fixedSizePartitions"`
+	PartTypes           []string `json:"partTypes,omitempty"`
 }
 
 // BootAPI handles unauthenticated and boot-token-authenticated endpoints
@@ -64,15 +65,16 @@ MACs []string `json:"macs"`
 }
 
 type handshakeResponse struct {
-BootToken           string `json:"bootToken"`
-TaskID              string `json:"taskId"`
-Action              string `json:"action"`
-ImageID             string `json:"imageId,omitempty"`
-PartCount           int    `json:"partCount,omitempty"`
-TotalBytes          int64  `json:"totalBytes,omitempty"`
-StorageNodeURL      string `json:"storageNodeUrl,omitempty"`
-ImageType           string `json:"imageType,omitempty"`
-FixedSizePartitions []int  `json:"fixedSizePartitions,omitempty"`
+	BootToken           string   `json:"bootToken"`
+	TaskID              string   `json:"taskId"`
+	Action              string   `json:"action"`
+	ImageID             string   `json:"imageId,omitempty"`
+	PartCount           int      `json:"partCount,omitempty"`
+	TotalBytes          int64    `json:"totalBytes,omitempty"`
+	StorageNodeURL      string   `json:"storageNodeUrl,omitempty"`
+	ImageType           string   `json:"imageType,omitempty"`
+	FixedSizePartitions []int    `json:"fixedSizePartitions,omitempty"`
+	PartTypes           []string `json:"partTypes,omitempty"`
 }
 
 func (h *BootAPI) Handshake(w http.ResponseWriter, r *http.Request) {
@@ -149,24 +151,25 @@ TaskID:    task.ID.String(),
 Action:    string(task.Type),
 }
 
-if task.ImageID != nil {
-resp.ImageID = task.ImageID.String()
-img, imgErr := h.db.Image.Get(r.Context(), *task.ImageID)
-if imgErr == nil {
-resp.TotalBytes = img.SizeBytes
-if ip := parseImagePartitions(img); ip != nil {
-resp.PartCount = ip.PartCount
-resp.ImageType = ip.ImageType
-resp.FixedSizePartitions = ip.FixedSizePartitions
-}
-if task.StorageNodeID != nil {
-node, nodeErr := h.db.StorageNode.Get(r.Context(), *task.StorageNodeID)
-if nodeErr == nil && node.IsEnabled {
-resp.StorageNodeURL = buildStorageNodeURL(node)
-}
-}
-}
-}
+	if task.ImageID != nil {
+		resp.ImageID = task.ImageID.String()
+		img, imgErr := h.db.Image.Get(r.Context(), *task.ImageID)
+		if imgErr == nil {
+			resp.TotalBytes = img.SizeBytes
+			if ip := parseImagePartitions(img); ip != nil {
+				resp.PartCount = ip.PartCount
+				resp.ImageType = ip.ImageType
+				resp.FixedSizePartitions = ip.FixedSizePartitions
+				resp.PartTypes = ip.PartTypes
+			}
+			if task.StorageNodeID != nil {
+				node, nodeErr := h.db.StorageNode.Get(r.Context(), *task.StorageNodeID)
+				if nodeErr == nil && node.IsEnabled {
+					resp.StorageNodeURL = buildStorageNodeURL(node)
+				}
+			}
+		}
+	}
 
 // Transition task to active.
 now := time.Now()
@@ -487,11 +490,12 @@ h.proxyPut(w, r, upstreamURL)
 // ------------------------------------------------------------------
 
 type imageMetaRequest struct {
-TaskID              string `json:"taskId"`
-ImageID             string `json:"imageId"`
-ImageType           string `json:"imageType"`
-FixedSizePartitions []int  `json:"fixedSizePartitions"`
-PartCount           int    `json:"partCount"`
+	TaskID              string   `json:"taskId"`
+	ImageID             string   `json:"imageId"`
+	ImageType           string   `json:"imageType"`
+	FixedSizePartitions []int    `json:"fixedSizePartitions"`
+	PartCount           int      `json:"partCount"`
+	PartTypes           []string `json:"partTypes,omitempty"`
 }
 
 func (h *BootAPI) ImageMeta(w http.ResponseWriter, r *http.Request) {
@@ -524,11 +528,12 @@ response.Forbidden(w)
 return
 }
 
-ip := imagePartitions{
-PartCount:           req.PartCount,
-ImageType:           req.ImageType,
-FixedSizePartitions: req.FixedSizePartitions,
-}
+	ip := imagePartitions{
+		PartCount:           req.PartCount,
+		ImageType:           req.ImageType,
+		FixedSizePartitions: req.FixedSizePartitions,
+		PartTypes:           req.PartTypes,
+	}
 partJSON, err := json.Marshal(ip)
 if err != nil {
 response.InternalError(w)
