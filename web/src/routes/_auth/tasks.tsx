@@ -1,4 +1,4 @@
-import { Plus, X } from "@phosphor-icons/react";
+import { Note, Plus, X } from "@phosphor-icons/react";
 import { useForm } from "@tanstack/react-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -11,6 +11,7 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 import * as z from "zod";
+import { AgentLogViewer } from "@/components/agent-log-viewer";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -144,10 +145,12 @@ function TaskTable({
 	tasks,
 	isLoading,
 	onCancel,
+	onViewLogs,
 }: {
 	tasks: Task[];
 	isLoading: boolean;
 	onCancel: (id: string) => void;
+	onViewLogs: (id: string) => void;
 }) {
 	const table = useReactTable({
 		data: tasks,
@@ -191,33 +194,44 @@ function TaskTable({
 								</TableCell>
 							))}
 							<TableCell className="text-right">
-								{["active", "queued"].includes(row.original.state) && (
-									<AlertDialog>
-										<AlertDialogTrigger
-											render={
-												<Button variant="ghost" size="icon-xs">
-													<X />
-												</Button>
-											}
-										/>
-										<AlertDialogContent>
-											<AlertDialogHeader>
-												<AlertDialogTitle>Cancel task?</AlertDialogTitle>
-												<AlertDialogDescription>
-													This will cancel the running task.
-												</AlertDialogDescription>
-											</AlertDialogHeader>
-											<AlertDialogFooter>
-												<AlertDialogCancel>Keep</AlertDialogCancel>
-												<AlertDialogAction
-													onClick={() => onCancel(row.original.id)}
-												>
-													Cancel Task
-												</AlertDialogAction>
-											</AlertDialogFooter>
-										</AlertDialogContent>
-									</AlertDialog>
-								)}
+								<div className="flex items-center justify-end gap-1">
+									{row.original.state !== "queued" && (
+										<Button
+											variant="ghost"
+											size="icon-xs"
+											onClick={() => onViewLogs(row.original.id)}
+										>
+											<Note />
+										</Button>
+									)}
+									{["active", "queued"].includes(row.original.state) && (
+										<AlertDialog>
+											<AlertDialogTrigger
+												render={
+													<Button variant="ghost" size="icon-xs">
+														<X />
+													</Button>
+												}
+											/>
+											<AlertDialogContent>
+												<AlertDialogHeader>
+													<AlertDialogTitle>Cancel task?</AlertDialogTitle>
+													<AlertDialogDescription>
+														This will cancel the running task.
+													</AlertDialogDescription>
+												</AlertDialogHeader>
+												<AlertDialogFooter>
+													<AlertDialogCancel>Keep</AlertDialogCancel>
+													<AlertDialogAction
+														onClick={() => onCancel(row.original.id)}
+													>
+														Cancel Task
+													</AlertDialogAction>
+												</AlertDialogFooter>
+											</AlertDialogContent>
+										</AlertDialog>
+									)}
+								</div>
 							</TableCell>
 						</TableRow>
 					))}
@@ -231,6 +245,7 @@ function TasksPage() {
 	const qc = useQueryClient();
 	const [open, setOpen] = useState(false);
 	const [page, setPage] = useState(1);
+	const [logDialogTaskId, setLogDialogTaskId] = useState<string | null>(null);
 
 	useServerEvents();
 
@@ -325,6 +340,7 @@ function TasksPage() {
 						tasks={activeTasks}
 						isLoading={tasksQuery.isLoading}
 						onCancel={(id) => cancelMutation.mutate(id)}
+						onViewLogs={(id) => setLogDialogTaskId(id)}
 					/>
 				</TabsContent>
 				<TabsContent value="queued">
@@ -332,6 +348,7 @@ function TasksPage() {
 						tasks={queuedTasks}
 						isLoading={tasksQuery.isLoading}
 						onCancel={(id) => cancelMutation.mutate(id)}
+						onViewLogs={(id) => setLogDialogTaskId(id)}
 					/>
 				</TabsContent>
 				<TabsContent value="history">
@@ -339,6 +356,7 @@ function TasksPage() {
 						tasks={historyTasks}
 						isLoading={tasksQuery.isLoading}
 						onCancel={() => {}}
+						onViewLogs={(id) => setLogDialogTaskId(id)}
 					/>
 				</TabsContent>
 			</Tabs>
@@ -512,6 +530,20 @@ function TasksPage() {
 							</form.Subscribe>
 						</DialogFooter>
 					</form>
+				</DialogContent>
+			</Dialog>
+
+			<Dialog
+				open={logDialogTaskId !== null}
+				onOpenChange={(open) => {
+					if (!open) setLogDialogTaskId(null);
+				}}
+			>
+				<DialogContent className="max-w-3xl">
+					<DialogHeader>
+						<DialogTitle>Task Logs</DialogTitle>
+					</DialogHeader>
+					{logDialogTaskId && <AgentLogViewer taskId={logDialogTaskId} />}
 				</DialogContent>
 			</Dialog>
 		</div>

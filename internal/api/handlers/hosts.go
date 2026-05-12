@@ -240,10 +240,16 @@ id, ok := parseUUID(w, chi.URLParam(r, "id"))
 if !ok {
 return
 }
-task, err := h.db.Task.Query().Where(
-enttask.HostIDEQ(id),
-enttask.StateIn(enttask.StateQueued, enttask.StateActive),
-).Order(enttask.ByCreatedAt()).First(r.Context())
+	task, err := h.db.Task.Query().Where(
+		enttask.HostIDEQ(id),
+		enttask.StateIn(
+			enttask.StateQueued,
+			enttask.StateActive,
+			enttask.StateComplete,
+			enttask.StateFailed,
+			enttask.StateCanceled,
+		),
+	).Order(enttask.ByCreatedAt()).First(r.Context())
 if err != nil {
 if ent.IsNotFound(err) {
 response.NotFound(w, "task")

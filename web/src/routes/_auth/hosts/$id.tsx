@@ -492,7 +492,7 @@ function HostDetailPage() {
 				<TabsContent value="tasks">
 					<Card>
 						<CardHeader>
-							<CardTitle>Active Task</CardTitle>
+							<CardTitle>Current Task</CardTitle>
 						</CardHeader>
 						<CardContent>
 							{taskQuery.isLoading ? (
@@ -528,8 +528,7 @@ function HostDetailPage() {
 								<p className="text-muted-foreground text-sm">Loading task…</p>
 							) : !taskQuery.data ? (
 								<p className="text-muted-foreground text-sm">
-									No active task. Logs appear here when an imaging task is
-									running.
+									No task found. Logs appear here when an imaging task runs.
 								</p>
 							) : (
 								<AgentLogViewer taskId={taskQuery.data.id} />
