@@ -34,6 +34,7 @@ type imagePartitions struct {
 	ImageType           string   `json:"imageType"`
 	FixedSizePartitions []int    `json:"fixedSizePartitions"`
 	PartTypes           []string `json:"partTypes,omitempty"`
+	PartNumbers         []int    `json:"partNumbers,omitempty"`
 }
 
 // BootAPI handles unauthenticated and boot-token-authenticated endpoints
@@ -75,6 +76,7 @@ type handshakeResponse struct {
 	ImageType           string   `json:"imageType,omitempty"`
 	FixedSizePartitions []int    `json:"fixedSizePartitions,omitempty"`
 	PartTypes           []string `json:"partTypes,omitempty"`
+	PartNumbers         []int    `json:"partNumbers,omitempty"`
 }
 
 func (h *BootAPI) Handshake(w http.ResponseWriter, r *http.Request) {
@@ -161,6 +163,7 @@ Action:    string(task.Type),
 				resp.ImageType = ip.ImageType
 				resp.FixedSizePartitions = ip.FixedSizePartitions
 				resp.PartTypes = ip.PartTypes
+				resp.PartNumbers = ip.PartNumbers
 			}
 			if task.StorageNodeID != nil {
 				node, nodeErr := h.db.StorageNode.Get(r.Context(), *task.StorageNodeID)
@@ -496,6 +499,7 @@ type imageMetaRequest struct {
 	FixedSizePartitions []int    `json:"fixedSizePartitions"`
 	PartCount           int      `json:"partCount"`
 	PartTypes           []string `json:"partTypes,omitempty"`
+	PartNumbers         []int    `json:"partNumbers,omitempty"`
 }
 
 func (h *BootAPI) ImageMeta(w http.ResponseWriter, r *http.Request) {
@@ -533,6 +537,7 @@ return
 		ImageType:           req.ImageType,
 		FixedSizePartitions: req.FixedSizePartitions,
 		PartTypes:           req.PartTypes,
+		PartNumbers:         req.PartNumbers,
 	}
 partJSON, err := json.Marshal(ip)
 if err != nil {
