@@ -3,7 +3,7 @@
 set -eux
 
 ROOTFS=/tmp/rootfs
-OUT=$1
+OUT=/work/pixie/output
 
 rm -rf $ROOTFS
 mkdir -p $ROOTFS
@@ -143,3 +143,6 @@ find . \
 
 # copy kernel
 cp /boot/vmlinuz-lts $OUT/bzImage
+
+# Make output readable outside the container (Docker runs as root).
+chmod -R a+r $OUT 2>/dev/null || true

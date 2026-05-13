@@ -34,7 +34,7 @@ build_agent() {
         --privileged \
         -v "$ROOT:/work" \
         alpine-image-builder \
-        sh /work/pixie/build.sh $OUTPUT_DIR
+        sh /work/pixie/build.sh
     info "agent build complete → $OUTPUT_DIR/bzImage, $OUTPUT_DIR/init.xz"
 }
 

@@ -115,6 +115,7 @@ jobs:
 
       - name: Upload agent artifacts
         uses: actions/upload-artifact@v7
+        if: startsWith(github.ref, 'refs/tags/')
         with:
           name: fos-agent-x86_64
           path: |
