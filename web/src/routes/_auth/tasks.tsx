@@ -1,16 +1,3 @@
-import { Note, Plus, X } from "@phosphor-icons/react";
-import { useForm } from "@tanstack/react-form";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import {
-	createColumnHelper,
-	flexRender,
-	getCoreRowModel,
-	useReactTable,
-} from "@tanstack/react-table";
-import { useState } from "react";
-import { toast } from "sonner";
-import * as z from "zod";
 import { AgentLogViewer } from "@/components/agent-log-viewer";
 import {
 	AlertDialog,
@@ -59,6 +46,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useServerEvents } from "@/hooks/useServerEvents";
 import { api } from "@/lib/api";
 import type { Host, Image, Paginated, Task } from "@/types";
+import { Note, Plus, X } from "@phosphor-icons/react";
+import { useForm } from "@tanstack/react-form";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
+import {
+	createColumnHelper,
+	flexRender,
+	getCoreRowModel,
+	getSortedRowModel,
+	type SortingState,
+	useReactTable,
+} from "@tanstack/react-table";
+import { useState } from "react";
+import { toast } from "sonner";
+import * as z from "zod";
 
 export const Route = createFileRoute("/_auth/tasks")({
 	component: TasksPage,
@@ -152,10 +154,15 @@ function TaskTable({
 	onCancel: (id: string) => void;
 	onViewLogs: (id: string) => void;
 }) {
+	const [sorting, setSorting] = useState<SortingState>([]);
+
 	const table = useReactTable({
 		data: tasks,
 		columns,
 		getCoreRowModel: getCoreRowModel(),
+		getSortedRowModel: getSortedRowModel(),
+		state: { sorting },
+		onSortingChange: setSorting,
 	});
 
 	if (isLoading) {
@@ -178,7 +185,23 @@ function TaskTable({
 						<TableRow key={hg.id}>
 							{hg.headers.map((h) => (
 								<TableHead key={h.id}>
-									{flexRender(h.column.columnDef.header, h.getContext())}
+									{h.column.getCanSort() ? (
+										<button
+											type="button"
+											className="flex items-center gap-1 cursor-pointer select-none"
+											onClick={h.column.getToggleSortingHandler()}
+										>
+											{flexRender(h.column.columnDef.header, h.getContext())}
+											{h.column.getIsSorted() === "asc" && (
+												<span className="text-xs">▲</span>
+											)}
+											{h.column.getIsSorted() === "desc" && (
+												<span className="text-xs">▼</span>
+											)}
+										</button>
+									) : (
+										flexRender(h.column.columnDef.header, h.getContext())
+									)}
 								</TableHead>
 							))}
 							<TableHead />
@@ -539,7 +562,7 @@ function TasksPage() {
 					if (!open) setLogDialogTaskId(null);
 				}}
 			>
-				<DialogContent className="max-w-5xl">
+				<DialogContent className="max-w-dvw">
 					<DialogHeader>
 						<DialogTitle>Task Logs</DialogTitle>
 					</DialogHeader>
