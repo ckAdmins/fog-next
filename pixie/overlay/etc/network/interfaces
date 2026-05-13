@@ -1,0 +1,8 @@
+# /etc/network/interfaces — Alpine networking config
+#
+# Only loopback is static.  Non-loopback interfaces are brought up
+# dynamically by the fos-net OpenRC service, which runs udhcpc on
+# every NIC it finds regardless of name.
+
+auto lo
+iface lo inet loopback

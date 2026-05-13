@@ -1,0 +1,48 @@
+#!/bin/sh
+# fos-autologin — autologin wrapper for FOS imaging agent
+#
+# Launched from /etc/inittab via getty -n -l.  Checks the kernel cmdline
+# for fog_auto=0, then either runs the agent or drops to an interactive
+# shell.
+#
+# Exit code convention from fos-agent:
+#   0 = imaging completed successfully  → poweroff
+#   1 = error / action failed           → drop to shell
+#   2 = debug action                    → drop to shell
+#   3 = register completed              → poweroff
+
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+export HOME=/root
+export TERM=linux
+
+# Log to kmsg so debug output survives in dmesg regardless of which tty
+# the script runs on.
+log() {
+    echo "fos-autologin: $*"
+    echo "fos-autologin: $*" >/dev/kmsg 2>/dev/null || true
+}
+
+log "started on $(tty 2>/dev/null || echo 'unknown')"
+
+# Parse kernel cmdline for auto-launch control.
+if grep -qw 'fog_auto=0\|fog_auto=false' /proc/cmdline 2>/dev/null; then
+    log "fog_auto=0 detected — dropping to shell"
+    exec /bin/sh
+fi
+
+log "launching fos-agent..."
+/bin/fos-agent
+EXIT_CODE=$?
+log "fos-agent exited with code ${EXIT_CODE}"
+
+case "$EXIT_CODE" in
+    0|3)
+        log "agent succeeded — powering off in 3s"
+        sleep 3
+        poweroff -f
+        ;;
+    *)
+        log "agent failed — dropping to shell"
+        exec /bin/sh
+        ;;
+esac

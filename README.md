@@ -25,41 +25,40 @@ FOG Next replaces the PHP/Apache stack with a single statically-linked Go binary
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/nemvince/fog-next.git
-cd fog-next
+git clone https://github.com/nemvince/imaging.git
+cd imaging
 
 # 2. Create a config file from the example
-cp deploy/config.example.yaml deploy/docker/config.yaml
-#    Edit deploy/docker/config.yaml and set a strong jwt_secret and DB password
+cp config.example.yaml server/deploy/docker/config.yaml
+#    Edit server/deploy/docker/config.yaml and set a strong jwt_secret and DB password
 
 # 3. Start
 make docker-up
 
 # 4. Run the install wizard to create your admin account
-docker compose -f deploy/docker/docker-compose.yml exec fog fog install
+docker compose -f server/deploy/docker/docker-compose.yml exec fog fog install
 ```
 
 The web UI is available at **http://localhost** after the first `fog serve` starts.
 
-> **Tip:** To tear down (preserving volumes): `make docker-down`  
-> To destroy everything including data: `docker compose -f deploy/docker/docker-compose.yml down -v`
+> **Tip:** To tear down (preserving volumes): `make docker-down`
+> To destroy everything including data: `docker compose -f server/deploy/docker/docker-compose.yml down -v`
 
 ---
 
 ## Build from Source
 
-**Prerequisites:** Go 1.23+, Bun 1.x (or Node 20+ with npm), git.
+**Prerequisites:** Go 1.25+, Bun 1.x, git.
 
 ```bash
-# Install Bun (if needed)
-curl -fsSL https://bun.sh/install | bash
-
-# Build the React frontend and embed it into the binary
-make build
-
-# The output binary is at build/fog
-./build/fog version
+# Single entry point for all builds
+./build.sh server     # Go binary → build/fog
+./build.sh web        # React frontend (embeds into server binary)
+./build.sh all        # web → server → server-docker → agent
+./build.sh agent      # Agent initramfs + kernel (via pixie Docker)
 ```
+
+Also available as `make build` / `make test` / `make lint` for server-only workflows.
 
 ### Development mode (hot reload)
 
@@ -70,7 +69,7 @@ Start the backend and frontend in separate terminals:
 export FOG_DATABASE_HOST=localhost FOG_DATABASE_USER=fog \
        FOG_DATABASE_PASSWORD=fog   FOG_DATABASE_NAME=fog \
        FOG_AUTH_JWT_SECRET=dev-secret FOG_SERVER_HTTP=:8080
-go run ./cmd/fog serve
+cd server && go run ./cmd/fog serve -c config.yaml
 
 # Terminal 2 — Vite dev server with HMR (proxies /api/* → :8080)
 cd web && bun run dev
@@ -113,7 +112,7 @@ Configuration is loaded from (in priority order):
 2. `$HOME/.fog/config.yaml`
 3. `./config.yaml`
 
-See [`deploy/config.example.yaml`](deploy/config.example.yaml) for the full reference with inline comments.
+See **[config.example.yaml](config.example.yaml)** for the full reference with inline comments.
 
 ### Key settings
 
@@ -147,9 +146,9 @@ All commands accept `-c /path/to/config.yaml` to override the config file path.
 
 ## API
 
-The REST API is available at `/api/v1/`. Authentication uses JWT Bearer tokens obtained from `POST /api/v1/auth/login`.
+The REST API is available at `/fog/api/v1/`. Authentication uses JWT Bearer tokens obtained from `POST /fog/api/v1/auth/login`.
 
-See [`docs/api.md`](docs/api.md) for the full endpoint reference.
+See **[docs/api.md](docs/api.md)** for the full endpoint reference.
 
 ---
 

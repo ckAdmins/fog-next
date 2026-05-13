@@ -1,0 +1,72 @@
+#!/sbin/openrc-run
+# Dynamic DHCP on all non-loopback network interfaces.
+#
+# Unlike Alpine's static networking service (which needs interface names
+# hardcoded in /etc/network/interfaces), this service scans /sys/class/net
+# at boot and runs udhcpc on every interface it finds.  This is essential
+# in an initramfs where the NIC name depends on PCI topology and is not
+# known at build time.
+
+description="Dynamic DHCP on all network interfaces"
+
+depend() {
+    need udev
+    use clock
+    provide net
+}
+
+start() {
+    ebegin "Starting DHCP on all interfaces"
+
+    # Modules from /etc/modules-load.d/ were loaded by OpenRC's modules
+    # service in the boot runlevel.  Settle udev so NICs appear in sysfs.
+    udevadm settle 2>/dev/null || true
+
+    # Retry up to 3 times — on some hardware the NIC may take a moment
+    # to appear after module loading + udev processing.
+    local count=0
+    local attempt=0
+    while [ "$count" -eq 0 ] && [ "$attempt" -lt 3 ]; do
+        if [ "$attempt" -gt 0 ]; then
+            sleep 1
+            udevadm settle 2>/dev/null || true
+        fi
+
+        for iface in /sys/class/net/*; do
+            local name
+            name=$(basename "$iface")
+            [ "$name" = "lo" ] && continue
+            count=$((count + 1))
+        done
+
+        attempt=$((attempt + 1))
+    done
+
+    if [ "$count" -eq 0 ]; then
+        ewarn "No non-loopback network interfaces found after ${attempt} attempts"
+        eend 1
+        return 1
+    fi
+
+    # Bring up each interface and start udhcpc in foreground mode.
+    # Each instance keeps its own lease alive and handles renewals.
+    # Backgrounded so we start DHCP on all NICs in parallel.
+    local started=0
+    for iface in /sys/class/net/*; do
+        local name
+        name=$(basename "$iface")
+        [ "$name" = "lo" ] && continue
+
+        ip link set "$name" up 2>/dev/null || true
+        udhcpc -i "$name" -f -t 3 -A 5 &
+        started=$((started + 1))
+    done
+
+    eend 0 "Started DHCP on ${started} interface(s)"
+}
+
+stop() {
+    ebegin "Stopping DHCP clients"
+    pkill -f "^udhcpc " 2>/dev/null || true
+    eend 0
+}

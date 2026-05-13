@@ -1,10 +1,10 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { XIcon } from "@phosphor-icons/react";
 import type * as React from "react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 function Dialog({ ...props }: DialogPrimitive.Root.Props) {
 	return <DialogPrimitive.Root data-slot="dialog" {...props} />;
@@ -154,6 +154,5 @@ export {
 	DialogOverlay,
 	DialogPortal,
 	DialogTitle,
-	DialogTrigger
+	DialogTrigger,
 };
-

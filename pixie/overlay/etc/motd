@@ -1,0 +1,6 @@
+╔══════════════════════════════════════════════╗
+║   FOS Imaging Agent (Alpine + OpenRC)        ║
+║                                              ║
+║   Type 'fos-agent' to start manually         ║
+║   Type 'poweroff -f' to shut down            ║
+╚══════════════════════════════════════════════╝

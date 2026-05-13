@@ -1,0 +1,132 @@
+# fog-next configuration example
+# Copy to /etc/fog/config.yaml and adjust to your environment.
+# All values shown are defaults.
+
+# ─── HTTP server ────────────────────────────────────────────────────────────
+
+server:
+  # Address and port for the plain-HTTP listener.
+  http: ":80"
+
+  # Address and port for the TLS listener (optional).
+  # Leave tls_cert / tls_key empty to disable HTTPS.
+  https: ":443"
+  tls_cert: ""
+  tls_key: ""
+
+  # Externally reachable URL — used in generated iPXE scripts.
+  base_url: "http://fog.example.com"
+
+  # Time limit for reading request headers only. No read/write timeout is set
+  # for the body so that large image uploads are never killed mid-transfer.
+  read_header_timeout: 10s
+
+# ─── PostgreSQL database ─────────────────────────────────────────────────────
+
+database:
+  host: "localhost"
+  port: 5432
+  name: "fog"
+  user: "fog"
+  password: "change_me"
+  sslmode: "disable"   # disable | require | verify-full
+
+  # Connection pool
+  max_open_conns: 25
+  max_idle_conns: 5
+  conn_max_lifetime: 5m
+
+  # Alternatively, set a full DSN and all individual fields above are ignored:
+  # dsn: "postgres://fog:change_me@localhost:5432/fog?sslmode=disable"
+
+# ─── Authentication / JWT ───────────────────────────────────────────────────
+
+auth:
+  # MUST be changed in production. Generate with: openssl rand -hex 32
+  jwt_secret: "CHANGE_THIS_TO_A_RANDOM_SECRET"
+
+  access_token_expiry: 15m
+  refresh_token_expiry: 168h   # 7 days
+
+  # Lifetime of the short-lived JWT issued to fos-next clients during PXE boot.
+  boot_token_expiry: 2h
+
+# ─── File storage ───────────────────────────────────────────────────────────
+
+storage:
+  # Root directory where OS images are stored.
+  base_path: "/opt/fog/images"
+
+  # Root directory for snapin (software package) files.
+  snapin_path: "/opt/fog/snapins"
+
+  # Path to iPXE kernel/initrd files served over HTTP.
+  kernel_path: "/var/www/html/fog/service/ipxe"
+
+  # Maximum allowed size for a single file upload (bytes). Default: 100 GiB
+  max_upload_bytes: 107374182400
+
+# ─── TFTP server ────────────────────────────────────────────────────────────
+
+tftp:
+  enabled: true
+  listen: ":69"
+  root_dir: "/tftpboot"
+
+# ─── Background service intervals ───────────────────────────────────────────
+
+services:
+  # How often the task scheduler checks for queued tasks.
+  scheduler_interval: 60s
+
+  # How often the image replicator syncs images to storage nodes.
+  replicator_interval: 10m
+
+  # How often snapins are replicated to storage nodes.
+  snapin_replicator_interval: 10m
+
+  # How often hosts are pinged to update online status.
+  ping_interval: 5m
+
+  # How often image sizes on disk are recalculated.
+  image_size_interval: 1h
+
+  # How often snapin file hashes are recomputed.
+  snapin_hash_interval: 30m
+
+  # Multicast session poll interval.
+  multicast_interval: 10s
+
+# ─── LDAP / Active Directory (optional) ─────────────────────────────────────
+
+ldap:
+  enabled: false
+  url: "ldap://dc.example.com:389"
+  bind_dn: "CN=fog,OU=ServiceAccounts,DC=example,DC=com"
+  bind_password: ""
+  base_dn: "DC=example,DC=com"
+  user_filter: "(sAMAccountName=%s)"
+
+# ─── Logging ────────────────────────────────────────────────────────────────
+
+log:
+  level: "info"   # debug | info | warn | error
+  format: "json"  # json | text
+
+# ─── FOS (FOG Operating System) kernel/initramfs ────────────────────────────
+
+fos:
+  # Base URL of the fos-next release to download from.
+  # The installer fetches <release_url>/<kernel_file>, <release_url>/<init_file>,
+  # and <release_url>/sha256sums, then verifies checksums before installing.
+  release_url: "https://github.com/nemvince/fos-next/releases/latest/download"
+
+  # Filename of the kernel image in the release.
+  kernel_file: "bzImage"
+
+  # Filename of the compressed initramfs in the release.
+  init_file: "init.xz"
+
+  # Set to true to skip automatic downloading during `fog install`.
+  # Use `fog fetch-kernels` to download manually at any time.
+  skip_download: false

@@ -5,11 +5,16 @@ on:
     branches: ["main", "develop"]
   pull_request:
     branches: ["main"]
+  release:
+    types: [published]
+
+env:
+  GHCR_IMAGE: ghcr.io/${{ github.repository_owner }}/fog-next
 
 jobs:
-  # ─── Go backend ───────────────────────────────────────────────────────────
-  go:
-    name: Go build & vet
+  # ─── Go backend (server) ──────────────────────────────────────────────────
+  server:
+    name: Server — build, vet, test
     runs-on: ubuntu-latest
 
     services:
@@ -33,15 +38,15 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version-file: go.mod
-
-      - name: Download modules
-        run: go mod download
+          go-version-file: server/go.mod
+          cache-dependency-path: server/go.sum
 
       - name: go vet
+        working-directory: server
         run: go vet ./...
 
       - name: Build
+        working-directory: server
         run: go build ./...
 
       - name: staticcheck
@@ -49,8 +54,10 @@ jobs:
         with:
           version: latest
           install-go: false
+          working-directory: server
 
       - name: Test
+        working-directory: server
         run: go test -race -timeout 120s ./...
         env:
           FOG_DATABASE_HOST: localhost
@@ -62,7 +69,7 @@ jobs:
 
   # ─── React frontend ───────────────────────────────────────────────────────
   frontend:
-    name: Frontend lint, build & type-check
+    name: Frontend — lint, typecheck, build
     runs-on: ubuntu-latest
 
     steps:
@@ -84,3 +91,106 @@ jobs:
       - name: Type-check & build
         working-directory: web
         run: bun run build
+
+  # ─── Agent — test, build initramfs + kernel ───────────────────────────────
+  agent:
+    name: Agent — test, build (pixie Docker)
+    runs-on: ubuntu-latest
+    needs: server
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: agent/go.mod
+          cache-dependency-path: agent/go.sum
+
+      - name: Test
+        working-directory: agent
+        run: go test ./...
+
+      - name: Build initramfs + kernel via pixie Docker
+        run: ./build.sh agent
+
+      - name: Upload agent artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: fos-agent-x86_64
+          path: |
+            pixie/output/bzImage
+            pixie/output/init.xz
+          retention-days: 30
+
+  # ─── Server Docker image (on push to main or release) ─────────────────────
+  server-docker:
+    name: Server Docker image
+    runs-on: ubuntu-latest
+    needs: [server, frontend]
+    if: github.event_name == 'push' || github.event_name == 'release'
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.GHCR_IMAGE }}
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix=,format=short
+
+      - name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: server/deploy/docker/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  # ─── GitHub Release (on published release) ────────────────────────────────
+  release:
+    name: Publish Release
+    runs-on: ubuntu-latest
+    needs: [agent, server-docker]
+    if: github.event_name == 'release'
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download agent artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: fos-agent-x86_64
+          path: release/
+
+      # Also include sha256sums for the agent artifacts.
+      - name: Generate checksums
+        working-directory: release
+        run: sha256sum bzImage init.xz > sha256sums
+
+      - name: Upload to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release/bzImage
+            release/init.xz
+            release/sha256sums

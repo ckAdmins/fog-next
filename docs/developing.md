@@ -1,6 +1,6 @@
 # Developing FOG Next
 
-This guide covers everything you need to run the development servers, write code, run tests, and submit changes.
+Deep-dive developer guide. For build commands and gotchas see [AGENTS.md](../AGENTS.md).
 
 ---
 
@@ -8,8 +8,8 @@ This guide covers everything you need to run the development servers, write code
 
 | Tool | Minimum version | Install hint |
 |------|----------------|--------------|
-| Go | 1.23 | https://go.dev/dl |
-| Bun | 1.x | `curl -fsSL https://bun.sh/install \| bash` |
+| Go | 1.25 | `mise install` |
+| Bun | 1.x | `mise install` |
 | PostgreSQL | 15 | Docker is easiest (see below) |
 | golangci-lint | 1.57 | `go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest` |
 | Playwright browsers | — | `cd web && bunx playwright install --with-deps` |
@@ -17,8 +17,6 @@ This guide covers everything you need to run the development servers, write code
 ---
 
 ## Spinning up a development database
-
-The fastest way is Docker:
 
 ```bash
 docker run -d \
@@ -33,89 +31,36 @@ docker run -d \
 Apply the schema:
 
 ```bash
-# Build the binary first (or use go run):
-go build -o build/fog ./cmd/fog
-./build/fog migrate up
+cd server && go run ./cmd/fog migrate up
 ```
 
 ---
 
 ## Running the backend dev server
 
-The Go server can be started without pre-building the frontend — it will serve the last embedded build (or an empty `/` if none exists).
-
 ```bash
-cp deploy/config.example.yaml config.yaml
+cp config.example.yaml config.yaml
 # Edit config.yaml …
-go run ./cmd/fog serve -c config.yaml
+cd server && go run ./cmd/fog serve -c config.yaml
 ```
 
-The API is now at **http://localhost:8080/api/v1/**.
+The API is now at **http://localhost:8080/fog/api/v1/**.
 
-> **Port 80/443:** Binding to privileged ports requires `sudo` (or set the
-> `net.ipv4.ip_unprivileged_port_start` sysctl). For development, use
-> `FOG_SERVER_HTTP=:8080` instead.
+> Use `FOG_SERVER_HTTP=:8080` to avoid privileged ports during development.
 
 ---
 
 ## Running the frontend dev server
 
-The React app (Vite + React 19) has its own dev server with hot-module replacement.  It proxies `/api/*` and `/api/v1/ws` to the backend so you never need CORS headers during development.
+The React app (Vite + TanStack Router) has HMR and proxies `/fog/api/*` to `:8080`.
 
 ```bash
 cd web
-bun install          # only needed once, or after changing package.json
+bun install          # only needed once
 bun run dev
 ```
 
-The UI is now at **http://localhost:5173**.  Open this URL in your browser — not the backend port.
-
-### Proxy configuration
-
-The Vite proxy is defined in [`web/vite.config.ts`](../web/vite.config.ts).  If you changed the backend port from `:8080`, update the `target` there.
-
----
-
-## Typical two-terminal workflow
-
-```
-Terminal 1                      Terminal 2
-──────────────────────────────  ──────────────────────────────────────
-export FOG_DATABASE_PASSWORD=…  cd web
-go run ./cmd/fog serve          bun run dev
-  → API on :8080                  → UI on :5173 (proxies /api → :8080)
-```
-
-Save a Go file → the backend restarts automatically if you use a file-watcher:
-
-```bash
-# Install air (optional live-reload for Go)
-go install github.com/air-verse/air@latest
-
-air   # uses .air.toml in repo root if present, otherwise defaults
-```
-
----
-
-## Building the full binary
-
-```bash
-# Build React → embed → compile Go
-make build
-
-# Output: build/fog
-./build/fog version
-```
-
-The Makefile target `web-build` compiles the React app and copies it into
-`internal/api/static/` so it is embedded via `//go:embed static` in
-`internal/api/server.go`.
-
-For a quicker backend-only rebuild (skips the frontend):
-
-```bash
-make build-dev
-```
+UI at **http://localhost:5173**. The proxy config is in [`web/vite.config.ts`](../web/vite.config.ts).
 
 ---
 
@@ -124,76 +69,52 @@ make build-dev
 ### Go unit tests
 
 ```bash
-# All tests, race detector enabled
-make test
-
-# Single package
-go test -v ./internal/api/handlers/...
-
-# Single test function
-go test -v -run TestHosts_Create ./internal/api/handlers/...
+make test                                         # all tests, race detector
+cd server && go test -v ./internal/api/handlers/...  # single package
+cd server && go test -v -run TestHosts_Create ./internal/api/handlers/...  # single test
 ```
+
+Requires PostgreSQL on `localhost:5432` with `FOG_DATABASE_*` env vars set.
 
 ### Playwright E2E tests
 
-The E2E tests require both servers to be running (or a deployed staging server).
+E2E tests require a running backend.
 
-**Option A — local dev servers:**
+**Local dev servers:**
 
 ```bash
-# In terminal 1: start the backend
-go run ./cmd/fog serve
+# Terminal 1: backend
+cd server && go run ./cmd/fog serve
 
-# In terminal 2: run Playwright (it starts Vite automatically)
-cd web
-bunx playwright test
-
-# With interactive UI explorer
-bunx playwright test --ui
+# Terminal 2: Playwright (starts Vite automatically)
+cd web && bunx playwright test
 ```
 
-**Option B — against a staging server:**
+**Against a staging server:**
 
 ```bash
 FOG_E2E_BASE_URL=https://staging.example.com \
 FOG_E2E_USER=admin \
 FOG_E2E_PASS=secret \
-  bunx playwright test
+  cd web && bunx playwright test
 ```
 
-**Useful Playwright flags:**
-
-```bash
-bunx playwright test --headed          # show browser window
-bunx playwright test --debug           # step through tests in inspector
-bunx playwright test auth.spec.ts      # run a single file
-bunx playwright show-report            # open last HTML report
-```
-
-First run: install browser binaries:
-
-```bash
-cd web && bunx playwright install --with-deps
-```
+Useful flags: `--headed`, `--debug`, `--ui`, `auth.spec.ts` (single file).
 
 ---
 
 ## Linting
 
 ```bash
-# Go
-make lint                    # golangci-lint
-
-# TypeScript / React
-cd web && bun run lint       # eslint
+make lint                    # golangci-lint (server)
+cd web && bun run lint       # eslint (frontend)
 ```
 
 ---
 
 ## Database migrations
 
-Migrations live in `internal/database/migrations/` and use
-[golang-migrate](https://github.com/golang-migrate/migrate).
+Migrations live in `server/internal/database/migrations/` and use [golang-migrate](https://github.com/golang-migrate/migrate).
 
 ```bash
 ./build/fog migrate up        # apply all pending
@@ -204,66 +125,80 @@ Migrations live in `internal/database/migrations/` and use
 To add a new migration:
 
 ```bash
-# Name format: NNNNNN_description.up.sql / NNNNNN_description.down.sql
-touch internal/database/migrations/000002_add_column.up.sql
-touch internal/database/migrations/000002_add_column.down.sql
+touch server/internal/database/migrations/000002_description.up.sql
+touch server/internal/database/migrations/000002_description.down.sql
 ```
 
 ---
 
-## Project layout quick-reference
+## Project layout
 
 ```
-cmd/fog/                  CLI (cobra): serve, install, migrate, migrate-legacy
-internal/
+server/
+  cmd/fog/                  CLI (cobra): serve, install, migrate, migrate-legacy
+  internal/
+    api/
+      handlers/             One file per resource (hosts.go, images.go, tasks.go …)
+      middleware/            JWT auth, boot auth, rate limiter, request logger
+      response/              JSON helper functions (OK, Created, Error, …)
+      server.go              Chi router + HTTP/HTTPS lifecycle
+      static/                Embedded React build output (git-ignored)
+    auth/                    JWT sign/verify, bcrypt helpers, boot tokens
+    config/                  Config struct + Viper loader
+    database/                PostgreSQL connect + golang-migrate runner
+    legacymigrate/           FOG 1.x MySQL → PostgreSQL migration
+    plugins/                 Compile-time hook interfaces and Registry
+    pxe/                     iPXE script template generator
+    services/                Background goroutines (scheduler, replicator, multicast, …)
+    tftp/                    UDP TFTP server
+    ws/                      WebSocket hub for live task progress + agent logs
+  ent/                       Ent ORM generated code (schemas in ent/schema/)
+  deploy/
+    docker/                  docker-compose + Dockerfile
   api/
-    handlers/             One file per resource (hosts.go, images.go, tasks.go …)
-    middleware/           JWT auth, rate limiter, request logger
-    response/             JSON helper functions
-    server.go             Chi router + HTTP/HTTPS lifecycle
-    static/               Embedded React build output (git-ignored)
-  auth/                   JWT sign/verify, bcrypt helpers
-  config/                 Config struct + Viper loader
-  database/               sqlx wrapper, golang-migrate runner
-  legacymigrate/          FOG 1.x MySQL → PostgreSQL migration runner
-  models/                 Shared domain types
-  plugins/                Compile-time hook interfaces and Registry
-  pxe/                    iPXE script template generator
-  services/               Background goroutines (scheduler, replicator, …)
-  store/
-    store.go              Repository interfaces
-    postgres/             PostgreSQL implementations
-  tftp/                   UDP TFTP server
+    openapi.yaml             OpenAPI 3.1 specification
+
+agent/
+  cmd/fos-agent/             Agent entrypoint (PID 1 in initramfs)
+  internal/
+    actions/                 Capture, deploy, wipe, register, debug dispatch
+    api/                     HTTP client for fog-next boot API
+    cmdline/                 /proc/cmdline parser
+    disk/                    Block device enumeration, partition device helpers
+    imaging/                 partclone wrapper, filesystem shrink/expand, NTFS ops
+    inventory/               Hardware inventory collection
+    netup/                   Network readiness poller
+    partition/               GPT/MBR backup/restore, UUID management, ExpandLast
+    tui/                     Bubble Tea TUI dashboard for imaging progress
+    version/                 Build-time version stamps
+
 web/
   src/
-    api/client.ts         Typed API client (all fetch calls live here)
-    components/           Reusable UI components
-    pages/                One file per route
-    stores/               Zustand state stores
-  e2e/                    Playwright tests
-  playwright.config.ts
-deploy/
-  docker/                 docker-compose + Dockerfile
-  ansible/                Ansible role for bare-metal provisioning
-  systemd/                fog.service unit file
-api/
-  openapi.yaml            OpenAPI 3.1 specification
+    lib/api.ts               Typed API client (all fetch calls live here)
+    components/              Reusable React components + shadcn/ui primitives
+    routes/                  TanStack Router file-based routes
+    store/                   Zustand auth store
+    hooks/                   Custom React hooks (WebSocket, keyboard shortcuts)
+    types/                   Shared TypeScript interfaces
+
+pixie/
+  build.sh                   Initramfs assembly script (runs inside Docker)
+  Dockerfile                 Alpine build container
+  overlay/                   Rootfs overlay (init scripts, OpenRC services)
+  output/                    Build artifacts (bzImage, init.xz)
 ```
 
 ---
 
 ## Making a plugin
 
-Implement one or more hook interfaces from `internal/plugins` and register in an `init()` function (or directly in `cmd/fog/main.go`):
+Implement one or more hook interfaces from `server/internal/plugins` and register in an `init()` function:
 
 ```go
 package myplugin
 
 import (
     "context"
-    "log"
-
-    "github.com/nemvince/fog-next/internal/models"
     "github.com/nemvince/fog-next/internal/plugins"
 )
 
@@ -273,20 +208,10 @@ func init() {
 
 type AuditPlugin struct{ plugins.Noop }
 
-func (AuditPlugin) BeforeTaskCreate(ctx context.Context, task *models.Task) error {
+func (AuditPlugin) BeforeTaskCreate(ctx context.Context, task *ent.Task) error {
     log.Printf("task being created: type=%s host=%s", task.Type, task.HostID)
     return nil // return an error to reject the task
 }
 ```
 
-See [internal/plugins/plugins.go](../internal/plugins/plugins.go) for all available hook interfaces.
-
----
-
-## Submitting changes
-
-1. Fork the repo and create a branch: `git checkout -b feat/my-thing`
-2. Make your changes with tests.
-3. Run `make test && make lint` — both must pass.
-4. Run `cd web && bun run lint` for frontend changes.
-5. Open a pull request against `main`.
+See `server/internal/plugins/plugins.go` for all available hook interfaces.

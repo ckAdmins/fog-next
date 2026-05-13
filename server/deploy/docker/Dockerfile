@@ -7,9 +7,9 @@ RUN bun run build
 
 FROM golang:1.26-alpine AS builder
 WORKDIR /src
-COPY go.mod go.sum ./
+COPY server/go.mod server/go.sum ./
 RUN go mod download
-COPY . .
+COPY server/ ./
 COPY --from=web-builder /web/dist ./internal/api/static/
 RUN CGO_ENABLED=0 go build -ldflags "-s -w" -o /fog ./cmd/fog
 

@@ -1,12 +1,19 @@
 # built binaries
-build
+build/
+pixie/output/
+agent/fos-agent
 
 # built frontend
-internal/api/static/*
+server/internal/api/static/*
+!server/internal/api/static/.gitkeep
+web/dist/
+
+# Go workspace
+go.work.sum
 
 # IDE settings
-.vscode
+.vscode/
 
-# vibeslop assist
-.agents
+# AI agent assist
+.agents/
 skills-lock.json

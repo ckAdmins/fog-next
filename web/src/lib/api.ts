@@ -61,7 +61,11 @@ function authHeaders(token: string | null): Record<string, string> {
 // The server returns RFC 7807 Problem Details like {"detail": "message"}.
 function parseErrorBody(text: string): string {
 	try {
-		const parsed = JSON.parse(text) as { detail?: string; error?: string; message?: string };
+		const parsed = JSON.parse(text) as {
+			detail?: string;
+			error?: string;
+			message?: string;
+		};
 		return parsed.detail || parsed.error || parsed.message || text;
 	} catch {
 		return text;
@@ -99,7 +103,10 @@ async function request<T>(
 		});
 		if (!retry.ok) {
 			const text = await retry.text().catch(() => retry.statusText);
-			throw new ApiError(retry.status, parseErrorBody(text || retry.statusText));
+			throw new ApiError(
+				retry.status,
+				parseErrorBody(text || retry.statusText),
+			);
 		}
 		if (retry.status === 204) return undefined as T;
 		return retry.json() as Promise<T>;
@@ -135,7 +142,10 @@ async function upload<T>(path: string, formData: FormData): Promise<T> {
 		});
 		if (!retry.ok) {
 			const text = await retry.text().catch(() => retry.statusText);
-			throw new ApiError(retry.status, parseErrorBody(text || retry.statusText));
+			throw new ApiError(
+				retry.status,
+				parseErrorBody(text || retry.statusText),
+			);
 		}
 		if (retry.status === 204) return undefined as T;
 		return retry.json() as Promise<T>;
