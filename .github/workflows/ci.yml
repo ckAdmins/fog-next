@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: ["main", "develop"]
+    branches: ["main"]
     tags: ["v*"]
   pull_request:
     branches: ["main"]
@@ -11,8 +11,9 @@ env:
   GHCR_IMAGE: ghcr.io/${{ github.repository_owner }}/fog-next
 
 jobs:
-  ci:
-    name: Lint, check & test — server, frontend, agent
+  # ─── Go backend (server) ──────────────────────────────────────────────────
+  server:
+    name: Server — build, vet, test
     runs-on: ubuntu-latest
 
     services:
@@ -33,8 +34,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      # ── Server ────────────────────────────────────────────────────────────
-      - name: Set up Go (server)
+      - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version-file: server/go.mod
@@ -66,7 +66,14 @@ jobs:
           FOG_DATABASE_PASSWORD: fog
           FOG_DATABASE_SSLMODE: disable
 
-      # ── Frontend ──────────────────────────────────────────────────────────
+  # ─── React frontend ───────────────────────────────────────────────────────
+  frontend:
+    name: Frontend — lint, typecheck, build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
         with:
@@ -84,8 +91,16 @@ jobs:
         working-directory: web
         run: bun run build
 
-      # ── Agent ─────────────────────────────────────────────────────────────
-      - name: Set up Go (agent)
+  # ─── Agent — test, build initramfs + kernel ───────────────────────────────
+  agent:
+    name: Agent — test, build (pixie Docker)
+    runs-on: ubuntu-latest
+    needs: server
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version-file: agent/go.mod
@@ -107,15 +122,15 @@ jobs:
             pixie/output/init.xz
           retention-days: 30
 
-  # ─── Release ───────────────────────────────────────────────────────────────
-  release:
-    name: Build & publish
+  # ─── Server Docker image (on push to main or release) ─────────────────────
+  server-docker:
+    name: Server Docker image
     runs-on: ubuntu-latest
-    needs: ci
-    if: startsWith(github.ref, 'refs/tags/')
+    needs: [server, frontend]
+    if: github.event_name == 'push' || github.event_name == 'release'
 
     permissions:
-      contents: write
+      contents: read
       packages: write
 
     steps:
@@ -135,12 +150,11 @@ jobs:
           images: ${{ env.GHCR_IMAGE }}
           tags: |
             type=ref,event=branch
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha,prefix=,format=short
+            type=ref,event=tag,pattern=v*.*.*  # Only tag versions, not pre-releases or build metadata.
 
-      - name: Build and push server image
+      - name: Build and push
         uses: docker/build-push-action@v7
+        if: startsWith(github.ref, 'refs/tags/')
         with:
           context: .
           file: server/deploy/docker/Dockerfile
@@ -148,20 +162,29 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
+  # ─── GitHub Release (on published release) ────────────────────────────────
+  release:
+    name: Publish Release
+    runs-on: ubuntu-latest
+    needs: [agent, server-docker]
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v6
+
       - name: Download agent artifacts
-        if: github.event_name == 'release'
         uses: actions/download-artifact@v8
         with:
           name: fos-agent-x86_64
           path: release/
 
       - name: Generate checksums
-        if: github.event_name == 'release'
         working-directory: release
         run: sha256sum bzImage init.xz > sha256sums
 
       - name: Upload to release
-        if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
           files: |
