@@ -1,9 +1,18 @@
 import { Download } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import {
+	createColumnHelper,
+	flexRender,
+	getCoreRowModel,
+	useReactTable,
+} from "@tanstack/react-table";
 import { useState } from "react";
+import { RouteError } from "@/components/RouteError";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Pagination } from "@/components/ui/pagination";
 import {
 	Table,
 	TableBody,
@@ -12,12 +21,14 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/lib/api";
 import type { Host, ImagingLog, Inventory, Paginated } from "@/types";
 
 export const Route = createFileRoute("/_auth/reports")({
 	component: ReportsPage,
+	errorComponent: RouteError,
 });
 
 function downloadCsv(filename: string, rows: string[][]) {
@@ -34,14 +45,71 @@ function downloadCsv(filename: string, rows: string[][]) {
 
 function ImagingHistoryTab() {
 	const [page, setPage] = useState(1);
+	const [pageSize, setPageSize] = useState(50);
 
 	const { data, isLoading } = useQuery({
-		queryKey: ["imaging-logs", page],
+		queryKey: ["imaging-logs", page, pageSize],
 		queryFn: () =>
-			api.get<Paginated<ImagingLog>>(`/reports/imaging?page=${page}&limit=50`),
+			api.get<Paginated<ImagingLog>>(
+				`/reports/imaging?page=${page}&limit=${pageSize}`,
+			),
 	});
 
 	const logs = data?.data ?? [];
+
+	const logColHelper = createColumnHelper<ImagingLog>();
+
+	const logColumns = [
+		logColHelper.accessor("hostId", {
+			header: "Host ID",
+			cell: (info) => info.getValue(),
+		}),
+		logColHelper.accessor("imageId", {
+			header: "Image",
+			cell: (info) => info.getValue() ?? "—",
+		}),
+		logColHelper.accessor("type", {
+			header: "Type",
+			cell: (info) => info.getValue(),
+		}),
+		logColHelper.accessor("state", {
+			header: "State",
+			cell: (info) => {
+				const state = info.getValue();
+				return (
+					<Badge
+						variant={
+							state === "complete"
+								? "default"
+								: state === "failed"
+									? "destructive"
+									: "secondary"
+						}
+					>
+						{state}
+					</Badge>
+				);
+			},
+		}),
+		logColHelper.accessor("durationSeconds", {
+			header: "Duration",
+			cell: (info) => (info.getValue() != null ? `${info.getValue()}s` : "—"),
+		}),
+		logColHelper.accessor("createdAt", {
+			header: "Date",
+			cell: (info) => (
+				<span className="text-sm text-muted-foreground">
+					{new Date(info.getValue()).toLocaleString()}
+				</span>
+			),
+		}),
+	];
+
+	const logTable = useReactTable({
+		data: logs,
+		columns: logColumns,
+		getCoreRowModel: getCoreRowModel(),
+	});
 
 	return (
 		<div className="flex flex-col gap-4">
@@ -71,90 +139,57 @@ function ImagingHistoryTab() {
 			<div className="rounded-lg border">
 				<Table>
 					<TableHeader>
-						<TableRow>
-							<TableHead>Host ID</TableHead>
-							<TableHead>Image</TableHead>
-							<TableHead>Type</TableHead>
-							<TableHead>State</TableHead>
-							<TableHead>Duration</TableHead>
-							<TableHead>Date</TableHead>
-						</TableRow>
+						{logTable.getHeaderGroups().map((headerGroup) => (
+							<TableRow key={headerGroup.id}>
+								{headerGroup.headers.map((header) => (
+									<TableHead key={header.id}>
+										{header.isPlaceholder
+											? null
+											: flexRender(
+													header.column.columnDef.header,
+													header.getContext(),
+												)}
+									</TableHead>
+								))}
+							</TableRow>
+						))}
 					</TableHeader>
 					<TableBody>
 						{isLoading ? (
+							<TableSkeleton columns={6} />
+						) : logTable.getRowModel().rows.length === 0 ? (
 							<TableRow>
-								<TableCell
-									colSpan={6}
-									className="text-center text-muted-foreground py-8"
-								>
-									Loading…
-								</TableCell>
-							</TableRow>
-						) : logs.length === 0 ? (
-							<TableRow>
-								<TableCell
-									colSpan={6}
-									className="text-center text-muted-foreground py-8"
-								>
-									No imaging history
+								<TableCell colSpan={6}>
+									<EmptyState title="No imaging history" />
 								</TableCell>
 							</TableRow>
 						) : (
-							logs.map((log) => (
-								<TableRow key={log.id}>
-									<TableCell>{log.hostId}</TableCell>
-									<TableCell>{log.imageId ?? "—"}</TableCell>
-									<TableCell>{log.type}</TableCell>
-									<TableCell>
-										<Badge
-											variant={
-												log.state === "complete"
-													? "default"
-													: log.state === "failed"
-														? "destructive"
-														: "secondary"
-											}
-										>
-											{log.state}
-										</Badge>
-									</TableCell>
-									<TableCell>
-										{log.durationSeconds != null
-											? `${log.durationSeconds}s`
-											: "—"}
-									</TableCell>
-									<TableCell className="text-sm text-muted-foreground">
-										{new Date(log.createdAt).toLocaleString()}
-									</TableCell>
+							logTable.getRowModel().rows.map((row) => (
+								<TableRow key={row.id}>
+									{row.getVisibleCells().map((cell) => (
+										<TableCell key={cell.id}>
+											{flexRender(
+												cell.column.columnDef.cell,
+												cell.getContext(),
+											)}
+										</TableCell>
+									))}
 								</TableRow>
 							))
 						)}
 					</TableBody>
 				</Table>
 			</div>
-			{data && data.total > 50 && (
-				<div className="flex items-center justify-end gap-2">
-					<Button
-						variant="outline"
-						size="sm"
-						disabled={page <= 1}
-						onClick={() => setPage((p) => p - 1)}
-					>
-						Previous
-					</Button>
-					<span className="text-sm text-muted-foreground">
-						Page {page} of {Math.ceil(data.total / 50)}
-					</span>
-					<Button
-						variant="outline"
-						size="sm"
-						disabled={page >= Math.ceil(data.total / 50)}
-						onClick={() => setPage((p) => p + 1)}
-					>
-						Next
-					</Button>
-				</div>
-			)}
+			<Pagination
+				page={page}
+				pageSize={pageSize}
+				total={data?.total ?? 0}
+				onPageChange={setPage}
+				onPageSizeChange={(s) => {
+					setPageSize(s);
+					setPage(1);
+				}}
+			/>
 		</div>
 	);
 }
@@ -180,6 +215,40 @@ function HostInventoryTab() {
 	const rows = inventories.map((inv) => {
 		const host = hosts.find((h) => h.id === inv.hostId);
 		return { ...inv, hostName: host?.name ?? inv.hostId };
+	});
+
+	type InventoryRow = Inventory & { hostName: string };
+
+	const invColHelper = createColumnHelper<InventoryRow>();
+
+	const invColumns = [
+		invColHelper.accessor("hostName", {
+			header: "Host",
+			cell: (info) => <span className="font-medium">{info.getValue()}</span>,
+		}),
+		invColHelper.accessor("cpuModel", {
+			header: "CPU",
+			cell: (info) =>
+				`${info.getValue()} (${info.row.original.cpuCores} cores)`,
+		}),
+		invColHelper.accessor("ramMib", {
+			header: "RAM",
+			cell: (info) => `${info.getValue()} MiB`,
+		}),
+		invColHelper.accessor("hdModel", {
+			header: "Disk",
+			cell: (info) => `${info.getValue()} (${info.row.original.hdSizeGb} GB)`,
+		}),
+		invColHelper.accessor("osName", {
+			header: "OS",
+			cell: (info) => `${info.getValue()} ${info.row.original.osVersion}`,
+		}),
+	];
+
+	const invTable = useReactTable({
+		data: rows,
+		columns: invColumns,
+		getCoreRowModel: getCoreRowModel(),
 	});
 
 	return (
@@ -221,47 +290,41 @@ function HostInventoryTab() {
 			<div className="rounded-lg border">
 				<Table>
 					<TableHeader>
-						<TableRow>
-							<TableHead>Host</TableHead>
-							<TableHead>CPU</TableHead>
-							<TableHead>RAM</TableHead>
-							<TableHead>Disk</TableHead>
-							<TableHead>OS</TableHead>
-						</TableRow>
+						{invTable.getHeaderGroups().map((headerGroup) => (
+							<TableRow key={headerGroup.id}>
+								{headerGroup.headers.map((header) => (
+									<TableHead key={header.id}>
+										{header.isPlaceholder
+											? null
+											: flexRender(
+													header.column.columnDef.header,
+													header.getContext(),
+												)}
+									</TableHead>
+								))}
+							</TableRow>
+						))}
 					</TableHeader>
 					<TableBody>
 						{inventoryQuery.isLoading ? (
+							<TableSkeleton columns={5} />
+						) : invTable.getRowModel().rows.length === 0 ? (
 							<TableRow>
-								<TableCell
-									colSpan={5}
-									className="text-center text-muted-foreground py-8"
-								>
-									Loading…
-								</TableCell>
-							</TableRow>
-						) : rows.length === 0 ? (
-							<TableRow>
-								<TableCell
-									colSpan={5}
-									className="text-center text-muted-foreground py-8"
-								>
-									No inventory data
+								<TableCell colSpan={5}>
+									<EmptyState title="No inventory data" />
 								</TableCell>
 							</TableRow>
 						) : (
-							rows.map((row) => (
+							invTable.getRowModel().rows.map((row) => (
 								<TableRow key={row.id}>
-									<TableCell className="font-medium">{row.hostName}</TableCell>
-									<TableCell>
-										{row.cpuModel} ({row.cpuCores} cores)
-									</TableCell>
-									<TableCell>{row.ramMib} MiB</TableCell>
-									<TableCell>
-										{row.hdModel} ({row.hdSizeGb} GB)
-									</TableCell>
-									<TableCell>
-										{row.osName} {row.osVersion}
-									</TableCell>
+									{row.getVisibleCells().map((cell) => (
+										<TableCell key={cell.id}>
+											{flexRender(
+												cell.column.columnDef.cell,
+												cell.getContext(),
+											)}
+										</TableCell>
+									))}
 								</TableRow>
 							))
 						)}

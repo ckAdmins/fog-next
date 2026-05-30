@@ -2,6 +2,7 @@ import { useForm } from "@tanstack/react-form";
 import { createFileRoute, redirect, useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
 import * as z from "zod";
+import { RouteError } from "@/components/RouteError";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -29,6 +30,7 @@ export const Route = createFileRoute("/login")({
 		}
 	},
 	component: LoginPage,
+	errorComponent: RouteError,
 });
 
 const loginSchema = z.object({
@@ -42,7 +44,7 @@ function LoginPage() {
 
 	const form = useForm({
 		defaultValues: { username: "", password: "" },
-		validators: { onSubmit: loginSchema },
+		validators: { onBlur: loginSchema, onSubmit: loginSchema },
 		onSubmit: async ({ value }) => {
 			try {
 				const tokens = await api.post<TokenPair>("/auth/login", value);

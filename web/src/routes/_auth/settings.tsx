@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { RouteError } from "@/components/RouteError";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +14,7 @@ import type { GlobalSetting, ListResponse } from "@/types";
 
 export const Route = createFileRoute("/_auth/settings")({
 	component: SettingsPage,
+	errorComponent: RouteError,
 });
 
 function SettingRow({ setting }: { setting: GlobalSetting }) {
@@ -27,8 +29,6 @@ function SettingRow({ setting }: { setting: GlobalSetting }) {
 			void qc.invalidateQueries({ queryKey: ["settings"] });
 			toast.success(`Saved "${setting.key}"`);
 		},
-		onError: (err) =>
-			toast.error(err instanceof Error ? err.message : "Save failed"),
 	});
 
 	const dirty = value !== setting.value;

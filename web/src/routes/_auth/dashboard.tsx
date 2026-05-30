@@ -1,6 +1,7 @@
 import { Cpu, HardDrive, ListChecks } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { RouteError } from "@/components/RouteError";
 import {
 	Card,
 	CardContent,
@@ -14,6 +15,7 @@ import type { Host, Image, Paginated, Task } from "@/types";
 
 export const Route = createFileRoute("/_auth/dashboard")({
 	component: DashboardPage,
+	errorComponent: RouteError,
 });
 
 function StatCard({

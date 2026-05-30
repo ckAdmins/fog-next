@@ -1,16 +1,4 @@
-import {
-	ChartBar,
-	Cpu,
-	FolderOpen,
-	Gauge,
-	HardDrive,
-	HouseSimple,
-	Package,
-	Sliders,
-	Users,
-	WifiMedium,
-	X,
-} from "@phosphor-icons/react";
+import { X } from "@phosphor-icons/react";
 import { useNavigate } from "@tanstack/react-router";
 import {
 	type KeyboardEvent,
@@ -20,103 +8,10 @@ import {
 	useState,
 } from "react";
 import { Input } from "@/components/ui/input";
-
-interface CommandItem {
-	id: string;
-	label: string;
-	icon: React.ElementType;
-	to: string;
-	shortcut?: string;
-	section: string;
-}
-
-const commands: CommandItem[] = [
-	{
-		id: "dashboard",
-		label: "Dashboard",
-		icon: HouseSimple,
-		to: "/dashboard",
-		shortcut: "g d",
-		section: "Navigate",
-	},
-	{
-		id: "hosts",
-		label: "Hosts",
-		icon: Cpu,
-		to: "/hosts",
-		shortcut: "g h",
-		section: "Navigate",
-	},
-	{
-		id: "images",
-		label: "Images",
-		icon: HardDrive,
-		to: "/images",
-		shortcut: "g i",
-		section: "Navigate",
-	},
-	{
-		id: "tasks",
-		label: "Tasks",
-		icon: Gauge,
-		to: "/tasks",
-		shortcut: "g t",
-		section: "Navigate",
-	},
-	{
-		id: "groups",
-		label: "Groups",
-		icon: FolderOpen,
-		to: "/groups",
-		shortcut: "g g",
-		section: "Navigate",
-	},
-	{
-		id: "snapins",
-		label: "Snapins",
-		icon: Package,
-		to: "/snapins",
-		shortcut: "g s",
-		section: "Navigate",
-	},
-	{
-		id: "storage",
-		label: "Storage",
-		icon: WifiMedium,
-		to: "/storage",
-		section: "Navigate",
-	},
-	{
-		id: "users",
-		label: "Users",
-		icon: Users,
-		to: "/users",
-		shortcut: "g u",
-		section: "Administration",
-	},
-	{
-		id: "settings",
-		label: "Settings",
-		icon: Sliders,
-		to: "/settings",
-		shortcut: "g ,",
-		section: "Administration",
-	},
-	{
-		id: "pending-macs",
-		label: "Pending MACs",
-		icon: WifiMedium,
-		to: "/pending-macs",
-		section: "Administration",
-	},
-	{
-		id: "reports",
-		label: "Reports",
-		icon: ChartBar,
-		to: "/reports",
-		section: "Reports",
-	},
-];
+import { fuzzyMatch } from "@/lib/fuzzy";
+import type { NavShortcut } from "@/lib/shortcuts";
+import { navShortcuts } from "@/lib/shortcuts";
+import { useAuthStore } from "@/store/auth";
 
 export function CommandPalette() {
 	const [open, setOpen] = useState(false);
@@ -125,17 +20,29 @@ export function CommandPalette() {
 	const inputRef = useRef<HTMLInputElement>(null);
 	const listRef = useRef<HTMLDivElement>(null);
 	const navigate = useNavigate();
+	const role = useAuthStore((s) => s.role);
+	const isAdmin = role === "admin";
+
+	const visibleShortcuts = isAdmin
+		? navShortcuts
+		: navShortcuts.filter((c) => c.section === "Navigate");
 
 	const filtered = query.trim()
-		? commands.filter(
-				(c) =>
-					c.label.toLowerCase().includes(query.toLowerCase()) ||
-					c.id.toLowerCase().includes(query.toLowerCase()) ||
-					c.section.toLowerCase().includes(query.toLowerCase()),
-			)
-		: commands;
+		? visibleShortcuts
+				.map((c) => {
+					const score = Math.max(
+						fuzzyMatch(query, c.label),
+						fuzzyMatch(query, c.id),
+						fuzzyMatch(query, c.section),
+					);
+					return { item: c, score };
+				})
+				.filter(({ score }) => score > 0)
+				.sort((a, b) => b.score - a.score)
+				.map(({ item }) => item)
+		: visibleShortcuts;
 
-	const grouped = filtered.reduce<Record<string, CommandItem[]>>((acc, c) => {
+	const grouped = filtered.reduce<Record<string, NavShortcut[]>>((acc, c) => {
 		if (!acc[c.section]) acc[c.section] = [];
 		acc[c.section].push(c);
 		return acc;
@@ -145,7 +52,7 @@ export function CommandPalette() {
 
 	const handleSelect = useCallback(
 		(id: string) => {
-			const cmd = commands.find((c) => c.id === id);
+			const cmd = navShortcuts.find((c) => c.id === id);
 			if (cmd) {
 				navigate({ to: cmd.to });
 				setOpen(false);
@@ -224,8 +131,8 @@ export function CommandPalette() {
 			/>
 
 			{/* Palette */}
-			<div className="absolute left-1/2 top-[20%] w-full max-w-lg -translate-x-1/2 animate-in fade-in slide-in-from-top-2 duration-150">
-				<div className="rounded-lg border bg-card shadow-2xl overflow-hidden">
+			<div className="absolute inset-x-0 top-0 bottom-auto max-w-none sm:left-1/2 sm:right-auto sm:top-[20%] sm:w-full sm:max-w-lg sm:-translate-x-1/2 sm:bottom-auto animate-in fade-in slide-in-from-top-2 duration-150">
+				<div className="sm:rounded-lg border-t sm:border bg-card shadow-2xl overflow-hidden h-[100dvh] sm:h-auto sm:max-h-[80vh] flex flex-col">
 					{/* Search */}
 					<div className="flex items-center border-b px-3">
 						<Input
@@ -245,7 +152,10 @@ export function CommandPalette() {
 					</div>
 
 					{/* Results */}
-					<div ref={listRef} className="max-h-72 overflow-y-auto p-2">
+					<div
+						ref={listRef}
+						className="max-h-72 sm:max-h-72 overflow-y-auto p-2 flex-1 sm:flex-none"
+					>
 						{entries.length === 0 && (
 							<p className="text-center text-sm text-muted-foreground py-8">
 								No results found.
@@ -269,11 +179,9 @@ export function CommandPalette() {
 										>
 											<item.icon className="size-4 shrink-0 text-muted-foreground" />
 											<span className="flex-1 text-left">{item.label}</span>
-											{item.shortcut && (
-												<kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-0.5 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
-													{item.shortcut.replace(" ", " ")}
-												</kbd>
-											)}
+											<kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-0.5 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+												g {item.shortcut}
+											</kbd>
 										</button>
 									);
 								})}

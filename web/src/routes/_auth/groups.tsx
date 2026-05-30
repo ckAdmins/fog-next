@@ -1,21 +1,14 @@
-import { Plus, Trash } from "@phosphor-icons/react";
-import { useForm } from "@tanstack/react-form";
+import { Plus } from "@phosphor-icons/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import {
+	flexRender,
+	getCoreRowModel,
+	useReactTable,
+} from "@tanstack/react-table";
 import { useState } from "react";
 import { toast } from "sonner";
-import * as z from "zod";
-import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-	AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { RouteError } from "@/components/RouteError";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -31,13 +24,8 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import {
-	Field,
-	FieldError,
-	FieldGroup,
-	FieldLabel,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Field, FieldLabel } from "@/components/ui/field";
 import {
 	Select,
 	SelectContent,
@@ -45,6 +33,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
 	Table,
 	TableBody,
@@ -54,15 +43,16 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { api } from "@/lib/api";
+import { GroupDialog } from "@/routes/_auth/_components/GroupDialog";
+import {
+	makeGroupListColumns,
+	makeGroupMembersColumns,
+} from "@/routes/_auth/_components/groupsColumns";
 import type { Group, GroupMember, Host, Paginated } from "@/types";
 
 export const Route = createFileRoute("/_auth/groups")({
 	component: GroupsPage,
-});
-
-const groupSchema = z.object({
-	name: z.string().min(1, "Name is required"),
-	description: z.string(),
+	errorComponent: RouteError,
 });
 
 function GroupsPage() {
@@ -90,18 +80,6 @@ function GroupsPage() {
 		queryFn: () => api.get<Paginated<Host>>("/hosts?page=1&limit=1000"),
 	});
 
-	const createMutation = useMutation({
-		mutationFn: (values: z.infer<typeof groupSchema>) =>
-			api.post<Group>("/groups", values),
-		onSuccess: () => {
-			void qc.invalidateQueries({ queryKey: ["groups"] });
-			setCreateOpen(false);
-			toast.success("Group created");
-		},
-		onError: (err) =>
-			toast.error(err instanceof Error ? err.message : "Failed"),
-	});
-
 	const deleteMutation = useMutation({
 		mutationFn: (id: string) => api.del<void>(`/groups/${id}`),
 		onSuccess: (_, id) => {
@@ -109,8 +87,6 @@ function GroupsPage() {
 			if (selectedGroup?.id === id) setSelectedGroup(null);
 			toast.success("Group deleted");
 		},
-		onError: (err) =>
-			toast.error(err instanceof Error ? err.message : "Failed"),
 	});
 
 	const addMemberMutation = useMutation({
@@ -125,8 +101,6 @@ function GroupsPage() {
 			setAddMemberHostId("");
 			toast.success("Member added");
 		},
-		onError: (err) =>
-			toast.error(err instanceof Error ? err.message : "Failed"),
 	});
 
 	const removeMemberMutation = useMutation({
@@ -139,23 +113,31 @@ function GroupsPage() {
 			});
 			toast.success("Member removed");
 		},
-		onError: (err) =>
-			toast.error(err instanceof Error ? err.message : "Failed"),
-	});
-
-	const form = useForm({
-		defaultValues: { name: "", description: "" },
-		validators: { onSubmit: groupSchema },
-		onSubmit: ({ value }) => createMutation.mutate(value),
 	});
 
 	const groups = groupsQuery.data?.data ?? [];
 	const members = membersQuery.data?.data ?? [];
 
-	// Hosts not already in the group
 	const allHosts = hostsQuery.data?.data ?? [];
 	const memberHostIds = new Set(members.map((m) => m.hostId));
 	const availableHosts = allHosts.filter((h) => !memberHostIds.has(h.id));
+
+	const groupTable = useReactTable({
+		data: groups,
+		columns: makeGroupListColumns({
+			onDelete: (id) => deleteMutation.mutate(id),
+		}),
+		getCoreRowModel: getCoreRowModel(),
+	});
+
+	const memberTable = useReactTable({
+		data: members,
+		columns: makeGroupMembersColumns({
+			allHosts,
+			onRemove: (hostId) => removeMemberMutation.mutate(hostId),
+		}),
+		getCoreRowModel: getCoreRowModel(),
+	});
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -171,65 +153,31 @@ function GroupsPage() {
 			</div>
 
 			<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-				{/* Group list */}
 				<Card className="md:col-span-1">
 					<CardHeader>
 						<CardTitle>Groups</CardTitle>
 					</CardHeader>
 					<CardContent className="p-0">
 						{groups.length === 0 ? (
-							<p className="px-4 py-6 text-sm text-muted-foreground">
-								No groups
-							</p>
+							<EmptyState title="No groups" />
 						) : (
 							<Table>
 								<TableBody>
-									{groups.map((group) => (
+									{groupTable.getRowModel().rows.map((row) => (
 										<TableRow
-											key={group.id}
+											key={row.id}
 											className="cursor-pointer"
-											data-selected={selectedGroup?.id === group.id}
-											onClick={() => setSelectedGroup(group)}
+											data-selected={selectedGroup?.id === row.original.id}
+											onClick={() => setSelectedGroup(row.original)}
 										>
-											<TableCell>
-												<div className="font-medium">{group.name}</div>
-												{group.description && (
-													<div className="text-xs text-muted-foreground">
-														{group.description}
-													</div>
-												)}
-											</TableCell>
-											<TableCell className="text-right">
-												<AlertDialog>
-													<AlertDialogTrigger
-														render={
-															<Button
-																variant="ghost"
-																size="icon-xs"
-																onClick={(e) => e.stopPropagation()}
-															>
-																<Trash />
-															</Button>
-														}
-													/>
-													<AlertDialogContent>
-														<AlertDialogHeader>
-															<AlertDialogTitle>Delete group?</AlertDialogTitle>
-															<AlertDialogDescription>
-																This will delete "{group.name}".
-															</AlertDialogDescription>
-														</AlertDialogHeader>
-														<AlertDialogFooter>
-															<AlertDialogCancel>Cancel</AlertDialogCancel>
-															<AlertDialogAction
-																onClick={() => deleteMutation.mutate(group.id)}
-															>
-																Delete
-															</AlertDialogAction>
-														</AlertDialogFooter>
-													</AlertDialogContent>
-												</AlertDialog>
-											</TableCell>
+											{row.getVisibleCells().map((cell) => (
+												<TableCell key={cell.id}>
+													{flexRender(
+														cell.column.columnDef.cell,
+														cell.getContext(),
+													)}
+												</TableCell>
+											))}
 										</TableRow>
 									))}
 								</TableBody>
@@ -238,7 +186,6 @@ function GroupsPage() {
 					</CardContent>
 				</Card>
 
-				{/* Members panel */}
 				<Card className="md:col-span-2">
 					<CardHeader className="flex flex-row items-center justify-between">
 						<div>
@@ -260,37 +207,40 @@ function GroupsPage() {
 					</CardHeader>
 					<CardContent>
 						{!selectedGroup ? null : membersQuery.isLoading ? (
-							<p className="text-sm text-muted-foreground">Loading…</p>
+							<Skeleton className="h-24 w-full" />
 						) : members.length === 0 ? (
-							<p className="text-sm text-muted-foreground">No members</p>
+							<EmptyState title="No members" />
 						) : (
 							<Table>
 								<TableHeader>
-									<TableRow>
-										<TableHead>Host</TableHead>
-										<TableHead />
-									</TableRow>
+									{memberTable.getHeaderGroups().map((headerGroup) => (
+										<TableRow key={headerGroup.id}>
+											{headerGroup.headers.map((header) => (
+												<TableHead key={header.id}>
+													{header.isPlaceholder
+														? null
+														: flexRender(
+																header.column.columnDef.header,
+																header.getContext(),
+															)}
+												</TableHead>
+											))}
+										</TableRow>
+									))}
 								</TableHeader>
 								<TableBody>
-									{members.map((member) => {
-										const host = allHosts.find((h) => h.id === member.hostId);
-										return (
-											<TableRow key={member.hostId}>
-												<TableCell>{host?.name ?? member.hostId}</TableCell>
-												<TableCell className="text-right">
-													<Button
-														variant="ghost"
-														size="icon-xs"
-														onClick={() =>
-															removeMemberMutation.mutate(member.hostId)
-														}
-													>
-														<Trash />
-													</Button>
+									{memberTable.getRowModel().rows.map((row) => (
+										<TableRow key={row.id}>
+											{row.getVisibleCells().map((cell) => (
+												<TableCell key={cell.id}>
+													{flexRender(
+														cell.column.columnDef.cell,
+														cell.getContext(),
+													)}
 												</TableCell>
-											</TableRow>
-										);
-									})}
+											))}
+										</TableRow>
+									))}
 								</TableBody>
 							</Table>
 						)}
@@ -298,77 +248,8 @@ function GroupsPage() {
 				</Card>
 			</div>
 
-			{/* Create Group Dialog */}
-			<Dialog open={createOpen} onOpenChange={setCreateOpen}>
-				<DialogContent>
-					<DialogHeader>
-						<DialogTitle>New Group</DialogTitle>
-					</DialogHeader>
-					<form
-						onSubmit={(e) => {
-							e.preventDefault();
-							void form.handleSubmit();
-						}}
-					>
-						<FieldGroup>
-							<form.Field name="name">
-								{(field) => {
-									const isInvalid =
-										field.state.meta.isTouched && !field.state.meta.isValid;
-									return (
-										<Field data-invalid={isInvalid}>
-											<FieldLabel htmlFor={field.name}>Name</FieldLabel>
-											<Input
-												id={field.name}
-												name={field.name}
-												value={field.state.value}
-												onBlur={field.handleBlur}
-												onChange={(e) => field.handleChange(e.target.value)}
-												aria-invalid={isInvalid}
-											/>
-											{isInvalid && (
-												<FieldError errors={field.state.meta.errors} />
-											)}
-										</Field>
-									);
-								}}
-							</form.Field>
-							<form.Field name="description">
-								{(field) => (
-									<Field>
-										<FieldLabel htmlFor={field.name}>Description</FieldLabel>
-										<Input
-											id={field.name}
-											name={field.name}
-											value={field.state.value}
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-										/>
-									</Field>
-								)}
-							</form.Field>
-						</FieldGroup>
-						<DialogFooter className="mt-4">
-							<Button
-								type="button"
-								variant="outline"
-								onClick={() => setCreateOpen(false)}
-							>
-								Cancel
-							</Button>
-							<form.Subscribe selector={(s) => s.isSubmitting}>
-								{(isSubmitting) => (
-									<Button type="submit" disabled={isSubmitting}>
-										{isSubmitting ? "Creating…" : "Create"}
-									</Button>
-								)}
-							</form.Subscribe>
-						</DialogFooter>
-					</form>
-				</DialogContent>
-			</Dialog>
+			<GroupDialog open={createOpen} onOpenChange={setCreateOpen} />
 
-			{/* Add Member Dialog */}
 			<Dialog open={addMemberOpen} onOpenChange={setAddMemberOpen}>
 				<DialogContent>
 					<DialogHeader>

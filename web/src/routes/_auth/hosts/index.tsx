@@ -11,6 +11,7 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 import * as z from "zod";
+import { RouteError } from "@/components/RouteError";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +21,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
 	Field,
 	FieldError,
@@ -27,6 +29,7 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Pagination } from "@/components/ui/pagination";
 import {
 	Table,
 	TableBody,
@@ -35,11 +38,13 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { api } from "@/lib/api";
 import type { Host, Paginated } from "@/types";
 
 export const Route = createFileRoute("/_auth/hosts/")({
 	component: HostsPage,
+	errorComponent: RouteError,
 });
 
 const col = createColumnHelper<Host>();
@@ -75,11 +80,13 @@ function HostsPage() {
 	const navigate = useNavigate();
 	const qc = useQueryClient();
 	const [page, setPage] = useState(1);
+	const [pageSize, setPageSize] = useState(25);
 	const [open, setOpen] = useState(false);
 
 	const { data, isLoading } = useQuery({
-		queryKey: ["hosts", page],
-		queryFn: () => api.get<Paginated<Host>>(`/hosts?page=${page}&limit=25`),
+		queryKey: ["hosts", page, pageSize],
+		queryFn: () =>
+			api.get<Paginated<Host>>(`/hosts?page=${page}&limit=${pageSize}`),
 	});
 
 	const createMutation = useMutation({
@@ -90,13 +97,11 @@ function HostsPage() {
 			setOpen(false);
 			toast.success("Host created");
 		},
-		onError: (err) =>
-			toast.error(err instanceof Error ? err.message : "Failed to create host"),
 	});
 
 	const form = useForm({
 		defaultValues: { name: "", ip: "", description: "" },
-		validators: { onSubmit: createSchema },
+		validators: { onBlur: createSchema, onSubmit: createSchema },
 		onSubmit: ({ value }) => createMutation.mutate(value),
 	});
 
@@ -134,21 +139,11 @@ function HostsPage() {
 					</TableHeader>
 					<TableBody>
 						{isLoading ? (
-							<TableRow>
-								<TableCell
-									colSpan={columns.length}
-									className="text-center text-muted-foreground py-8"
-								>
-									Loading…
-								</TableCell>
-							</TableRow>
+							<TableSkeleton columns={columns.length} />
 						) : table.getRowModel().rows.length === 0 ? (
 							<TableRow>
-								<TableCell
-									colSpan={columns.length}
-									className="text-center text-muted-foreground py-8"
-								>
-									No hosts found
+								<TableCell colSpan={columns.length}>
+									<EmptyState title="No hosts found" />
 								</TableCell>
 							</TableRow>
 						) : (
@@ -178,29 +173,16 @@ function HostsPage() {
 				</Table>
 			</div>
 
-			{data && data.total > 25 && (
-				<div className="flex items-center justify-end gap-2">
-					<Button
-						variant="outline"
-						size="sm"
-						disabled={page <= 1}
-						onClick={() => setPage((p) => p - 1)}
-					>
-						Previous
-					</Button>
-					<span className="text-sm text-muted-foreground">
-						Page {page} of {Math.ceil(data.total / 25)}
-					</span>
-					<Button
-						variant="outline"
-						size="sm"
-						disabled={page >= Math.ceil(data.total / 25)}
-						onClick={() => setPage((p) => p + 1)}
-					>
-						Next
-					</Button>
-				</div>
-			)}
+			<Pagination
+				page={page}
+				pageSize={pageSize}
+				total={data?.total ?? 0}
+				onPageChange={setPage}
+				onPageSizeChange={(s) => {
+					setPageSize(s);
+					setPage(1);
+				}}
+			/>
 
 			<Dialog open={open} onOpenChange={setOpen}>
 				<DialogContent>

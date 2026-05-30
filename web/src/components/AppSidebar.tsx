@@ -1,18 +1,7 @@
-import {
-	ChartBar,
-	Cpu,
-	FolderOpen,
-	Gauge,
-	Gear,
-	HardDrive,
-	HouseSimple,
-	Package,
-	SignOut,
-	Sliders,
-	Users,
-	WifiMedium,
-} from "@phosphor-icons/react";
+import type { Icon } from "@phosphor-icons/react";
+import { Gear, SignOut, WifiX } from "@phosphor-icons/react";
 import { Link, useRouter } from "@tanstack/react-router";
+import { Fragment } from "react";
 import {
 	Sidebar,
 	SidebarContent,
@@ -26,30 +15,34 @@ import {
 	SidebarMenuItem,
 	SidebarSeparator,
 } from "@/components/ui/sidebar";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { navShortcuts } from "@/lib/shortcuts";
 import { useAuthStore } from "@/store/auth";
 
-const navItems = [
-	{ to: "/dashboard", label: "Dashboard", icon: HouseSimple, shortcut: "d" },
-	{ to: "/hosts", label: "Hosts", icon: Cpu, shortcut: "h" },
-	{ to: "/images", label: "Images", icon: HardDrive, shortcut: "i" },
-	{ to: "/tasks", label: "Tasks", icon: Gauge, shortcut: "t" },
-	{ to: "/groups", label: "Groups", icon: FolderOpen, shortcut: "g" },
-	{ to: "/snapins", label: "Snapins", icon: Package, shortcut: "s" },
-	{ to: "/storage", label: "Storage", icon: WifiMedium, shortcut: null },
-] as const;
-
-const adminItems = [
-	{ to: "/users", label: "Users", icon: Users, shortcut: "u" },
-	{ to: "/settings", label: "Settings", icon: Sliders, shortcut: "," },
-] as const;
-
-const reportItems = [
-	{ to: "/reports", label: "Reports", icon: ChartBar, shortcut: "r" },
-] as const;
+const sections = navShortcuts.reduce<
+	Record<string, { to: string; label: string; icon: Icon; shortcut: string }[]>
+>((acc, s) => {
+	if (!acc[s.section]) acc[s.section] = [];
+	acc[s.section].push({
+		to: s.to,
+		label: s.label,
+		icon: s.icon,
+		shortcut: s.shortcut,
+	});
+	return acc;
+}, {});
 
 export function AppSidebar() {
 	const router = useRouter();
 	const logout = useAuthStore((s) => s.logout);
+	const role = useAuthStore((s) => s.role);
+	const isAdmin = role === "admin";
+	const online = useOnlineStatus();
+
+	const visibleSections = Object.entries(sections).filter(([name]) => {
+		if (isAdmin) return true;
+		return name === "Navigate";
+	});
 
 	const handleLogout = () => {
 		logout();
@@ -70,108 +63,50 @@ export function AppSidebar() {
 			</SidebarHeader>
 
 			<SidebarContent>
-				<SidebarGroup>
-					<SidebarGroupLabel className="sidebar-group-label">
-						Navigation
-					</SidebarGroupLabel>
-					<SidebarGroupContent>
-						<SidebarMenu>
-							{navItems.map(({ to, label, icon: Icon, shortcut }) => (
-								<SidebarMenuItem key={to}>
-									<SidebarMenuButton
-										render={
-											<Link
-												to={to}
-												activeProps={{
-													className:
-														"bg-sidebar-accent text-sidebar-accent-foreground font-medium",
-												}}
-											>
-												<Icon weight="duotone" />
-												<span>{label}</span>
-												{shortcut != null && (
-													<kbd className="ml-auto hidden font-mono text-[9px] text-sidebar-foreground/30 group-hover/menu-button:text-sidebar-foreground/50 sm:inline-flex">
-														g {shortcut}
-													</kbd>
-												)}
-											</Link>
-										}
-									/>
-								</SidebarMenuItem>
-							))}
-						</SidebarMenu>
-					</SidebarGroupContent>
-				</SidebarGroup>
-
-				<SidebarSeparator />
-
-				<SidebarGroup>
-					<SidebarGroupLabel className="sidebar-group-label">
-						Administration
-					</SidebarGroupLabel>
-					<SidebarGroupContent>
-						<SidebarMenu>
-							{adminItems.map(({ to, label, icon: Icon, shortcut }) => (
-								<SidebarMenuItem key={to}>
-									<SidebarMenuButton
-										render={
-											<Link
-												to={to}
-												activeProps={{
-													className:
-														"bg-sidebar-accent text-sidebar-accent-foreground font-medium",
-												}}
-											>
-												<Icon weight="duotone" />
-												<span>{label}</span>
-												{shortcut != null && (
-													<kbd className="ml-auto hidden font-mono text-[9px] text-sidebar-foreground/30 sm:inline-flex">
-														g {shortcut}
-													</kbd>
-												)}
-											</Link>
-										}
-									/>
-								</SidebarMenuItem>
-							))}
-						</SidebarMenu>
-					</SidebarGroupContent>
-				</SidebarGroup>
-
-				<SidebarSeparator />
-
-				<SidebarGroup>
-					<SidebarGroupContent>
-						<SidebarMenu>
-							{reportItems.map(({ to, label, icon: Icon, shortcut }) => (
-								<SidebarMenuItem key={to}>
-									<SidebarMenuButton
-										render={
-											<Link
-												to={to}
-												activeProps={{
-													className:
-														"bg-sidebar-accent text-sidebar-accent-foreground font-medium",
-												}}
-											>
-												<Icon weight="duotone" />
-												<span>{label}</span>
-												{shortcut != null && (
-													<kbd className="ml-auto hidden font-mono text-[9px] text-sidebar-foreground/30 sm:inline-flex">
-														g {shortcut}
-													</kbd>
-												)}
-											</Link>
-										}
-									/>
-								</SidebarMenuItem>
-							))}
-						</SidebarMenu>
-					</SidebarGroupContent>
-				</SidebarGroup>
+				{visibleSections.map(([sectionName, items], idx) => (
+					<Fragment key={sectionName}>
+						{idx > 0 && <SidebarSeparator />}
+						<SidebarGroup>
+							<SidebarGroupLabel className="sidebar-group-label">
+								{sectionName}
+							</SidebarGroupLabel>
+							<SidebarGroupContent>
+								<SidebarMenu>
+									{items.map(({ to, label, icon: Icon, shortcut }) => (
+										<SidebarMenuItem key={to}>
+											<SidebarMenuButton
+												render={
+													<Link
+														to={to}
+														activeProps={{
+															className:
+																"bg-sidebar-accent text-sidebar-accent-foreground font-medium",
+														}}
+													>
+														<Icon weight="duotone" />
+														<span>{label}</span>
+														<kbd className="ml-auto hidden font-mono text-[9px] text-sidebar-foreground/30 group-hover/menu-button:text-sidebar-foreground/50 sm:inline-flex">
+															g {shortcut}
+														</kbd>
+													</Link>
+												}
+											/>
+										</SidebarMenuItem>
+									))}
+								</SidebarMenu>
+							</SidebarGroupContent>
+						</SidebarGroup>
+					</Fragment>
+				))}
 			</SidebarContent>
 
 			<SidebarFooter>
+				{!online && (
+					<div className="flex items-center gap-2 px-2 py-1.5 text-xs text-destructive">
+						<WifiX className="size-3.5" />
+						<span>Offline</span>
+					</div>
+				)}
 				<SidebarMenu>
 					<SidebarMenuItem>
 						<SidebarMenuButton onClick={handleLogout}>

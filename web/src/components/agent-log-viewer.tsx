@@ -1,7 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api";
 import type { AgentLog } from "@/types";
 
@@ -39,14 +41,15 @@ export function AgentLogViewer({ taskId }: Props) {
 	}, [logs.length]);
 
 	if (isLoading) {
-		return <p className="text-muted-foreground text-sm">Loading logs…</p>;
+		return <Skeleton className="h-48 w-full" />;
 	}
 
 	if (logs.length === 0) {
 		return (
-			<p className="text-muted-foreground text-sm">
-				No log entries yet. Logs appear here while the agent is running.
-			</p>
+			<EmptyState
+				title="No log entries yet"
+				description="Logs appear here while the agent is running."
+			/>
 		);
 	}
 

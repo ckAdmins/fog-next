@@ -1,22 +1,14 @@
-import { Pencil, Plus, Trash } from "@phosphor-icons/react";
-import { useForm } from "@tanstack/react-form";
+import { Plus } from "@phosphor-icons/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import {
+	flexRender,
+	getCoreRowModel,
+	useReactTable,
+} from "@tanstack/react-table";
 import { useState } from "react";
 import { toast } from "sonner";
-import * as z from "zod";
-import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-	AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
+import { RouteError } from "@/components/RouteError";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -25,20 +17,8 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import {
-	Dialog,
-	DialogContent,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from "@/components/ui/dialog";
-import {
-	Field,
-	FieldError,
-	FieldGroup,
-	FieldLabel,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
 	Table,
 	TableBody,
@@ -49,31 +29,29 @@ import {
 } from "@/components/ui/table";
 import { api } from "@/lib/api";
 import type { StorageGroup, StorageNode } from "@/types";
+import { StorageGroupDialog } from "./_components/StorageGroupDialog";
+import { StorageNodeDialog } from "./_components/StorageNodeDialog";
+import {
+	makeStorageGroupColumns,
+	makeStorageNodeColumns,
+} from "./_components/storageColumns";
 
 export const Route = createFileRoute("/_auth/storage")({
 	component: StoragePage,
-});
-
-const groupSchema = z.object({
-	name: z.string().min(1, "Required"),
-	description: z.string(),
-});
-
-const nodeSchema = z.object({
-	name: z.string().min(1, "Required"),
-	description: z.string(),
-	ip: z.string().min(1, "Required"),
-	path: z.string().min(1, "Required"),
-	maxClients: z.number().int().min(1),
-	bandwidthMbps: z.number().int().min(0),
+	errorComponent: RouteError,
 });
 
 function StoragePage() {
 	const qc = useQueryClient();
 	const [selectedGroup, setSelectedGroup] = useState<StorageGroup | null>(null);
-	const [createGroupOpen, setCreateGroupOpen] = useState(false);
-	const [createNodeOpen, setCreateNodeOpen] = useState(false);
-	const [editNode, setEditNode] = useState<StorageNode | null>(null);
+	const [groupDialogOpen, setGroupDialogOpen] = useState(false);
+	const [nodeDialogOpen, setNodeDialogOpen] = useState(false);
+	const [groupEditTarget, setGroupEditTarget] = useState<StorageGroup | null>(
+		null,
+	);
+	const [nodeEditTarget, setNodeEditTarget] = useState<StorageNode | null>(
+		null,
+	);
 
 	const groupsQuery = useQuery({
 		queryKey: ["storage-groups"],
@@ -90,18 +68,6 @@ function StoragePage() {
 		enabled: !!selectedGroup,
 	});
 
-	const createGroupMutation = useMutation({
-		mutationFn: (values: z.infer<typeof groupSchema>) =>
-			api.post<StorageGroup>("/storage/groups", values),
-		onSuccess: () => {
-			void qc.invalidateQueries({ queryKey: ["storage-groups"] });
-			setCreateGroupOpen(false);
-			toast.success("Storage group created");
-		},
-		onError: (err) =>
-			toast.error(err instanceof Error ? err.message : "Failed"),
-	});
-
 	const deleteGroupMutation = useMutation({
 		mutationFn: (id: string) => api.del<void>(`/storage/groups/${id}`),
 		onSuccess: (_, id) => {
@@ -109,45 +75,6 @@ function StoragePage() {
 			if (selectedGroup?.id === id) setSelectedGroup(null);
 			toast.success("Storage group deleted");
 		},
-		onError: (err) =>
-			toast.error(err instanceof Error ? err.message : "Failed"),
-	});
-
-	const createNodeMutation = useMutation({
-		mutationFn: (values: z.infer<typeof nodeSchema>) =>
-			api.post<StorageNode>(
-				// biome-ignore lint/style/noNonNullAssertion: mutates only when selectedGroup is set
-				`/storage/groups/${selectedGroup!.id}/nodes`,
-				values,
-			),
-		onSuccess: () => {
-			void qc.invalidateQueries({
-				queryKey: ["storage-nodes", selectedGroup?.id],
-			});
-			setCreateNodeOpen(false);
-			toast.success("Node added");
-		},
-		onError: (err) =>
-			toast.error(err instanceof Error ? err.message : "Failed"),
-	});
-
-	const updateNodeMutation = useMutation({
-		mutationFn: ({
-			id,
-			values,
-		}: {
-			id: string;
-			values: z.infer<typeof nodeSchema>;
-		}) => api.put<StorageNode>(`/storage/nodes/${id}`, values),
-		onSuccess: () => {
-			void qc.invalidateQueries({
-				queryKey: ["storage-nodes", selectedGroup?.id],
-			});
-			setEditNode(null);
-			toast.success("Node updated");
-		},
-		onError: (err) =>
-			toast.error(err instanceof Error ? err.message : "Failed"),
 	});
 
 	const deleteNodeMutation = useMutation({
@@ -158,103 +85,35 @@ function StoragePage() {
 			});
 			toast.success("Node removed");
 		},
-		onError: (err) =>
-			toast.error(err instanceof Error ? err.message : "Failed"),
-	});
-
-	const groupForm = useForm({
-		defaultValues: { name: "", description: "" },
-		validators: { onSubmit: groupSchema },
-		onSubmit: ({ value }) => createGroupMutation.mutate(value),
-	});
-
-	const nodeForm = useForm({
-		defaultValues: {
-			name: "",
-			description: "",
-			ip: "",
-			path: "",
-			maxClients: 10,
-			bandwidthMbps: 0,
-		},
-		validators: { onSubmit: nodeSchema },
-		onSubmit: ({ value }) => createNodeMutation.mutate(value),
-	});
-
-	const editNodeForm = useForm({
-		defaultValues: {
-			name: editNode?.name ?? "",
-			description: editNode?.description ?? "",
-			ip: editNode?.ip ?? "",
-			path: editNode?.path ?? "",
-			maxClients: editNode?.maxClients ?? 10,
-			bandwidthMbps: editNode?.bandwidthMbps ?? 0,
-		},
-		validators: { onSubmit: nodeSchema },
-		onSubmit: ({ value }) => {
-			if (editNode)
-				updateNodeMutation.mutate({ id: editNode.id, values: value });
-		},
 	});
 
 	const groups = groupsQuery.data?.data ?? [];
 	const nodes = nodesQuery.data?.data ?? [];
 
-	function NodeFormFields({ formInstance }: { formInstance: typeof nodeForm }) {
-		return (
-			<FieldGroup>
-				{(["name", "ip", "path", "description"] as const).map((fieldName) => (
-					<formInstance.Field key={fieldName} name={fieldName}>
-						{(field) => {
-							const isInvalid =
-								field.state.meta.isTouched && !field.state.meta.isValid;
-							return (
-								<Field data-invalid={isInvalid}>
-									<FieldLabel htmlFor={field.name} className="capitalize">
-										{fieldName}
-									</FieldLabel>
-									<Input
-										id={field.name}
-										name={field.name}
-										value={field.state.value as string}
-										onBlur={field.handleBlur}
-										onChange={(e) => field.handleChange(e.target.value)}
-										aria-invalid={isInvalid}
-									/>
-									{isInvalid && <FieldError errors={field.state.meta.errors} />}
-								</Field>
-							);
-						}}
-					</formInstance.Field>
-				))}
-				{(["maxClients", "bandwidthMbps"] as const).map((fieldName) => {
-					const labels: Record<string, string> = {
-						maxClients: "Max Clients",
-						bandwidthMbps: "Bandwidth (Mbps)",
-					};
-					return (
-						<formInstance.Field key={fieldName} name={fieldName}>
-							{(field) => (
-								<Field>
-									<FieldLabel htmlFor={field.name}>
-										{labels[fieldName]}
-									</FieldLabel>
-									<Input
-										id={field.name}
-										name={field.name}
-										type="number"
-										value={field.state.value as number}
-										onBlur={field.handleBlur}
-										onChange={(e) => field.handleChange(Number(e.target.value))}
-									/>
-								</Field>
-							)}
-						</formInstance.Field>
-					);
-				})}
-			</FieldGroup>
-		);
-	}
+	const sgColumns = makeStorageGroupColumns({
+		onDelete: (id) => deleteGroupMutation.mutate(id),
+		selectedGroupId: selectedGroup?.id,
+	});
+
+	const sgTable = useReactTable({
+		data: groups,
+		columns: sgColumns,
+		getCoreRowModel: getCoreRowModel(),
+	});
+
+	const snColumns = makeStorageNodeColumns({
+		onEdit: (node) => {
+			setNodeEditTarget(node);
+			setNodeDialogOpen(true);
+		},
+		onRemove: (id) => deleteNodeMutation.mutate(id),
+	});
+
+	const snTable = useReactTable({
+		data: nodes,
+		columns: snColumns,
+		getCoreRowModel: getCoreRowModel(),
+	});
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -271,63 +130,35 @@ function StoragePage() {
 						<Button
 							size="sm"
 							variant="ghost"
-							onClick={() => setCreateGroupOpen(true)}
+							onClick={() => {
+								setGroupEditTarget(null);
+								setGroupDialogOpen(true);
+							}}
 						>
 							<Plus />
 						</Button>
 					</CardHeader>
 					<CardContent className="p-0">
 						{groups.length === 0 ? (
-							<p className="px-4 py-6 text-sm text-muted-foreground">
-								No groups
-							</p>
+							<EmptyState title="No groups" />
 						) : (
 							<Table>
 								<TableBody>
-									{groups.map((group) => (
+									{sgTable.getRowModel().rows.map((row) => (
 										<TableRow
-											key={group.id}
+											key={row.id}
 											className="cursor-pointer"
-											data-selected={selectedGroup?.id === group.id}
-											onClick={() => setSelectedGroup(group)}
+											data-selected={selectedGroup?.id === row.original.id}
+											onClick={() => setSelectedGroup(row.original)}
 										>
-											<TableCell>
-												<div className="font-medium">{group.name}</div>
-											</TableCell>
-											<TableCell className="text-right">
-												<AlertDialog>
-													<AlertDialogTrigger
-														render={
-															<Button
-																variant="ghost"
-																size="icon-xs"
-																onClick={(e) => e.stopPropagation()}
-															>
-																<Trash />
-															</Button>
-														}
-													/>
-													<AlertDialogContent>
-														<AlertDialogHeader>
-															<AlertDialogTitle>Delete group?</AlertDialogTitle>
-															<AlertDialogDescription>
-																This will delete "{group.name}" and all its
-																nodes.
-															</AlertDialogDescription>
-														</AlertDialogHeader>
-														<AlertDialogFooter>
-															<AlertDialogCancel>Cancel</AlertDialogCancel>
-															<AlertDialogAction
-																onClick={() =>
-																	deleteGroupMutation.mutate(group.id)
-																}
-															>
-																Delete
-															</AlertDialogAction>
-														</AlertDialogFooter>
-													</AlertDialogContent>
-												</AlertDialog>
-											</TableCell>
+											{row.getVisibleCells().map((cell) => (
+												<TableCell key={cell.id}>
+													{flexRender(
+														cell.column.columnDef.cell,
+														cell.getContext(),
+													)}
+												</TableCell>
+											))}
 										</TableRow>
 									))}
 								</TableBody>
@@ -350,7 +181,13 @@ function StoragePage() {
 							</CardDescription>
 						</div>
 						{selectedGroup && (
-							<Button size="sm" onClick={() => setCreateNodeOpen(true)}>
+							<Button
+								size="sm"
+								onClick={() => {
+									setNodeEditTarget(null);
+									setNodeDialogOpen(true);
+								}}
+							>
 								<Plus data-icon="inline-start" />
 								Add Node
 							</Button>
@@ -358,76 +195,38 @@ function StoragePage() {
 					</CardHeader>
 					<CardContent>
 						{!selectedGroup ? null : nodesQuery.isLoading ? (
-							<p className="text-sm text-muted-foreground">Loading…</p>
+							<Skeleton className="h-24 w-full" />
 						) : nodes.length === 0 ? (
-							<p className="text-sm text-muted-foreground">No nodes</p>
+							<EmptyState title="No nodes" />
 						) : (
 							<Table>
 								<TableHeader>
-									<TableRow>
-										<TableHead>Name</TableHead>
-										<TableHead>IP</TableHead>
-										<TableHead>Path</TableHead>
-										<TableHead>Clients</TableHead>
-										<TableHead>Status</TableHead>
-										<TableHead />
-									</TableRow>
+									{snTable.getHeaderGroups().map((headerGroup) => (
+										<TableRow key={headerGroup.id}>
+											{headerGroup.headers.map((header) => (
+												<TableHead key={header.id}>
+													{header.isPlaceholder
+														? null
+														: flexRender(
+																header.column.columnDef.header,
+																header.getContext(),
+															)}
+												</TableHead>
+											))}
+										</TableRow>
+									))}
 								</TableHeader>
 								<TableBody>
-									{nodes.map((node) => (
-										<TableRow key={node.id}>
-											<TableCell className="font-medium">{node.name}</TableCell>
-											<TableCell className="font-mono">{node.ip}</TableCell>
-											<TableCell>{node.path}</TableCell>
-											<TableCell>{node.maxClients}</TableCell>
-											<TableCell>
-												{node.isOnline ? (
-													<Badge>Online</Badge>
-												) : (
-													<Badge variant="secondary">Offline</Badge>
-												)}
-											</TableCell>
-											<TableCell className="text-right">
-												<div className="flex justify-end gap-1">
-													<Button
-														variant="ghost"
-														size="icon-xs"
-														onClick={() => setEditNode(node)}
-													>
-														<Pencil />
-													</Button>
-													<AlertDialog>
-														<AlertDialogTrigger
-															render={
-																<Button variant="ghost" size="icon-xs">
-																	<Trash />
-																</Button>
-															}
-														/>
-														<AlertDialogContent>
-															<AlertDialogHeader>
-																<AlertDialogTitle>
-																	Remove node?
-																</AlertDialogTitle>
-																<AlertDialogDescription>
-																	This will remove "{node.name}" from the
-																	storage group.
-																</AlertDialogDescription>
-															</AlertDialogHeader>
-															<AlertDialogFooter>
-																<AlertDialogCancel>Cancel</AlertDialogCancel>
-																<AlertDialogAction
-																	onClick={() =>
-																		deleteNodeMutation.mutate(node.id)
-																	}
-																>
-																	Remove
-																</AlertDialogAction>
-															</AlertDialogFooter>
-														</AlertDialogContent>
-													</AlertDialog>
-												</div>
-											</TableCell>
+									{snTable.getRowModel().rows.map((row) => (
+										<TableRow key={row.id}>
+											{row.getVisibleCells().map((cell) => (
+												<TableCell key={cell.id}>
+													{flexRender(
+														cell.column.columnDef.cell,
+														cell.getContext(),
+													)}
+												</TableCell>
+											))}
 										</TableRow>
 									))}
 								</TableBody>
@@ -437,141 +236,30 @@ function StoragePage() {
 				</Card>
 			</div>
 
-			{/* Create Group Dialog */}
-			<Dialog open={createGroupOpen} onOpenChange={setCreateGroupOpen}>
-				<DialogContent>
-					<DialogHeader>
-						<DialogTitle>New Storage Group</DialogTitle>
-					</DialogHeader>
-					<form
-						onSubmit={(e) => {
-							e.preventDefault();
-							void groupForm.handleSubmit();
-						}}
-					>
-						<FieldGroup>
-							<groupForm.Field name="name">
-								{(field) => {
-									const isInvalid =
-										field.state.meta.isTouched && !field.state.meta.isValid;
-									return (
-										<Field data-invalid={isInvalid}>
-											<FieldLabel htmlFor={field.name}>Name</FieldLabel>
-											<Input
-												id={field.name}
-												name={field.name}
-												value={field.state.value}
-												onBlur={field.handleBlur}
-												onChange={(e) => field.handleChange(e.target.value)}
-												aria-invalid={isInvalid}
-											/>
-											{isInvalid && (
-												<FieldError errors={field.state.meta.errors} />
-											)}
-										</Field>
-									);
-								}}
-							</groupForm.Field>
-							<groupForm.Field name="description">
-								{(field) => (
-									<Field>
-										<FieldLabel htmlFor={field.name}>Description</FieldLabel>
-										<Input
-											id={field.name}
-											name={field.name}
-											value={field.state.value}
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-										/>
-									</Field>
-								)}
-							</groupForm.Field>
-						</FieldGroup>
-						<DialogFooter className="mt-4">
-							<Button
-								type="button"
-								variant="outline"
-								onClick={() => setCreateGroupOpen(false)}
-							>
-								Cancel
-							</Button>
-							<groupForm.Subscribe selector={(s) => s.isSubmitting}>
-								{(isSubmitting) => (
-									<Button type="submit" disabled={isSubmitting}>
-										{isSubmitting ? "Creating…" : "Create"}
-									</Button>
-								)}
-							</groupForm.Subscribe>
-						</DialogFooter>
-					</form>
-				</DialogContent>
-			</Dialog>
+			<StorageGroupDialog
+				open={groupDialogOpen}
+				onOpenChange={(open) => {
+					setGroupDialogOpen(open);
+					if (!open) setGroupEditTarget(null);
+				}}
+				editTarget={groupEditTarget}
+				groups={groups}
+				selectedGroup={selectedGroup}
+				setSelectedGroup={setSelectedGroup}
+			/>
 
-			{/* Create Node Dialog */}
-			<Dialog open={createNodeOpen} onOpenChange={setCreateNodeOpen}>
-				<DialogContent>
-					<DialogHeader>
-						<DialogTitle>Add Node</DialogTitle>
-					</DialogHeader>
-					<form
-						onSubmit={(e) => {
-							e.preventDefault();
-							void nodeForm.handleSubmit();
-						}}
-					>
-						<NodeFormFields formInstance={nodeForm} />
-						<DialogFooter className="mt-4">
-							<Button
-								type="button"
-								variant="outline"
-								onClick={() => setCreateNodeOpen(false)}
-							>
-								Cancel
-							</Button>
-							<nodeForm.Subscribe selector={(s) => s.isSubmitting}>
-								{(isSubmitting) => (
-									<Button type="submit" disabled={isSubmitting}>
-										{isSubmitting ? "Adding…" : "Add Node"}
-									</Button>
-								)}
-							</nodeForm.Subscribe>
-						</DialogFooter>
-					</form>
-				</DialogContent>
-			</Dialog>
-
-			{/* Edit Node Dialog */}
-			<Dialog open={!!editNode} onOpenChange={(o) => !o && setEditNode(null)}>
-				<DialogContent>
-					<DialogHeader>
-						<DialogTitle>Edit Node</DialogTitle>
-					</DialogHeader>
-					<form
-						onSubmit={(e) => {
-							e.preventDefault();
-							void editNodeForm.handleSubmit();
-						}}
-					>
-						<NodeFormFields formInstance={editNodeForm as typeof nodeForm} />
-						<DialogFooter className="mt-4">
-							<Button
-								type="button"
-								variant="outline"
-								onClick={() => setEditNode(null)}
-							>
-								Cancel
-							</Button>
-							<editNodeForm.Subscribe selector={(s) => s.isSubmitting}>
-								{(isSubmitting) => (
-									<Button type="submit" disabled={isSubmitting}>
-										{isSubmitting ? "Saving…" : "Save"}
-									</Button>
-								)}
-							</editNodeForm.Subscribe>
-						</DialogFooter>
-					</form>
-				</DialogContent>
-			</Dialog>
+			{selectedGroup && (
+				<StorageNodeDialog
+					open={nodeDialogOpen}
+					onOpenChange={(open) => {
+						setNodeDialogOpen(open);
+						if (!open) setNodeEditTarget(null);
+					}}
+					editTarget={nodeEditTarget}
+					nodes={nodes}
+					selectedGroup={selectedGroup}
+				/>
+			)}
 		</div>
 	);
 }
