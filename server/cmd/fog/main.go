@@ -4,7 +4,6 @@
 //	fog serve              -- start the HTTP server + all background services
 //	fog migrate up         -- apply pending schema migrations
 //	fog install            -- interactive first-run setup
-//	fog migrate-legacy     -- migrate data from a legacy FOG 1.x MySQL database
 package main
 
 import (
@@ -23,7 +22,6 @@ import (
 	"github.com/nemvince/fog-next/internal/config"
 	"github.com/nemvince/fog-next/internal/database"
 	"github.com/nemvince/fog-next/internal/fos"
-	"github.com/nemvince/fog-next/internal/legacymigrate"
 	"github.com/nemvince/fog-next/internal/services"
 	"github.com/nemvince/fog-next/internal/tftp"
 	"golang.org/x/term"
@@ -45,7 +43,7 @@ func rootCmd() *cobra.Command {
 		Short: "FOG Next — network boot and imaging server",
 	}
 	root.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default: /etc/fog/config.yaml)")
-	root.AddCommand(serveCmd(), migrateCmd(), installCmd(), migrateLegacyCmd(), fetchKernelsCmd(), versionCmd())
+	root.AddCommand(serveCmd(), migrateCmd(), installCmd(), fetchKernelsCmd(), versionCmd())
 	return root
 }
 
@@ -257,66 +255,6 @@ Example:
 			return nil
 		},
 	}
-}
-
-// -------------------------------------------------------- migrate-legacy ---
-
-func migrateLegacyCmd() *cobra.Command {
-	var legacyDSN string
-
-	cmd := &cobra.Command{
-		Use:   "migrate-legacy",
-		Short: "Migrate data from a FOG 1.x MySQL database into the new schema",
-		Long: `Reads hosts, images, groups, snapins, and users from a legacy FOG 1.x
-MySQL database and inserts them into the configured PostgreSQL database.
-
-The new PostgreSQL database must already be initialised (fog migrate up).
-
-Example:
-  fog migrate-legacy --legacy-dsn "fog:secret@tcp(localhost:3306)/fog?parseTime=true"
-
-Note: Legacy user passwords are MD5 hashes and cannot be converted.
-Migrated users will need to reset their passwords via the web UI.`,
-		RunE: func(_ *cobra.Command, _ []string) error {
-			return runMigrateLegacy(legacyDSN)
-		},
-	}
-	cmd.Flags().StringVar(&legacyDSN, "legacy-dsn", "",
-		"MySQL DSN for the FOG 1.x database (required)")
-	_ = cmd.MarkFlagRequired("legacy-dsn")
-	return cmd
-}
-
-func runMigrateLegacy(legacyDSN string) error {
-	cfg := mustConfig()
-	ctx := context.Background()
-
-	client, err := database.Open(ctx, cfg.Database)
-	if err != nil {
-		return fmt.Errorf("connect to postgres: %w", err)
-	}
-	defer client.Close()
-
-	runner, err := legacymigrate.New(legacymigrate.Config{DSN: legacyDSN}, client)
-	if err != nil {
-		return fmt.Errorf("connect to legacy database: %w", err)
-	}
-	defer runner.Close()
-
-	fmt.Println("Starting legacy migration…")
-	report, err := runner.Run(ctx)
-	if err != nil {
-		return fmt.Errorf("migration failed: %w", err)
-	}
-
-	fmt.Println(report)
-	if len(report.Errors) > 0 {
-		fmt.Println("\nErrors encountered:")
-		for _, e := range report.Errors {
-			fmt.Printf("  - %s\n", e)
-		}
-	}
-	return nil
 }
 
 // -------------------------------------------------------------- version ---

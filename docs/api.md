@@ -304,7 +304,7 @@ Cancel the task. Only queued or active tasks can be cancelled.
 
 ### POST /tasks/{id}/progress _(auth required)_
 
-Update task progress (called by the FOG client or imaging service).
+Update task progress (called by the imaging agent).
 
 **Request body:**
 ```json
@@ -511,21 +511,6 @@ Upgrade to a WebSocket connection. Events are JSON objects:
 | `task.canceled` | Task cancelled |
 | `host.online` | Host ping succeeded (was offline) |
 | `host.offline` | Host ping failed (was online) |
-
----
-
-## Legacy endpoints (FOG 1.x client compatibility)
-
-These endpoints mimic the FOG 1.x PHP API to allow existing `fogclient` installations to work without modification.
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/fog/service/register.php` | Register a new host |
-| `GET`  | `/fog/service/hostinfo.php` | Return host config |
-| `POST` | `/fog/service/progress.php` | Report task progress |
-| `GET`  | `/fog/service/jobs.php` | List pending jobs for host |
-| `GET`  | `/fog/service/ipxe/boot.php` | iPXE boot script (legacy URL) |
-| `GET`  | `/fog/boot` | iPXE boot script (primary URL) |
 
 ---
 

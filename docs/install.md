@@ -149,7 +149,13 @@ This downloads:
 | `ipxe.efi` | UEFI x86-64 |
 | `arm64-efi/snponly.efi` | UEFI ARM64 |
 
-Download the FOG kernel and init from the [FOG Project releases page](https://github.com/FOGProject/fos/releases) and place them in `/opt/fog/kernels/`.
+Build the foss-agent kernel and initramfs using the pixie Docker build:
+
+```bash
+cd pixie && ./build.sh           # → pixie/output/bzImage + pixie/output/init.xz
+sudo cp pixie/output/bzImage /opt/fog/kernels/bzImage
+sudo cp pixie/output/init.xz /opt/fog/kernels/init.xz
+```
 
 ---
 
@@ -238,7 +244,7 @@ journalctl -u fog -f
 
 ## Upgrading
 
-See [upgrading.md](upgrading.md) for migration instructions, including upgrading from FOG 1.x.
+See [upgrading.md](upgrading.md) for updating between fog-next releases.
 
 For minor updates within fog-next:
 

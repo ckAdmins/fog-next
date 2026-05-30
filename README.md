@@ -2,7 +2,7 @@
 
 A modern rewrite of the **FOG Project** network boot and computer imaging server.
 
-FOG Next replaces the PHP/Apache stack with a single statically-linked Go binary that serves the REST API, web UI, TFTP, and legacy FOG 1.x client endpoints all at once.
+FOG Next replaces the PHP/Apache stack with a single statically-linked Go binary that serves the REST API, web UI, and TFTP all at once.
 
 ---
 
@@ -14,7 +14,6 @@ FOG Next replaces the PHP/Apache stack with a single statically-linked Go binary
 - **Snapin support** — deploy software packages to hosts after imaging
 - **Live task progress** — WebSocket feed; no page refresh needed
 - **REST API** — full JSON API with JWT auth, suitable for scripting and integrations
-- **Legacy client compatibility** — FOG 1.x `fogclient` continues to work unchanged
 - **Single binary** — embeds the React web UI; no separate web server required
 
 ---
@@ -135,7 +134,6 @@ fog install            Interactive first-run setup wizard
 fog migrate up         Apply all pending database migrations
 fog migrate down       Roll back the most recent migration
 fog migrate status     Print current migration schema version
-fog migrate-legacy     Import hosts/images/groups from a FOG 1.x MySQL database
 fog fetch-kernels      Download (or re-download) the fos-next kernel and initramfs
 fog version            Print the fog-next version
 ```
@@ -160,7 +158,7 @@ See **[docs/api.md](docs/api.md)** for the full endpoint reference.
 | [docs/install.md](docs/install.md) | Detailed installation guide (bare-metal and Docker) |
 | [docs/architecture.md](docs/architecture.md) | Component overview and request flow |
 | [docs/api.md](docs/api.md) | REST API endpoint reference |
-| [docs/upgrading.md](docs/upgrading.md) | Migrating from FOG 1.x |
+| [docs/upgrading.md](docs/upgrading.md) | Upgrading between releases |
 
 ---
 

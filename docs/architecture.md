@@ -21,7 +21,7 @@ FOG Next is a single Go binary that combines five historically separate subsyste
 │  │  Chi router                                         │   │
 │  │  /api/v1/*  ── REST handlers                        │   │
 │  │  /api/v1/ws ── WebSocket hub                        │   │
-│  │  /fog/*     ── Legacy FOG 1.x endpoints             │   │
+│  │  /fog/*     ── Boot + kernel endpoints                   │   │
 │  │  /*         ── Embedded React SPA                   │   │
 │  └──────────────────────────────────────────────────────┘  │
 │                                                             │

@@ -135,7 +135,7 @@ touch server/internal/database/migrations/000002_description.down.sql
 
 ```
 server/
-  cmd/fog/                  CLI (cobra): serve, install, migrate, migrate-legacy
+  cmd/fog/                  CLI (cobra): serve, install, migrate
   internal/
     api/
       handlers/             One file per resource (hosts.go, images.go, tasks.go …)
@@ -146,7 +146,6 @@ server/
     auth/                    JWT sign/verify, bcrypt helpers, boot tokens
     config/                  Config struct + Viper loader
     database/                PostgreSQL connect + golang-migrate runner
-    legacymigrate/           FOG 1.x MySQL → PostgreSQL migration
     plugins/                 Compile-time hook interfaces and Registry
     pxe/                     iPXE script template generator
     services/                Background goroutines (scheduler, replicator, multicast, …)

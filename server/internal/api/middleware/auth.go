@@ -47,6 +47,5 @@ func extractBearerToken(r *http.Request) string {
 	if strings.HasPrefix(header, "Bearer ") {
 		return strings.TrimPrefix(header, "Bearer ")
 	}
-	// Also support ?token= query param for legacy client compatibility.
-	return r.URL.Query().Get("token")
+	return ""
 }

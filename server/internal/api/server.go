@@ -255,17 +255,6 @@ func (s *Server) buildRouter() *chi.Mux {
 		})
 	})
 
-	// ── Legacy client endpoints (FOG 1.x client compatibility) ──────
-	r.Route("/fog/service", func(r chi.Router) {
-		legacyH := handlers.NewLegacy(s.cfg, s.db)
-		r.Post("/register.php", legacyH.Register)
-		r.Get("/hostinfo.php", legacyH.HostInfo)
-		r.Post("/progress.php", legacyH.Progress)
-		r.Get("/jobs.php", legacyH.Jobs)
-	})
-	r.Get("/fog/service/ipxe/boot.php", func(w http.ResponseWriter, req *http.Request) {
-		handlers.NewBoot(s.cfg, s.db).ServeHTTP(w, req)
-	})
 	// Primary iPXE boot endpoint (used by chain-load from DHCP option 67).
 	r.Get("/fog/boot", func(w http.ResponseWriter, req *http.Request) {
 		handlers.NewBoot(s.cfg, s.db).ServeHTTP(w, req)
