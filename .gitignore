@@ -17,3 +17,5 @@ go.work.sum
 # AI agent assist
 .agents/
 skills-lock.json
+
+thoughts/

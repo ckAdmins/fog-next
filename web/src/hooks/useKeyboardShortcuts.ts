@@ -1,25 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { goRoutes } from "@/lib/shortcuts";
 
-/**
- * Registers global keyboard shortcuts for navigating the app.
- *
- * Vim/Google-style "go to" shortcuts:
- *   g then d → Dashboard
- *   g then h → Hosts
- *   g then i → Images
- *   g then t → Tasks
- *   g then g → Groups
- *   g then s → Snapins
- *   g then u → Users
- *   g then , → Settings
- *
- * Direct shortcuts:
- *   / → Focus search/command palette (handled by CommandPalette)
- *
- * The handler skips when focus is inside an input, textarea, select,
- * or contenteditable element.
- */
 export function useKeyboardShortcuts() {
 	const navigate = useNavigate();
 
@@ -36,18 +18,6 @@ export function useKeyboardShortcuts() {
 			return !!target.closest(
 				'input, textarea, select, [contenteditable="true"]',
 			);
-		};
-
-		const goRoutes: Record<string, string> = {
-			d: "/dashboard",
-			h: "/hosts",
-			i: "/images",
-			t: "/tasks",
-			g: "/groups",
-			s: "/snapins",
-			u: "/users",
-			",": "/settings",
-			r: "/reports",
 		};
 
 		const handler = (e: KeyboardEvent) => {
