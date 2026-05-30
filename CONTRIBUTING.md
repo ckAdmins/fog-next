@@ -3,8 +3,8 @@
 ## Setup
 
 ```bash
-git clone https://github.com/nemvince/imaging.git
-cd imaging
+git clone https://github.com/nemvince/fog-next.git
+cd fog-next
 mise install          # Installs Go + Bun
 ./build.sh server     # Build the server
 ./build.sh web        # Build the frontend

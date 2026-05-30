@@ -24,8 +24,8 @@ FOG Next replaces the PHP/Apache stack with a single statically-linked Go binary
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/nemvince/imaging.git
-cd imaging
+git clone https://github.com/nemvince/fog-next.git
+cd fog-next
 
 # 2. Create a config file from the example
 cp config.example.yaml server/deploy/docker/config.yaml
