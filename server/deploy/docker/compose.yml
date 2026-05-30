@@ -1,13 +1,13 @@
 services:
   postgres:
-    image: postgres:16-alpine
+    image: postgres:18-alpine
     restart: unless-stopped
     environment:
       POSTGRES_DB: fog
       POSTGRES_USER: fog
       POSTGRES_PASSWORD: fogpassword
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
     ports:
       - "5432:5432"
     healthcheck:
@@ -28,7 +28,7 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "69:69/udp"  # TFTP
+      - "69:69/udp" # TFTP
     volumes:
       - fog_images:/opt/fog/images
       - fog_snapins:/opt/fog/snapins
