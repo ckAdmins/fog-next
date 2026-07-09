@@ -10,8 +10,8 @@ import (
 "path/filepath"
 "time"
 
-"github.com/nemvince/fog-next/ent"
-"github.com/nemvince/fog-next/internal/config"
+"github.com/ckAdmins/fog-next/ent"
+"github.com/ckAdmins/fog-next/internal/config"
 )
 
 // SnapinHash periodically computes SHA-256 checksums for all snapin files

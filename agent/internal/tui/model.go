@@ -1,5 +1,5 @@
 // Package tui provides a Bubble-Tea-based terminal dashboard for the
-// fos-agent.  It renders a full-screen display showing connection status,
+// fog imaging agent.  It renders a full-screen display showing connection status,
 // task info, partition progress, and a scrollable log window.
 package tui
 
@@ -157,7 +157,7 @@ func NewModel() Model {
 	}
 }
 
-// Init returns the initial command.  The fos-agent dashboard is
+// Init returns the initial command.  The agent dashboard is
 // externally-driven so there is nothing to kick off.
 func (m Model) Init() tea.Cmd {
 	return nil

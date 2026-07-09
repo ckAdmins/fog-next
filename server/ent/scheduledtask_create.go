@@ -13,7 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
-	"github.com/nemvince/fog-next/ent/scheduledtask"
+	"github.com/ckAdmins/fog-next/ent/scheduledtask"
 )
 
 // ScheduledTaskCreate is the builder for creating a ScheduledTask entity.

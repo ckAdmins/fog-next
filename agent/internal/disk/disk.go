@@ -1,4 +1,4 @@
-// Package disk provides block-device enumeration for the fos-agent.
+// Package disk provides block-device enumeration for the fog imaging agent.
 // It replaces the previous hard-coded candidate list in actions.go with a
 // proper lsblk-based approach that handles SATA, NVMe, MMC, virtio, and any
 // other disk type the kernel exposes.

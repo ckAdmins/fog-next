@@ -40,23 +40,23 @@ This guide covers installing FOG Next on a bare-metal server or VM running a Deb
 The quickest path to a running server.
 
 ```bash
-git clone https://github.com/nemvince/fog-next.git
+git clone https://github.com/ckAdmins/fog-next.git
 cd fog-next
 
 # Copy and edit the config
-cp deploy/config.example.yaml deploy/docker/config.yaml
+cp server/deploy/config.example.yaml server/deploy/docker/config.yaml
 ```
 
-Edit `deploy/docker/config.yaml` at minimum:
+Edit `server/deploy/docker/config.yaml` at minimum:
 - `server.base_url` — set to the server's IP or hostname (used in iPXE scripts)
 - `auth.jwt_secret` — replace with the output of `openssl rand -hex 32`
 
 ```bash
 # Pull images and start
-docker compose -f deploy/docker/docker-compose.yml up -d
+docker compose -f server/deploy/docker/compose.yml up -d
 
 # Wait for postgres to become healthy, then run the wizard
-docker compose -f deploy/docker/docker-compose.yml exec fog fog install
+docker compose -f server/deploy/docker/compose.yml exec fog fog install
 ```
 
 The wizard prompts for database connection details (use the values from your `config.yaml`) and creates the initial admin user.
@@ -100,9 +100,9 @@ SQL
 curl -fsSL https://bun.sh/install | bash
 
 # Clone and build
-git clone https://github.com/nemvince/fog-next.git
+git clone https://github.com/ckAdmins/fog-next.git
 cd fog-next
-make build
+mise run server
 
 # Install the binary
 sudo install -m 0755 build/fog /usr/local/bin/fog
@@ -136,9 +136,9 @@ FOG Next reads boot files from `tftp.root_dir` (default `/tftpboot`) and kernels
 Download the standard iPXE binaries using the provided Makefile target:
 
 ```bash
-sudo make fetch-ipxe          # writes to /tftpboot by default
+mise run fetch-ipxe            # writes to /tftpboot by default
 # or to a custom directory:
-sudo make fetch-ipxe IPXE_DIR=/srv/tftp
+IPXE_DIR=/srv/tftp mise run fetch-ipxe
 ```
 
 This downloads:
@@ -149,10 +149,10 @@ This downloads:
 | `ipxe.efi` | UEFI x86-64 |
 | `arm64-efi/snponly.efi` | UEFI ARM64 |
 
-Build the foss-agent kernel and initramfs using the pixie Docker build:
+Build the agent kernel and initramfs using the pixie Docker build:
 
 ```bash
-cd pixie && ./build.sh           # → pixie/output/bzImage + pixie/output/init.xz
+mise run agent                   # → pixie/output/bzImage + pixie/output/init.xz
 sudo cp pixie/output/bzImage /opt/fog/kernels/bzImage
 sudo cp pixie/output/init.xz /opt/fog/kernels/init.xz
 ```
@@ -205,7 +205,7 @@ For **Docker Compose** deployments the iPXE binaries are baked into the image au
 For **bare-metal** deployments run:
 
 ```bash
-sudo make fetch-ipxe
+mise run fetch-ipxe
 ```
 
 Or manually:
@@ -226,7 +226,7 @@ tftp 192.168.1.10 -c get undionly.kpxe /tmp/test.kpxe && echo "TFTP OK"
 
 ## Systemd service
 
-A systemd unit is provided at `deploy/systemd/fog.service`:
+A systemd unit is provided at `server/deploy/systemd/fog.service`:
 
 ```bash
 sudo cp deploy/systemd/fog.service /etc/systemd/system/
@@ -250,7 +250,7 @@ For minor updates within fog-next:
 
 ```bash
 git pull
-make build
+mise run build
 sudo install -m 0755 build/fog /usr/local/bin/fog
 sudo systemctl restart fog
 ```

@@ -10,7 +10,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
-	"github.com/nemvince/fog-next/ent/storagegroup"
+	"github.com/ckAdmins/fog-next/ent/storagegroup"
 )
 
 // StorageGroup is the model entity for the StorageGroup schema.

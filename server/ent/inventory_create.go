@@ -13,8 +13,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
-	"github.com/nemvince/fog-next/ent/host"
-	"github.com/nemvince/fog-next/ent/inventory"
+	"github.com/ckAdmins/fog-next/ent/host"
+	"github.com/ckAdmins/fog-next/ent/inventory"
 )
 
 // InventoryCreate is the builder for creating a Inventory entity.

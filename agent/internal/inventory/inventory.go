@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/nemvince/fos-agent/internal/netup"
+	"github.com/ckAdmins/fog-next/agent/internal/netup"
 )
 
 // Info holds the hardware inventory collected from procfs/sysfs.

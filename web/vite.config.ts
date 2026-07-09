@@ -10,6 +10,7 @@ export default defineConfig({
 		tanstackRouter({
 			target: "react",
 			autoCodeSplitting: true,
+			routeFileIgnorePrefix: "-",
 		}),
 		react(),
 		tailwindcss(),

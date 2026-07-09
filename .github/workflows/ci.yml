@@ -111,7 +111,12 @@ jobs:
         run: go test ./...
 
       - name: Build initramfs + kernel via pixie Docker
-        run: ./build.sh agent
+        run: |
+          docker build -t alpine-image-builder pixie
+          docker run --rm --privileged \
+            -v ${{ github.workspace }}:/work \
+            alpine-image-builder \
+            sh /work/pixie/build.sh
 
       - name: Upload agent artifacts
         uses: actions/upload-artifact@v7

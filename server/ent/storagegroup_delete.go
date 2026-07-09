@@ -8,8 +8,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/nemvince/fog-next/ent/predicate"
-	"github.com/nemvince/fog-next/ent/storagegroup"
+	"github.com/ckAdmins/fog-next/ent/predicate"
+	"github.com/ckAdmins/fog-next/ent/storagegroup"
 )
 
 // StorageGroupDelete is the builder for deleting a StorageGroup entity.

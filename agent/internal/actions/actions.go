@@ -14,14 +14,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/charmbracelet/bubbletea"
+	tea "github.com/charmbracelet/bubbletea"
 
-	fogapi "github.com/nemvince/fos-agent/internal/api"
-	"github.com/nemvince/fos-agent/internal/disk"
-	"github.com/nemvince/fos-agent/internal/imaging"
-	"github.com/nemvince/fos-agent/internal/inventory"
-	"github.com/nemvince/fos-agent/internal/partition"
-	"github.com/nemvince/fos-agent/internal/tui"
+	fogapi "github.com/ckAdmins/fog-next/agent/internal/api"
+	"github.com/ckAdmins/fog-next/agent/internal/disk"
+	"github.com/ckAdmins/fog-next/agent/internal/imaging"
+	"github.com/ckAdmins/fog-next/agent/internal/inventory"
+	"github.com/ckAdmins/fog-next/agent/internal/partition"
+	"github.com/ckAdmins/fog-next/agent/internal/tui"
 )
 
 // Dispatcher routes the handshake action to the correct handler.

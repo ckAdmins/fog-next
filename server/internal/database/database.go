@@ -8,8 +8,8 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	_ "github.com/lib/pq" // PostgreSQL driver
-	"github.com/nemvince/fog-next/ent"
-	"github.com/nemvince/fog-next/internal/config"
+	"github.com/ckAdmins/fog-next/ent"
+	"github.com/ckAdmins/fog-next/internal/config"
 )
 
 // Open creates and verifies an Ent client connected to PostgreSQL.

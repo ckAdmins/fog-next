@@ -5,12 +5,12 @@ import (
 
 "github.com/go-chi/chi/v5"
 "github.com/google/uuid"
-"github.com/nemvince/fog-next/ent"
-enthost "github.com/nemvince/fog-next/ent/host"
-"github.com/nemvince/fog-next/ent/hostmac"
-enttask "github.com/nemvince/fog-next/ent/task"
-"github.com/nemvince/fog-next/internal/api/response"
-"github.com/nemvince/fog-next/internal/plugins"
+"github.com/ckAdmins/fog-next/ent"
+enthost "github.com/ckAdmins/fog-next/ent/host"
+"github.com/ckAdmins/fog-next/ent/hostmac"
+enttask "github.com/ckAdmins/fog-next/ent/task"
+"github.com/ckAdmins/fog-next/internal/api/response"
+"github.com/ckAdmins/fog-next/internal/plugins"
 )
 
 type Hosts struct {

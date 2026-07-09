@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/nemvince/fog-next/ent"
+	"github.com/ckAdmins/fog-next/ent"
 )
 
 // The AgentLogFunc type is an adapter to allow the use of ordinary

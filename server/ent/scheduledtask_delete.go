@@ -8,8 +8,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/nemvince/fog-next/ent/predicate"
-	"github.com/nemvince/fog-next/ent/scheduledtask"
+	"github.com/ckAdmins/fog-next/ent/predicate"
+	"github.com/ckAdmins/fog-next/ent/scheduledtask"
 )
 
 // ScheduledTaskDelete is the builder for deleting a ScheduledTask entity.

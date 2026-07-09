@@ -2,7 +2,7 @@ package tui
 
 import tea "github.com/charmbracelet/bubbletea"
 
-// NewProgram creates a Bubble Tea Program for the fos-agent TUI dashboard.
+// NewProgram creates a Bubble Tea Program for the fog imaging agent TUI dashboard.
 // The returned program must be run in a goroutine:
 //
 //	go p.Run()

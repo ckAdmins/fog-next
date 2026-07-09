@@ -4,11 +4,11 @@ import (
 "net/http"
 
 "github.com/go-chi/chi/v5"
-"github.com/nemvince/fog-next/ent"
-entuser "github.com/nemvince/fog-next/ent/user"
-"github.com/nemvince/fog-next/internal/api/response"
-fogauth "github.com/nemvince/fog-next/internal/auth"
-"github.com/nemvince/fog-next/internal/config"
+"github.com/ckAdmins/fog-next/ent"
+entuser "github.com/ckAdmins/fog-next/ent/user"
+"github.com/ckAdmins/fog-next/internal/api/response"
+fogauth "github.com/ckAdmins/fog-next/internal/auth"
+"github.com/ckAdmins/fog-next/internal/config"
 )
 
 type Users struct {

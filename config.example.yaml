@@ -48,7 +48,7 @@ auth:
   access_token_expiry: 15m
   refresh_token_expiry: 168h   # 7 days
 
-  # Lifetime of the short-lived JWT issued to fos-next clients during PXE boot.
+  # Lifetime of the short-lived JWT issued to imaging agent clients during PXE boot.
   boot_token_expiry: 2h
 
 # ─── File storage ───────────────────────────────────────────────────────────
@@ -116,10 +116,10 @@ log:
 # ─── FOS (FOG Operating System) kernel/initramfs ────────────────────────────
 
 fos:
-  # Base URL of the fos-next release to download from.
+  # Base URL of the fog-next release to download agent artifacts from.
   # The installer fetches <release_url>/<kernel_file>, <release_url>/<init_file>,
   # and <release_url>/sha256sums, then verifies checksums before installing.
-  release_url: "https://github.com/nemvince/fos-next/releases/latest/download"
+  release_url: "https://github.com/ckAdmins/fog-next/releases/latest/download"
 
   # Filename of the kernel image in the release.
   kernel_file: "bzImage"

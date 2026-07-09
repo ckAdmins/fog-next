@@ -7,11 +7,11 @@ import (
 	"net"
 	"time"
 
-	"github.com/nemvince/fog-next/ent"
-	"github.com/nemvince/fog-next/ent/hostmac"
-	"github.com/nemvince/fog-next/ent/scheduledtask"
-	enttask "github.com/nemvince/fog-next/ent/task"
-	"github.com/nemvince/fog-next/internal/config"
+	"github.com/ckAdmins/fog-next/ent"
+	"github.com/ckAdmins/fog-next/ent/hostmac"
+	"github.com/ckAdmins/fog-next/ent/scheduledtask"
+	enttask "github.com/ckAdmins/fog-next/ent/task"
+	"github.com/ckAdmins/fog-next/internal/config"
 	"github.com/robfig/cron/v3"
 )
 

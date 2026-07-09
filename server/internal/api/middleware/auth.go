@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	fogauth "github.com/nemvince/fog-next/internal/auth"
-	"github.com/nemvince/fog-next/internal/config"
+	fogauth "github.com/ckAdmins/fog-next/internal/auth"
+	"github.com/ckAdmins/fog-next/internal/config"
 )
 
 type contextKey string

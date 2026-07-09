@@ -9,7 +9,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
-	"github.com/nemvince/fog-next/ent/imagetype"
+	"github.com/ckAdmins/fog-next/ent/imagetype"
 )
 
 // ImageType is the model entity for the ImageType schema.

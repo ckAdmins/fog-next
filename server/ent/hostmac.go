@@ -10,8 +10,8 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
-	"github.com/nemvince/fog-next/ent/host"
-	"github.com/nemvince/fog-next/ent/hostmac"
+	"github.com/ckAdmins/fog-next/ent/host"
+	"github.com/ckAdmins/fog-next/ent/hostmac"
 )
 
 // HostMAC is the model entity for the HostMAC schema.

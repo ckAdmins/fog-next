@@ -24,24 +24,24 @@ FOG Next replaces the PHP/Apache stack with a single statically-linked Go binary
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/nemvince/fog-next.git
+git clone https://github.com/ckAdmins/fog-next.git
 cd fog-next
 
 # 2. Create a config file from the example
-cp config.example.yaml server/deploy/docker/config.yaml
+cp server/deploy/config.example.yaml server/deploy/docker/config.yaml
 #    Edit server/deploy/docker/config.yaml and set a strong jwt_secret and DB password
 
 # 3. Start
-make docker-up
+mise run docker-up
 
 # 4. Run the install wizard to create your admin account
-docker compose -f server/deploy/docker/docker-compose.yml exec fog fog install
+docker compose -f server/deploy/docker/compose.yml exec fog fog install
 ```
 
 The web UI is available at **http://localhost** after the first `fog serve` starts.
 
-> **Tip:** To tear down (preserving volumes): `make docker-down`
-> To destroy everything including data: `docker compose -f server/deploy/docker/docker-compose.yml down -v`
+> **Tip:** To tear down (preserving volumes): `mise run docker-down`
+> To destroy everything including data: `docker compose -f server/deploy/docker/compose.yml down -v`
 
 ---
 
@@ -49,15 +49,17 @@ The web UI is available at **http://localhost** after the first `fog serve` star
 
 **Prerequisites:** Go 1.25+, Bun 1.x, git.
 
-```bash
-# Single entry point for all builds
-./build.sh server     # Go binary → build/fog
-./build.sh web        # React frontend (embeds into server binary)
-./build.sh all        # web → server → server-docker → agent
-./build.sh agent      # Agent initramfs + kernel (via pixie Docker)
-```
+All targets are **mise tasks** (run `mise run <task>` or `mise <task>` for shorthand):
 
-Also available as `make build` / `make test` / `make lint` for server-only workflows.
+```bash
+mise run server        # Go binary → build/fog
+mise run web           # React frontend (embeds into server binary)
+mise run all           # web → server → server-docker → agent
+mise run agent         # Agent initramfs + kernel (via pixie Docker)
+mise run test          # Go tests (requires PostgreSQL)
+mise run lint          # golangci-lint on server
+mise run docker-up     # Start postgres + fog containers
+```
 
 ### Development mode (hot reload)
 
@@ -134,7 +136,7 @@ fog install            Interactive first-run setup wizard
 fog migrate up         Apply all pending database migrations
 fog migrate down       Roll back the most recent migration
 fog migrate status     Print current migration schema version
-fog fetch-kernels      Download (or re-download) the fos-next kernel and initramfs
+fog fetch-kernels      Download (or re-download) the fog-next kernel and initramfs
 fog version            Print the fog-next version
 ```
 

@@ -1,6 +1,6 @@
 [Unit]
 Description=FOG Network Boot and Imaging Server
-Documentation=https://github.com/nemvince/fog-next
+Documentation=https://github.com/ckAdmins/fog-next
 After=network-online.target postgresql.service
 Wants=network-online.target
 

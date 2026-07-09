@@ -11,9 +11,9 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
-	"github.com/nemvince/fog-next/ent/agentlog"
-	"github.com/nemvince/fog-next/ent/host"
-	"github.com/nemvince/fog-next/ent/task"
+	"github.com/ckAdmins/fog-next/ent/agentlog"
+	"github.com/ckAdmins/fog-next/ent/host"
+	"github.com/ckAdmins/fog-next/ent/task"
 )
 
 // AgentLog is the model entity for the AgentLog schema.

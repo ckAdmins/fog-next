@@ -4,8 +4,8 @@ import (
 "context"
 "net/http"
 
-"github.com/nemvince/fog-next/ent"
-"github.com/nemvince/fog-next/internal/api/middleware"
+"github.com/ckAdmins/fog-next/ent"
+"github.com/ckAdmins/fog-next/internal/api/middleware"
 )
 
 // writeAudit records an audit log entry in a fire-and-forget goroutine.

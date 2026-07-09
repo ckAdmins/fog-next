@@ -3,8 +3,8 @@ package handlers
 import (
 "net/http"
 
-"github.com/nemvince/fog-next/ent"
-"github.com/nemvince/fog-next/internal/api/response"
+"github.com/ckAdmins/fog-next/ent"
+"github.com/ckAdmins/fog-next/internal/api/response"
 )
 
 // Reports handles read-only reporting endpoints.

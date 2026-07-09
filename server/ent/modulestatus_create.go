@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
-	"github.com/nemvince/fog-next/ent/module"
-	"github.com/nemvince/fog-next/ent/modulestatus"
+	"github.com/ckAdmins/fog-next/ent/module"
+	"github.com/ckAdmins/fog-next/ent/modulestatus"
 )
 
 // ModuleStatusCreate is the builder for creating a ModuleStatus entity.

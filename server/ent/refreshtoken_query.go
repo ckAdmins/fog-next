@@ -12,9 +12,9 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
-	"github.com/nemvince/fog-next/ent/predicate"
-	"github.com/nemvince/fog-next/ent/refreshtoken"
-	"github.com/nemvince/fog-next/ent/user"
+	"github.com/ckAdmins/fog-next/ent/predicate"
+	"github.com/ckAdmins/fog-next/ent/refreshtoken"
+	"github.com/ckAdmins/fog-next/ent/user"
 )
 
 // RefreshTokenQuery is the builder for querying RefreshToken entities.

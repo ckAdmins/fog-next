@@ -10,7 +10,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
-	"github.com/nemvince/fog-next/ent/user"
+	"github.com/ckAdmins/fog-next/ent/user"
 )
 
 // User is the model entity for the User schema.

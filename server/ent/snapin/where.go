@@ -8,7 +8,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/google/uuid"
-	"github.com/nemvince/fog-next/ent/predicate"
+	"github.com/ckAdmins/fog-next/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.

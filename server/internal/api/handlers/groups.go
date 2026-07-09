@@ -5,9 +5,9 @@ import (
 
 "github.com/go-chi/chi/v5"
 "github.com/google/uuid"
-"github.com/nemvince/fog-next/ent"
-"github.com/nemvince/fog-next/ent/groupmember"
-"github.com/nemvince/fog-next/internal/api/response"
+"github.com/ckAdmins/fog-next/ent"
+"github.com/ckAdmins/fog-next/ent/groupmember"
+"github.com/ckAdmins/fog-next/internal/api/response"
 )
 
 type Groups struct{ db *ent.Client }

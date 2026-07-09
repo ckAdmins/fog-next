@@ -10,7 +10,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
-	"github.com/nemvince/fog-next/ent/globalsetting"
+	"github.com/ckAdmins/fog-next/ent/globalsetting"
 )
 
 // GlobalSetting is the model entity for the GlobalSetting schema.

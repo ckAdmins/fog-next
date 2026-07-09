@@ -7,8 +7,8 @@ import (
 "path/filepath"
 "time"
 
-"github.com/nemvince/fog-next/ent"
-"github.com/nemvince/fog-next/internal/config"
+"github.com/ckAdmins/fog-next/ent"
+"github.com/ckAdmins/fog-next/internal/config"
 )
 
 // ImageSize periodically walks the storage root and updates size_bytes on each Image.

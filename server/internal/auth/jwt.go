@@ -8,7 +8,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"github.com/nemvince/fog-next/internal/config"
+	"github.com/ckAdmins/fog-next/internal/config"
 )
 
 // Claims is the payload stored inside a JWT access token.

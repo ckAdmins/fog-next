@@ -1,4 +1,4 @@
-module github.com/nemvince/fog-next
+module github.com/ckAdmins/fog-next
 
 go 1.25.9
 

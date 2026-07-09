@@ -14,9 +14,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/charmbracelet/bubbletea"
+	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/nemvince/fos-agent/internal/tui"
+	"github.com/ckAdmins/fog-next/agent/internal/tui"
 )
 
 // Client wraps the fog-next boot API with automatic token attachment and retries.

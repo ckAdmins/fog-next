@@ -8,8 +8,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/nemvince/fog-next/ent/multicastsession"
-	"github.com/nemvince/fog-next/ent/predicate"
+	"github.com/ckAdmins/fog-next/ent/multicastsession"
+	"github.com/ckAdmins/fog-next/ent/predicate"
 )
 
 // MulticastSessionDelete is the builder for deleting a MulticastSession entity.

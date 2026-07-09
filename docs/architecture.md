@@ -47,7 +47,7 @@ internal/
     middleware/           Auth (JWT), rate limiter, logger
     response/             JSON helpers (OK, Created, BadRequest, …)
     server.go             Chi router and HTTP server lifecycle
-    static/               Embedded React build (populated by make build)
+    static/               Embedded React build (populated by mise run web)
   auth/                   JWT sign/verify, bcrypt password helpers
   config/                 Viper-based config loading and defaults
   database/               sqlx wrapper + golang-migrate integration
@@ -198,4 +198,4 @@ The React SPA is built with:
 - **Radix UI** — accessible primitives (Dialog, Toast)
 - **lucide-react** — icons
 
-`make build` runs `bun run build` and copies the output to `internal/api/static/`, which is embedded into the binary via `//go:embed static`. The `spaHandler` in `server.go` serves `index.html` for any path that doesn't match a real file, enabling React Router's history mode.
+`mise run web` runs `bun install && bun run build` and copies the output to `internal/api/static/`, which is embedded into the binary via `//go:embed static`. The `spaHandler` in `server.go` serves `index.html` for any path that doesn't match a real file, enabling React Router's history mode.

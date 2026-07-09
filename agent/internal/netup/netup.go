@@ -15,9 +15,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/charmbracelet/bubbletea"
+	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/nemvince/fos-agent/internal/tui"
+	"github.com/ckAdmins/fog-next/agent/internal/tui"
 )
 
 const (

@@ -13,8 +13,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
-	"github.com/nemvince/fog-next/ent/printer"
-	"github.com/nemvince/fog-next/ent/printerassoc"
+	"github.com/ckAdmins/fog-next/ent/printer"
+	"github.com/ckAdmins/fog-next/ent/printerassoc"
 )
 
 // PrinterCreate is the builder for creating a Printer entity.

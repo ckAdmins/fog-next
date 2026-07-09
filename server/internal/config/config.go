@@ -112,13 +112,13 @@ type LogConfig struct {
 	Format string `mapstructure:"format"` // "json" or "text"
 }
 
-// FOSConfig controls automatic download of fos-next kernel and initramfs
+// FOSConfig controls automatic download of the fog-next kernel and initramfs
 // artifacts during `fog install`.
 type FOSConfig struct {
-	// ReleaseURL is the base URL of the fos-next release to download from.
+	// ReleaseURL is the base URL of the fog-next release to download agent artifacts from.
 	// The installer appends the individual file names (KernelFile, InitFile,
 	// sha256sums) to this URL.
-	// Default: https://github.com/nemvince/fos-next/releases/latest/download
+	// Default: https://github.com/ckAdmins/fog-next/releases/latest/download
 	ReleaseURL string `mapstructure:"release_url"`
 	// KernelFile is the filename of the kernel image in the release archive.
 	KernelFile string `mapstructure:"kernel_file"`
@@ -198,7 +198,7 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("log.level", "info")
 	v.SetDefault("log.format", "text")
 
-	v.SetDefault("fos.release_url", "https://github.com/nemvince/fos-next/releases/latest/download")
+	v.SetDefault("fos.release_url", "https://github.com/ckAdmins/fog-next/releases/latest/download")
 	v.SetDefault("fos.kernel_file", "bzImage")
 	v.SetDefault("fos.init_file", "init.xz")
 	v.SetDefault("fos.skip_download", false)

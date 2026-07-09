@@ -10,9 +10,9 @@ import (
 "strings"
 "text/template"
 
-"github.com/nemvince/fog-next/ent"
-enttask "github.com/nemvince/fog-next/ent/task"
-"github.com/nemvince/fog-next/ent/hostmac"
+"github.com/ckAdmins/fog-next/ent"
+enttask "github.com/ckAdmins/fog-next/ent/task"
+"github.com/ckAdmins/fog-next/ent/hostmac"
 )
 
 // BootParams contains everything the boot script generator needs.

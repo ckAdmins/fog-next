@@ -7,9 +7,9 @@ import (
 "os/exec"
 "time"
 
-"github.com/nemvince/fog-next/ent"
-"github.com/nemvince/fog-next/ent/storagenode"
-"github.com/nemvince/fog-next/internal/config"
+"github.com/ckAdmins/fog-next/ent"
+"github.com/ckAdmins/fog-next/ent/storagenode"
+"github.com/ckAdmins/fog-next/internal/config"
 )
 
 // ImageReplicator copies master images to all slave storage nodes using rsync over SSH.

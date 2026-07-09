@@ -1,3 +1,79 @@
 [tools]
 bun = "latest"
 go = "latest"
+
+[tasks.server]
+description = "Build the fog server Go binary → build/fog"
+dir = "server"
+run = "go build -ldflags '-s -w' -o ../build/fog ./cmd/fog"
+
+[tasks.web]
+description = "Build the React frontend and install into server static dir"
+dir = "web"
+run = [
+    "bun run build",
+    "rm -rf ../server/internal/api/static/*",
+    "cp -r dist/. ../server/internal/api/static/",
+]
+
+[tasks.agent]
+description = "Build agent initramfs + kernel via pixie Docker → pixie/output/"
+run = [
+    "docker build -t alpine-image-builder pixie",
+    "mkdir -p pixie/output",
+    "docker run --rm --privileged -v .:/work alpine-image-builder sh /work/pixie/build.sh",
+]
+
+[tasks."server-docker"]
+description = "Build the fog server Docker image → fog-next:latest"
+run = "docker build -f server/deploy/docker/Dockerfile -t fog-next:latest ."
+
+[tasks.all]
+description = "Build everything (web → server → server-docker → agent)"
+run = [
+    { task = "web" },
+    { task = "server" },
+    { task = "server-docker" },
+    { task = "agent" },
+]
+
+[tasks.clean]
+description = "Remove all build artifacts"
+run = [
+    "rm -rf build",
+    "rm -rf web/dist",
+    "rm -f pixie/output/bzImage pixie/output/init.xz",
+]
+
+[tasks.run]
+description = "Run the fog server in dev mode"
+dir = "server"
+run = "go run ./cmd/fog serve"
+
+[tasks.test]
+description = "Run server Go tests (requires PostgreSQL)"
+dir = "server"
+run = "go test -race -timeout 120s ./..."
+
+[tasks.lint]
+description = "Lint server Go code with golangci-lint"
+dir = "server"
+run = "golangci-lint run ./..."
+
+[tasks."docker-up"]
+description = "Start docker-compose services (postgres + fog)"
+run = "docker compose -f server/deploy/docker/compose.yml up -d"
+
+[tasks."docker-down"]
+description = "Stop docker-compose services"
+run = "docker compose -f server/deploy/docker/compose.yml down"
+
+[tasks."fetch-ipxe"]
+description = "Download iPXE boot files to TFTP root"
+env = { IPXE_DIR = "/tftpboot" }
+run = [
+    "mkdir -p ${IPXE_DIR}/arm64-efi",
+    "curl -fsSL -o ${IPXE_DIR}/undionly.kpxe https://boot.ipxe.org/undionly.kpxe",
+    "curl -fsSL -o ${IPXE_DIR}/ipxe.efi https://boot.ipxe.org/x86_64-efi/ipxe.efi",
+    "curl -fsSL -o ${IPXE_DIR}/arm64-efi/snponly.efi https://boot.ipxe.org/x86_64-efi/snponly.efi",
+]

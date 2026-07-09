@@ -8,8 +8,8 @@ import (
 "time"
 
 "github.com/google/uuid"
-"github.com/nemvince/fog-next/ent"
-"github.com/nemvince/fog-next/internal/config"
+"github.com/ckAdmins/fog-next/ent"
+"github.com/ckAdmins/fog-next/internal/config"
 )
 
 // PingHosts periodically pings all registered hosts and updates their last_contact timestamp.

@@ -10,7 +10,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
-	"github.com/nemvince/fog-next/ent/scheduledtask"
+	"github.com/ckAdmins/fog-next/ent/scheduledtask"
 )
 
 // ScheduledTask is the model entity for the ScheduledTask schema.

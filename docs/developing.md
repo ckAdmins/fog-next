@@ -39,7 +39,7 @@ cd server && go run ./cmd/fog migrate up
 ## Running the backend dev server
 
 ```bash
-cp config.example.yaml config.yaml
+cp server/deploy/config.example.yaml config.yaml
 # Edit config.yaml …
 cd server && go run ./cmd/fog serve -c config.yaml
 ```
@@ -69,7 +69,7 @@ UI at **http://localhost:5173**. The proxy config is in [`web/vite.config.ts`](.
 ### Go unit tests
 
 ```bash
-make test                                         # all tests, race detector
+mise run test                                      # all tests, race detector
 cd server && go test -v ./internal/api/handlers/...  # single package
 cd server && go test -v -run TestHosts_Create ./internal/api/handlers/...  # single test
 ```
@@ -106,7 +106,7 @@ Useful flags: `--headed`, `--debug`, `--ui`, `auth.spec.ts` (single file).
 ## Linting
 
 ```bash
-make lint                    # golangci-lint (server)
+mise run lint                # golangci-lint (server)
 cd web && bun run lint       # eslint (frontend)
 ```
 
@@ -198,7 +198,7 @@ package myplugin
 
 import (
     "context"
-    "github.com/nemvince/fog-next/internal/plugins"
+    "github.com/ckAdmins/fog-next/internal/plugins"
 )
 
 func init() {

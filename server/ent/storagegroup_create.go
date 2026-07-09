@@ -13,10 +13,10 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
-	"github.com/nemvince/fog-next/ent/image"
-	"github.com/nemvince/fog-next/ent/storagegroup"
-	"github.com/nemvince/fog-next/ent/storagenode"
-	"github.com/nemvince/fog-next/ent/task"
+	"github.com/ckAdmins/fog-next/ent/image"
+	"github.com/ckAdmins/fog-next/ent/storagegroup"
+	"github.com/ckAdmins/fog-next/ent/storagenode"
+	"github.com/ckAdmins/fog-next/ent/task"
 )
 
 // StorageGroupCreate is the builder for creating a StorageGroup entity.

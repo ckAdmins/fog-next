@@ -1,31 +1,35 @@
-# AGENTS.md — imaging monorepo
+# AGENTS.md — fog-next monorepo
 
 ## Repo structure
 
 | Directory | What | Go module |
 |-----------|------|-----------|
-| `server/` | Network boot + imaging server (Go, single binary `fog`) | `github.com/nemvince/fog-next` |
-| `agent/` | PXE initramfs agent (Go, PID 1 in Buildroot initramfs) | `github.com/nemvince/fos-next` |
+| `server/` | Network boot + imaging server (Go, single binary `fog`) | `github.com/ckAdmins/fog-next` |
+| `agent/` | PXE initramfs imaging agent (Go, PID 1 in Alpine+OpenRC initramfs) | `github.com/ckAdmins/fog-next/agent` |
 | `web/` | React/TS frontend (Bun + Vite + TanStack Router) | — |
 | `pixie/` | Docker build environment for the agent initramfs + kernel | — |
 | `docs/` | Developer guide, API reference, architecture, install | — |
 
-The agent talks exclusively to the server's REST API (boot endpoints). No shared code.
+The agent talks exclusively to the server's REST API (boot endpoints). No shared Go code between agent and server — they have separate `go.mod` files.
 
 ## Build
 
-Single entry point: **`./build.sh`** (also `make` for server-only workflows).
+All targets are **mise tasks** — run `mise run <task>` (or `mise <task>` for shorthand).
 
-| Command | What |
-|---------|------|
-| `./build.sh agent` | Build agent kernel + initramfs via pixie Docker → `pixie/output/` |
-| `./build.sh server` | `go build` from `server/` → `build/fog` |
-| `./build.sh server-docker` | `docker build -f server/deploy/docker/Dockerfile` → `fog-next:latest` |
-| `./build.sh web` | `bun install && bun run build` → copies to `server/internal/api/static/` |
-| `./build.sh all` | web → server → server-docker → agent |
-| `./build.sh clean` | Remove `build/`, `web/dist/`, `pixie/output/` |
-
-Equivalent make targets: `make build`, `make run`, `make test`, `make lint`, `make docker-build`, `make docker-up`.
+| Task | What |
+|------|------|
+| `mise run server` | `go build` from `server/cmd/fog` → `build/fog` |
+| `mise run web` | `bun install && bun run build` → copies to `server/internal/api/static/` |
+| `mise run agent` | Build agent kernel + initramfs via pixie Docker → `pixie/output/` |
+| `mise run server-docker` | `docker build -f server/deploy/docker/Dockerfile` → `fog-next:latest` |
+| `mise run all` | web → server → server-docker → agent |
+| `mise run clean` | Remove `build/`, `web/dist/`, `pixie/output/` |
+| `mise run test` | `go test -race` from `server/` |
+| `mise run lint` | `golangci-lint run` from `server/` |
+| `mise run run` | `go run ./cmd/fog serve` from `server/` |
+| `mise run docker-up` | `docker compose up` postgres + fog-next |
+| `mise run docker-down` | `docker compose down` |
+| `mise run fetch-ipxe` | Download iPXE boot files to `/tftpboot` |
 
 ## Toolchain
 
@@ -33,7 +37,7 @@ Root `mise.toml`: `bun = "latest"`, `go = "latest"`. Run `mise install` at the r
 
 - Server and agent both build with Go. The server Dockerfile uses `golang:1.26-alpine`.
 - Frontend uses Bun. Run `cd web && bun run dev` for HMR during development.
-- The pixie Docker build uses an Alpine container with `go` installed.
+- The pixie Docker build uses an Alpine container with `go` + `git` installed.
 
 ## Dev workflow (server)
 
@@ -52,8 +56,8 @@ cd web && bun run dev
 ## Tests
 
 ```bash
-# Server Go tests
-make test          # runs from server/ with -race -timeout 120s
+# Server Go tests (requires PostgreSQL)
+mise run test      # runs from server/ with -race -timeout 120s
 
 # Frontend E2E (requires PostgreSQL + running server)
 cd web && bunx playwright install --with-deps
@@ -68,6 +72,18 @@ cd web && bunx playwright test
 ./build/fog migrate up      # apply pending
 ./build/fog migrate down    # rollback latest
 ./build/fog migrate status  # current version
+```
+
+Migrations live in `server/internal/database/migrations/` and use `golang-migrate`.
+
+## CLI
+
+```
+fog serve              Start the HTTP server and all background services
+fog install            Interactive first-run setup wizard
+fog migrate up/down    Apply or rollback database migrations
+fog fetch-kernels      Download the agent kernel (bzImage) + initramfs (init.xz)
+fog version            Print version
 ```
 
 ## Agent/imaging gotchas
@@ -122,8 +138,8 @@ There is no version-compatibility file. The agent and server are built and relea
 ## Docker Compose (server)
 
 ```bash
-make docker-up     # starts postgres:16 + fog-next
-make docker-down   # stops both
+mise run docker-up     # starts postgres:18 + fog-next
+mise run docker-down   # stops both
 ```
 
 Config volume: `server/deploy/docker/config.yaml` (create from `server/deploy/config.example.yaml`).

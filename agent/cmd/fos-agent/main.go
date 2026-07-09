@@ -17,14 +17,14 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/charmbracelet/bubbletea"
+	tea "github.com/charmbracelet/bubbletea"
 
-	"github.com/nemvince/fos-agent/internal/actions"
-	fogapi "github.com/nemvince/fos-agent/internal/api"
-	"github.com/nemvince/fos-agent/internal/cmdline"
-	"github.com/nemvince/fos-agent/internal/netup"
-	"github.com/nemvince/fos-agent/internal/tui"
-	"github.com/nemvince/fos-agent/internal/version"
+	"github.com/ckAdmins/fog-next/agent/internal/actions"
+	fogapi "github.com/ckAdmins/fog-next/agent/internal/api"
+	"github.com/ckAdmins/fog-next/agent/internal/cmdline"
+	"github.com/ckAdmins/fog-next/agent/internal/netup"
+	"github.com/ckAdmins/fog-next/agent/internal/tui"
+	"github.com/ckAdmins/fog-next/agent/internal/version"
 )
 
 // Exit codes communicated back to the fos-autologin wrapper.

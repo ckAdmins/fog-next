@@ -14,7 +14,7 @@ import (
 
 	tftp "github.com/pin/tftp/v3"
 
-	"github.com/nemvince/fog-next/internal/config"
+	"github.com/ckAdmins/fog-next/internal/config"
 )
 
 // Server wraps the pin/tftp server with FOG-specific configuration.

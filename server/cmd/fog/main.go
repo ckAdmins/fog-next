@@ -16,14 +16,14 @@ import (
 
 	"github.com/spf13/cobra"
 
-	entuser "github.com/nemvince/fog-next/ent/user"
-	"github.com/nemvince/fog-next/internal/api"
-	"github.com/nemvince/fog-next/internal/auth"
-	"github.com/nemvince/fog-next/internal/config"
-	"github.com/nemvince/fog-next/internal/database"
-	"github.com/nemvince/fog-next/internal/fos"
-	"github.com/nemvince/fog-next/internal/services"
-	"github.com/nemvince/fog-next/internal/tftp"
+	entuser "github.com/ckAdmins/fog-next/ent/user"
+	"github.com/ckAdmins/fog-next/internal/api"
+	"github.com/ckAdmins/fog-next/internal/auth"
+	"github.com/ckAdmins/fog-next/internal/config"
+	"github.com/ckAdmins/fog-next/internal/database"
+	"github.com/ckAdmins/fog-next/internal/fos"
+	"github.com/ckAdmins/fog-next/internal/services"
+	"github.com/ckAdmins/fog-next/internal/tftp"
 	"golang.org/x/term"
 )
 
@@ -209,18 +209,18 @@ func runInstall(_ *cobra.Command, _ []string) error {
 	}
 	fmt.Printf("Admin user %q created.\n", adminUser)
 
-	// Download fos-next kernel and initramfs unless explicitly disabled.
+	// Download fog-next kernel and initramfs unless explicitly disabled.
 	if !cfg.FOS.SkipDownload {
-		fmt.Printf("\nDownloading fos-next artifacts from %s\n", cfg.FOS.ReleaseURL)
+		fmt.Printf("\nDownloading fog-next agent artifacts from %s\n", cfg.FOS.ReleaseURL)
 		d := fos.New(cfg.FOS, cfg.Storage.KernelPath)
 		if err := d.Download(context.Background()); err != nil {
-			fmt.Printf("Warning: fos-next download failed: %v\n", err)
+			fmt.Printf("Warning: agent download failed: %v\n", err)
 			fmt.Println("You can retry later with: fog fetch-kernels")
 		} else {
-			fmt.Printf("fos-next artifacts installed to %s\n", cfg.Storage.KernelPath)
+			fmt.Printf("agent artifacts installed to %s\n", cfg.Storage.KernelPath)
 		}
 	} else {
-		fmt.Println("Skipping fos-next download (fos.skip_download = true).")
+		fmt.Println("Skipping agent download (fos.skip_download = true).")
 	}
 	return nil
 }
@@ -230,8 +230,8 @@ func runInstall(_ *cobra.Command, _ []string) error {
 func fetchKernelsCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "fetch-kernels",
-		Short: "Download or re-download the fos-next kernel and initramfs",
-		Long: `Downloads the fos-next kernel (bzImage) and initramfs (init.xz) from the
+		Short: "Download or re-download the fog-next kernel and initramfs",
+		Long: `Downloads the fog-next agent kernel (bzImage) and initramfs (init.xz) from the
 configured release URL and installs them into the kernel_path directory.
 
 The release URL is read from fos.release_url in the config file.
@@ -246,12 +246,12 @@ Example:
 				fmt.Println("fos.skip_download is true — nothing to do.")
 				return nil
 			}
-			fmt.Printf("Downloading fos-next artifacts from %s\n", cfg.FOS.ReleaseURL)
+			fmt.Printf("Downloading fog-next agent artifacts from %s\n", cfg.FOS.ReleaseURL)
 			d := fos.New(cfg.FOS, cfg.Storage.KernelPath)
 			if err := d.Download(context.Background()); err != nil {
 				return err
 			}
-			fmt.Printf("fos-next artifacts installed to %s\n", cfg.Storage.KernelPath)
+			fmt.Printf("agent artifacts installed to %s\n", cfg.Storage.KernelPath)
 			return nil
 		},
 	}

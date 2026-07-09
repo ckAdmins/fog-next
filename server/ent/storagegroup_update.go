@@ -12,11 +12,11 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
-	"github.com/nemvince/fog-next/ent/image"
-	"github.com/nemvince/fog-next/ent/predicate"
-	"github.com/nemvince/fog-next/ent/storagegroup"
-	"github.com/nemvince/fog-next/ent/storagenode"
-	"github.com/nemvince/fog-next/ent/task"
+	"github.com/ckAdmins/fog-next/ent/image"
+	"github.com/ckAdmins/fog-next/ent/predicate"
+	"github.com/ckAdmins/fog-next/ent/storagegroup"
+	"github.com/ckAdmins/fog-next/ent/storagenode"
+	"github.com/ckAdmins/fog-next/ent/task"
 )
 
 // StorageGroupUpdate is the builder for updating StorageGroup entities.

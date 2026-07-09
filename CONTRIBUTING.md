@@ -3,11 +3,11 @@
 ## Setup
 
 ```bash
-git clone https://github.com/nemvince/fog-next.git
+git clone https://github.com/ckAdmins/fog-next.git
 cd fog-next
 mise install          # Installs Go + Bun
-./build.sh server     # Build the server
-./build.sh web        # Build the frontend
+mise run server       # Build the server
+mise run web          # Build the frontend
 ```
 
 ## Development workflow
@@ -16,8 +16,8 @@ Make changes in a feature branch. Keep commits focused. Follow existing code con
 
 **Before submitting:**
 ```bash
-make lint             # golangci-lint on server
-make test             # Go tests (needs PostgreSQL on localhost:5432)
+mise run lint          # golangci-lint on server
+mise run test          # Go tests (needs PostgreSQL on localhost:5432)
 cd web && bun run lint && bun run build   # Frontend
 ```
 

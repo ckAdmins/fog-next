@@ -1,5 +1,5 @@
 // Package cmdline parses the kernel command line from /proc/cmdline and
-// extracts the fog-specific parameters that control fos-agent behaviour.
+// extracts the fog-specific parameters that control agent behaviour.
 package cmdline
 
 import (

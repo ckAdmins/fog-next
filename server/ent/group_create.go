@@ -13,8 +13,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
-	"github.com/nemvince/fog-next/ent/group"
-	"github.com/nemvince/fog-next/ent/groupmember"
+	"github.com/ckAdmins/fog-next/ent/group"
+	"github.com/ckAdmins/fog-next/ent/groupmember"
 )
 
 // GroupCreate is the builder for creating a Group entity.

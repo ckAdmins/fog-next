@@ -12,9 +12,9 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
-	"github.com/nemvince/fog-next/ent/host"
-	"github.com/nemvince/fog-next/ent/pendingmac"
-	"github.com/nemvince/fog-next/ent/predicate"
+	"github.com/ckAdmins/fog-next/ent/host"
+	"github.com/ckAdmins/fog-next/ent/pendingmac"
+	"github.com/ckAdmins/fog-next/ent/predicate"
 )
 
 // PendingMACUpdate is the builder for updating PendingMAC entities.

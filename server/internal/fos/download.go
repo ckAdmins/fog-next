@@ -1,4 +1,4 @@
-// Package fos handles downloading the fos-next kernel and initramfs artifacts
+// Package fos handles downloading the fog-next kernel and initramfs artifacts
 // from a release URL during `fog install`. Files are downloaded to a temporary
 // location, their SHA-256 checksums are verified against the release's
 // sha256sums file, and they are then atomically moved into kernel_path.
@@ -20,10 +20,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nemvince/fog-next/internal/config"
+	"github.com/ckAdmins/fog-next/internal/config"
 )
 
-// Downloader fetches fos-next release artifacts and verifies their checksums.
+// Downloader fetches fog-next release artifacts and verifies their checksums.
 type Downloader struct {
 	cfg    config.FOSConfig
 	dest   string // kernel_path from StorageConfig
@@ -64,7 +64,7 @@ func (d *Downloader) Download(ctx context.Context) error {
 
 	// Try the GitHub Releases API for version info and asset URLs.
 	if assets, tag, ok := d.fetchRelease(ctx); ok {
-		slog.Info("fos-next release", "version", tag)
+		slog.Info("fog-next agent release", "version", tag)
 
 		// Build a map of asset name → download URL from the API response.
 		assetURLs := make(map[string]string, len(assets))
@@ -77,7 +77,7 @@ func (d *Downloader) Download(ctx context.Context) error {
 		if !ok {
 			return fmt.Errorf("sha256sums not found in release assets")
 		}
-		slog.Info("fetching fos-next release checksums", "url", sumsURL)
+		slog.Info("fetching fog-next release checksums", "url", sumsURL)
 		sums, err := d.fetchChecksums(ctx, sumsURL)
 		if err != nil {
 			return fmt.Errorf("fetch sha256sums: %w", err)
@@ -104,7 +104,7 @@ func (d *Downloader) Download(ctx context.Context) error {
 
 	// Fallback: legacy URL-concatenation behaviour for non-GitHub or
 	// API-unreachable scenarios.
-	slog.Info("fetching fos-next release checksums", "url", base+"/sha256sums")
+	slog.Info("fetching fog-next release checksums", "url", base+"/sha256sums")
 	sums, err := d.fetchChecksums(ctx, base+"/sha256sums")
 	if err != nil {
 		return fmt.Errorf("fetch sha256sums: %w", err)

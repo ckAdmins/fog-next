@@ -7,9 +7,9 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	"github.com/nemvince/fog-next/ent"
-	entagentlog "github.com/nemvince/fog-next/ent/agentlog"
-	"github.com/nemvince/fog-next/internal/api/response"
+	"github.com/ckAdmins/fog-next/ent"
+	entagentlog "github.com/ckAdmins/fog-next/ent/agentlog"
+	"github.com/ckAdmins/fog-next/internal/api/response"
 )
 
 // Logs handles log-related read endpoints available to authenticated users.

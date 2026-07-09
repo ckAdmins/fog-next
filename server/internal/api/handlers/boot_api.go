@@ -15,17 +15,17 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	"github.com/nemvince/fog-next/ent"
-	enthost "github.com/nemvince/fog-next/ent/host"
-	"github.com/nemvince/fog-next/ent/hostmac"
-	"github.com/nemvince/fog-next/ent/inventory"
-	"github.com/nemvince/fog-next/ent/storagenode"
-	enttask "github.com/nemvince/fog-next/ent/task"
-	"github.com/nemvince/fog-next/internal/api/middleware"
-	"github.com/nemvince/fog-next/internal/api/response"
-	fogauth "github.com/nemvince/fog-next/internal/auth"
-	"github.com/nemvince/fog-next/internal/config"
-	"github.com/nemvince/fog-next/internal/ws"
+	"github.com/ckAdmins/fog-next/ent"
+	enthost "github.com/ckAdmins/fog-next/ent/host"
+	"github.com/ckAdmins/fog-next/ent/hostmac"
+	"github.com/ckAdmins/fog-next/ent/inventory"
+	"github.com/ckAdmins/fog-next/ent/storagenode"
+	enttask "github.com/ckAdmins/fog-next/ent/task"
+	"github.com/ckAdmins/fog-next/internal/api/middleware"
+	"github.com/ckAdmins/fog-next/internal/api/response"
+	fogauth "github.com/ckAdmins/fog-next/internal/auth"
+	"github.com/ckAdmins/fog-next/internal/config"
+	"github.com/ckAdmins/fog-next/internal/ws"
 )
 
 // imagePartitions is the JSONB shape stored in Image.Partitions.

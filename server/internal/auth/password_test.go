@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/nemvince/fog-next/internal/auth"
+	"github.com/ckAdmins/fog-next/internal/auth"
 )
 
 func TestHashAndCheckPassword(t *testing.T) {

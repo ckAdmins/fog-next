@@ -21,7 +21,7 @@ package plugins
 import (
 	"context"
 
-	"github.com/nemvince/fog-next/ent"
+	"github.com/ckAdmins/fog-next/ent"
 )
 
 // ─── Hook interfaces ──────────────────────────────────────────────────────────

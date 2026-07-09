@@ -8,7 +8,7 @@ For any patch or minor release:
 
 ```bash
 git pull
-make build
+mise run server
 sudo install -m 0755 build/fog /usr/local/bin/fog
 sudo systemctl restart fog
 ```

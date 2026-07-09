@@ -57,7 +57,7 @@ func (m Model) View() string {
 // ── header ───────────────────────────────────────────────────────────
 
 func (m Model) renderHeader() string {
-	left := fmt.Sprintf("fos-agent %s (%s)", m.Version, m.Commit)
+	left := fmt.Sprintf("fog-agent %s (%s)", m.Version, m.Commit)
 	right := m.BuildDate
 	if right == "" || right == "unknown" {
 		right = time.Now().UTC().Format("2006-01-02T15:04Z")

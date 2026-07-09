@@ -3,10 +3,10 @@ package handlers
 import (
 "net/http"
 
-"github.com/nemvince/fog-next/ent"
-"github.com/nemvince/fog-next/internal/api/response"
-"github.com/nemvince/fog-next/internal/config"
-"github.com/nemvince/fog-next/internal/pxe"
+"github.com/ckAdmins/fog-next/ent"
+"github.com/ckAdmins/fog-next/internal/api/response"
+"github.com/ckAdmins/fog-next/internal/config"
+"github.com/ckAdmins/fog-next/internal/pxe"
 )
 
 // BootHandler serves iPXE boot scripts based on the MAC address of the

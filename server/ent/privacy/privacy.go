@@ -5,7 +5,7 @@ package privacy
 import (
 	"context"
 
-	"github.com/nemvince/fog-next/ent"
+	"github.com/ckAdmins/fog-next/ent"
 
 	"entgo.io/ent/entql"
 	"entgo.io/ent/privacy"

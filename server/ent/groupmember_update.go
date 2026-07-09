@@ -11,10 +11,10 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
-	"github.com/nemvince/fog-next/ent/group"
-	"github.com/nemvince/fog-next/ent/groupmember"
-	"github.com/nemvince/fog-next/ent/host"
-	"github.com/nemvince/fog-next/ent/predicate"
+	"github.com/ckAdmins/fog-next/ent/group"
+	"github.com/ckAdmins/fog-next/ent/groupmember"
+	"github.com/ckAdmins/fog-next/ent/host"
+	"github.com/ckAdmins/fog-next/ent/predicate"
 )
 
 // GroupMemberUpdate is the builder for updating GroupMember entities.

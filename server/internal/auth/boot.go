@@ -6,7 +6,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"github.com/nemvince/fog-next/internal/config"
+	"github.com/ckAdmins/fog-next/internal/config"
 )
 
 // BootClaims is the payload stored in a boot token issued at handshake.

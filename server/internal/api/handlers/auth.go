@@ -8,12 +8,12 @@ import (
 "time"
 
 "github.com/google/uuid"
-"github.com/nemvince/fog-next/ent"
-"github.com/nemvince/fog-next/ent/refreshtoken"
-entuser "github.com/nemvince/fog-next/ent/user"
-"github.com/nemvince/fog-next/internal/api/response"
-fogauth "github.com/nemvince/fog-next/internal/auth"
-"github.com/nemvince/fog-next/internal/config"
+"github.com/ckAdmins/fog-next/ent"
+"github.com/ckAdmins/fog-next/ent/refreshtoken"
+entuser "github.com/ckAdmins/fog-next/ent/user"
+"github.com/ckAdmins/fog-next/internal/api/response"
+fogauth "github.com/ckAdmins/fog-next/internal/auth"
+"github.com/ckAdmins/fog-next/internal/config"
 )
 
 // Auth handles login, token refresh, and logout.

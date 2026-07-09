@@ -11,12 +11,12 @@ import (
 	"github.com/go-chi/chi/v5"
 	chimw "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
-	"github.com/nemvince/fog-next/ent"
-	"github.com/nemvince/fog-next/internal/api/handlers"
-	"github.com/nemvince/fog-next/internal/api/middleware"
-	"github.com/nemvince/fog-next/internal/config"
-	"github.com/nemvince/fog-next/internal/plugins"
-	"github.com/nemvince/fog-next/internal/ws"
+	"github.com/ckAdmins/fog-next/ent"
+	"github.com/ckAdmins/fog-next/internal/api/handlers"
+	"github.com/ckAdmins/fog-next/internal/api/middleware"
+	"github.com/ckAdmins/fog-next/internal/config"
+	"github.com/ckAdmins/fog-next/internal/plugins"
+	"github.com/ckAdmins/fog-next/internal/ws"
 )
 
 //go:embed all:static

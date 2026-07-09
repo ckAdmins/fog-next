@@ -1,4 +1,4 @@
-module github.com/nemvince/fos-agent
+module github.com/ckAdmins/fog-next/agent
 
 go 1.25.9
 

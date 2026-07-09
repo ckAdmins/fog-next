@@ -1,4 +1,5 @@
 #!/bin/sh
+# Pixie build script, meant to be run in an alpine Docker container.
 
 set -eux
 
@@ -51,9 +52,9 @@ cd /work/agent
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
   -buildvcs=false \
   -ldflags "-s -w \
-    -X github.com/nemvince/fos-agent/internal/version.Version=$(git describe --tags --always 2>/dev/null || echo dev) \
-    -X github.com/nemvince/fos-agent/internal/version.Commit=$(git rev-parse --short HEAD 2>/dev/null || echo unknown) \
-    -X github.com/nemvince/fos-agent/internal/version.BuildDate=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    -X github.com/ckAdmins/fog-next/agent/internal/version.Version=$(git describe --tags --always 2>/dev/null || echo dev) \
+    -X github.com/ckAdmins/fog-next/agent/internal/version.Commit=$(git rev-parse --short HEAD 2>/dev/null || echo unknown) \
+    -X github.com/ckAdmins/fog-next/agent/internal/version.BuildDate=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
   -o fos-agent ./cmd/fos-agent
 
 cp fos-agent $ROOTFS/bin/fos-agent

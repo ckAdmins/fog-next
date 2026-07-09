@@ -1,4 +1,4 @@
 ID=fos-alpine
 VERSION_ID=0.1.0
 PRETTY_NAME="FOS Imaging Agent (Alpine Linux + OpenRC)"
-HOME_URL="https://github.com/nemvince/fos-next"
+HOME_URL="https://github.com/ckAdmins/fog-next"

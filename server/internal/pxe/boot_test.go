@@ -5,9 +5,9 @@ import (
 "testing"
 
 "github.com/google/uuid"
-"github.com/nemvince/fog-next/ent"
-enttask "github.com/nemvince/fog-next/ent/task"
-"github.com/nemvince/fog-next/internal/pxe"
+"github.com/ckAdmins/fog-next/ent"
+enttask "github.com/ckAdmins/fog-next/ent/task"
+"github.com/ckAdmins/fog-next/internal/pxe"
 )
 
 func baseHost() *ent.Host {

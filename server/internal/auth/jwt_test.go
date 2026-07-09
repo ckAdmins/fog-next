@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/nemvince/fog-next/internal/auth"
-	"github.com/nemvince/fog-next/internal/config"
+	"github.com/ckAdmins/fog-next/internal/auth"
+	"github.com/ckAdmins/fog-next/internal/config"
 )
 
 func testAuthConfig() config.AuthConfig {

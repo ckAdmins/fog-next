@@ -4,9 +4,9 @@ import (
 "net/http"
 
 "github.com/go-chi/chi/v5"
-"github.com/nemvince/fog-next/ent"
-"github.com/nemvince/fog-next/ent/globalsetting"
-"github.com/nemvince/fog-next/internal/api/response"
+"github.com/ckAdmins/fog-next/ent"
+"github.com/ckAdmins/fog-next/ent/globalsetting"
+"github.com/ckAdmins/fog-next/internal/api/response"
 )
 
 type Settings struct{ db *ent.Client }

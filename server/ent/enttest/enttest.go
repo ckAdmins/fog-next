@@ -5,12 +5,12 @@ package enttest
 import (
 	"context"
 
-	"github.com/nemvince/fog-next/ent"
+	"github.com/ckAdmins/fog-next/ent"
 	// required by schema hooks.
-	_ "github.com/nemvince/fog-next/ent/runtime"
+	_ "github.com/ckAdmins/fog-next/ent/runtime"
 
 	"entgo.io/ent/dialect/sql/schema"
-	"github.com/nemvince/fog-next/ent/migrate"
+	"github.com/ckAdmins/fog-next/ent/migrate"
 )
 
 type (
