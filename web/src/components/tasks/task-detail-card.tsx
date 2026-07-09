@@ -1,4 +1,4 @@
-import { AgentLogViewer } from "@/components/agent-log-viewer";
+import { AgentLogViewer } from "@/components/app/agent-log-viewer";
 import {
 	Dialog,
 	DialogContent,

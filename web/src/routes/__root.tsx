@@ -1,9 +1,9 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { createRootRoute, Outlet } from "@tanstack/react-router";
-import { CommandPalette } from "@/components/CommandPalette";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { ThemeProvider } from "@/components/theme-provider";
+import { CommandPalette } from "@/components/app/command-palette";
+import { ErrorBoundary } from "@/components/app/error-boundary";
+import { ThemeProvider } from "@/components/app/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";

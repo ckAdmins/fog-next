@@ -11,7 +11,7 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 import * as z from "zod";
-import { RouteError } from "@/components/RouteError";
+import { RouteError } from "@/components/app/route-error";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {

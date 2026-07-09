@@ -9,7 +9,7 @@ import {
 } from "@tanstack/react-table";
 import { useState } from "react";
 import { toast } from "sonner";
-import { RouteError } from "@/components/RouteError";
+import { RouteError } from "@/components/app/route-error";
 import {
 	AlertDialog,
 	AlertDialogAction,

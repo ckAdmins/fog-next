@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { AgentLogViewer } from "@/components/agent-log-viewer";
+import { AgentLogViewer } from "@/components/app/agent-log-viewer";
 import { Badge } from "@/components/ui/badge";
 import {
 	Card,

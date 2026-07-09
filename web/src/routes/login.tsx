@@ -2,7 +2,7 @@ import { useForm } from "@tanstack/react-form";
 import { createFileRoute, redirect, useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
 import * as z from "zod";
-import { RouteError } from "@/components/RouteError";
+import { RouteError } from "@/components/app/route-error";
 import { Button } from "@/components/ui/button";
 import {
 	Card,

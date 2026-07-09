@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { RouteError } from "@/components/RouteError";
+import { RouteError } from "@/components/app/route-error";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/lib/api";
 import type { Host } from "@/types";
-import { HostInfoCard } from "./_components/HostInfoCard";
-import { InventoryCard } from "./_components/InventoryCard";
-import { MACAddressesCard } from "./_components/MACAddressesCard";
-import { TaskCard } from "./_components/TaskCard";
+import { HostInfoCard } from "@/components/hosts/host-info-card";
+import { InventoryCard } from "@/components/hosts/inventory-card";
+import { MACAddressesCard } from "@/components/hosts/mac-addresses-card";
+import { TaskCard } from "@/components/hosts/task-card";
 
 export const Route = createFileRoute("/_auth/hosts/$id")({
 	component: HostDetailPage,

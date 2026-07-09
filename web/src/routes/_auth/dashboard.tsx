@@ -1,7 +1,7 @@
 import { Cpu, HardDrive, ListChecks } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { RouteError } from "@/components/RouteError";
+import { RouteError } from "@/components/app/route-error";
 import {
 	Card,
 	CardContent,

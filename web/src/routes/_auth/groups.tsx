@@ -8,7 +8,7 @@ import {
 } from "@tanstack/react-table";
 import { useState } from "react";
 import { toast } from "sonner";
-import { RouteError } from "@/components/RouteError";
+import { RouteError } from "@/components/app/route-error";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -43,11 +43,11 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { api } from "@/lib/api";
-import { GroupDialog } from "@/routes/_auth/_components/GroupDialog";
+import { GroupDialog } from "@/components/groups/group-dialog";
 import {
 	makeGroupListColumns,
 	makeGroupMembersColumns,
-} from "@/routes/_auth/_components/groupsColumns";
+} from "@/components/groups/groups-columns";
 import type { Group, GroupMember, Host, Paginated } from "@/types";
 
 export const Route = createFileRoute("/_auth/groups")({

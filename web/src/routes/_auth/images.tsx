@@ -8,7 +8,7 @@ import {
 } from "@tanstack/react-table";
 import { useState } from "react";
 import { toast } from "sonner";
-import { RouteError } from "@/components/RouteError";
+import { RouteError } from "@/components/app/route-error";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Pagination } from "@/components/ui/pagination";
@@ -22,8 +22,8 @@ import {
 } from "@/components/ui/table";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { api } from "@/lib/api";
-import { ImageDialog } from "@/routes/_auth/_components/ImageDialog";
-import { makeImagesColumns } from "@/routes/_auth/_components/imagesColumns";
+import { ImageDialog } from "@/components/images/image-dialog";
+import { makeImagesColumns } from "@/components/images/images-columns";
 import type { Image, Paginated } from "@/types";
 
 export const Route = createFileRoute("/_auth/images")({

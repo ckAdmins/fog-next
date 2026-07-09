@@ -8,7 +8,7 @@ import {
 } from "@tanstack/react-table";
 import { useState } from "react";
 import { toast } from "sonner";
-import { RouteError } from "@/components/RouteError";
+import { RouteError } from "@/components/app/route-error";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import {
@@ -21,9 +21,9 @@ import {
 } from "@/components/ui/table";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { api } from "@/lib/api";
-import { APITokenDialog } from "@/routes/_auth/_components/APITokenDialog";
-import { UserDialog } from "@/routes/_auth/_components/UserDialog";
-import { makeUsersColumns } from "@/routes/_auth/_components/usersColumns";
+import { APITokenDialog } from "@/components/users/api-token-dialog";
+import { UserDialog } from "@/components/users/user-dialog";
+import { makeUsersColumns } from "@/components/users/users-columns";
 import type { Paginated, User } from "@/types";
 
 export const Route = createFileRoute("/_auth/users")({
