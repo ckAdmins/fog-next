@@ -9,6 +9,12 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 import { RouteError } from "@/components/app/route-error";
+import {
+	makeStorageGroupColumns,
+	makeStorageNodeColumns,
+} from "@/components/storage/storage-columns";
+import { StorageGroupDialog } from "@/components/storage/storage-group-dialog";
+import { StorageNodeDialog } from "@/components/storage/storage-node-dialog";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -29,12 +35,6 @@ import {
 } from "@/components/ui/table";
 import { api } from "@/lib/api";
 import type { StorageGroup, StorageNode } from "@/types";
-import { StorageGroupDialog } from "@/components/storage/storage-group-dialog";
-import { StorageNodeDialog } from "@/components/storage/storage-node-dialog";
-import {
-	makeStorageGroupColumns,
-	makeStorageNodeColumns,
-} from "@/components/storage/storage-columns";
 
 export const Route = createFileRoute("/_auth/storage")({
 	component: StoragePage,

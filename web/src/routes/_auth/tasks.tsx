@@ -11,6 +11,9 @@ import {
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { RouteError } from "@/components/app/route-error";
+import { TaskDetailCard } from "@/components/tasks/task-detail-card";
+import { TaskDialog } from "@/components/tasks/task-dialog";
+import { makeTasksColumns } from "@/components/tasks/tasks-columns";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Pagination } from "@/components/ui/pagination";
@@ -27,9 +30,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useServerEvents } from "@/hooks/useServerEvents";
 import { api } from "@/lib/api";
 import type { Host, Image, Paginated, Task } from "@/types";
-import { TaskDetailCard } from "@/components/tasks/task-detail-card";
-import { TaskDialog } from "@/components/tasks/task-dialog";
-import { makeTasksColumns } from "@/components/tasks/tasks-columns";
 
 export const Route = createFileRoute("/_auth/tasks")({
 	component: TasksPage,

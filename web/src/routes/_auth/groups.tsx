@@ -9,6 +9,11 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 import { RouteError } from "@/components/app/route-error";
+import { GroupDialog } from "@/components/groups/group-dialog";
+import {
+	makeGroupListColumns,
+	makeGroupMembersColumns,
+} from "@/components/groups/groups-columns";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -43,11 +48,6 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { api } from "@/lib/api";
-import { GroupDialog } from "@/components/groups/group-dialog";
-import {
-	makeGroupListColumns,
-	makeGroupMembersColumns,
-} from "@/components/groups/groups-columns";
 import type { Group, GroupMember, Host, Paginated } from "@/types";
 
 export const Route = createFileRoute("/_auth/groups")({

@@ -9,6 +9,8 @@ import {
 import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { RouteError } from "@/components/app/route-error";
+import { SnapinDialog } from "@/components/snapins/snapin-dialog";
+import { makeSnapinsColumns } from "@/components/snapins/snapins-columns";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import {
@@ -22,8 +24,6 @@ import {
 import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { api } from "@/lib/api";
 import type { Paginated, Snapin } from "@/types";
-import { SnapinDialog } from "@/components/snapins/snapin-dialog";
-import { makeSnapinsColumns } from "@/components/snapins/snapins-columns";
 
 export const Route = createFileRoute("/_auth/snapins")({
 	component: SnapinsPage,

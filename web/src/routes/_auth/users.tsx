@@ -20,10 +20,10 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
-import { api } from "@/lib/api";
 import { APITokenDialog } from "@/components/users/api-token-dialog";
 import { UserDialog } from "@/components/users/user-dialog";
 import { makeUsersColumns } from "@/components/users/users-columns";
+import { api } from "@/lib/api";
 import type { Paginated, User } from "@/types";
 
 export const Route = createFileRoute("/_auth/users")({
