@@ -9,10 +9,10 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/host"
 	"github.com/ckAdmins/fog-next/ent/image"
 	"github.com/ckAdmins/fog-next/ent/inventory"
+	"github.com/google/uuid"
 )
 
 // Host is the model entity for the Host schema.

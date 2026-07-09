@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/agentlog"
 	"github.com/ckAdmins/fog-next/ent/host"
 	"github.com/ckAdmins/fog-next/ent/image"
@@ -20,6 +19,7 @@ import (
 	"github.com/ckAdmins/fog-next/ent/storagegroup"
 	"github.com/ckAdmins/fog-next/ent/storagenode"
 	"github.com/ckAdmins/fog-next/ent/task"
+	"github.com/google/uuid"
 )
 
 // TaskCreate is the builder for creating a Task entity.
@@ -108,6 +108,20 @@ func (_c *TaskCreate) SetStorageGroupID(v uuid.UUID) *TaskCreate {
 func (_c *TaskCreate) SetNillableStorageGroupID(v *uuid.UUID) *TaskCreate {
 	if v != nil {
 		_c.SetStorageGroupID(*v)
+	}
+	return _c
+}
+
+// SetMulticastSessionID sets the "multicast_session_id" field.
+func (_c *TaskCreate) SetMulticastSessionID(v uuid.UUID) *TaskCreate {
+	_c.mutation.SetMulticastSessionID(v)
+	return _c
+}
+
+// SetNillableMulticastSessionID sets the "multicast_session_id" field if the given value is not nil.
+func (_c *TaskCreate) SetNillableMulticastSessionID(v *uuid.UUID) *TaskCreate {
+	if v != nil {
+		_c.SetMulticastSessionID(*v)
 	}
 	return _c
 }
@@ -535,6 +549,10 @@ func (_c *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 		_spec.SetField(task.FieldState, field.TypeEnum, value)
 		_node.State = value
 	}
+	if value, ok := _c.mutation.MulticastSessionID(); ok {
+		_spec.SetField(task.FieldMulticastSessionID, field.TypeUUID, value)
+		_node.MulticastSessionID = &value
+	}
 	if value, ok := _c.mutation.IsGroup(); ok {
 		_spec.SetField(task.FieldIsGroup, field.TypeBool, value)
 		_node.IsGroup = value
@@ -834,6 +852,24 @@ func (u *TaskUpsert) UpdateStorageGroupID() *TaskUpsert {
 // ClearStorageGroupID clears the value of the "storage_group_id" field.
 func (u *TaskUpsert) ClearStorageGroupID() *TaskUpsert {
 	u.SetNull(task.FieldStorageGroupID)
+	return u
+}
+
+// SetMulticastSessionID sets the "multicast_session_id" field.
+func (u *TaskUpsert) SetMulticastSessionID(v uuid.UUID) *TaskUpsert {
+	u.Set(task.FieldMulticastSessionID, v)
+	return u
+}
+
+// UpdateMulticastSessionID sets the "multicast_session_id" field to the value that was provided on create.
+func (u *TaskUpsert) UpdateMulticastSessionID() *TaskUpsert {
+	u.SetExcluded(task.FieldMulticastSessionID)
+	return u
+}
+
+// ClearMulticastSessionID clears the value of the "multicast_session_id" field.
+func (u *TaskUpsert) ClearMulticastSessionID() *TaskUpsert {
+	u.SetNull(task.FieldMulticastSessionID)
 	return u
 }
 
@@ -1172,6 +1208,27 @@ func (u *TaskUpsertOne) UpdateStorageGroupID() *TaskUpsertOne {
 func (u *TaskUpsertOne) ClearStorageGroupID() *TaskUpsertOne {
 	return u.Update(func(s *TaskUpsert) {
 		s.ClearStorageGroupID()
+	})
+}
+
+// SetMulticastSessionID sets the "multicast_session_id" field.
+func (u *TaskUpsertOne) SetMulticastSessionID(v uuid.UUID) *TaskUpsertOne {
+	return u.Update(func(s *TaskUpsert) {
+		s.SetMulticastSessionID(v)
+	})
+}
+
+// UpdateMulticastSessionID sets the "multicast_session_id" field to the value that was provided on create.
+func (u *TaskUpsertOne) UpdateMulticastSessionID() *TaskUpsertOne {
+	return u.Update(func(s *TaskUpsert) {
+		s.UpdateMulticastSessionID()
+	})
+}
+
+// ClearMulticastSessionID clears the value of the "multicast_session_id" field.
+func (u *TaskUpsertOne) ClearMulticastSessionID() *TaskUpsertOne {
+	return u.Update(func(s *TaskUpsert) {
+		s.ClearMulticastSessionID()
 	})
 }
 
@@ -1705,6 +1762,27 @@ func (u *TaskUpsertBulk) UpdateStorageGroupID() *TaskUpsertBulk {
 func (u *TaskUpsertBulk) ClearStorageGroupID() *TaskUpsertBulk {
 	return u.Update(func(s *TaskUpsert) {
 		s.ClearStorageGroupID()
+	})
+}
+
+// SetMulticastSessionID sets the "multicast_session_id" field.
+func (u *TaskUpsertBulk) SetMulticastSessionID(v uuid.UUID) *TaskUpsertBulk {
+	return u.Update(func(s *TaskUpsert) {
+		s.SetMulticastSessionID(v)
+	})
+}
+
+// UpdateMulticastSessionID sets the "multicast_session_id" field to the value that was provided on create.
+func (u *TaskUpsertBulk) UpdateMulticastSessionID() *TaskUpsertBulk {
+	return u.Update(func(s *TaskUpsert) {
+		s.UpdateMulticastSessionID()
+	})
+}
+
+// ClearMulticastSessionID clears the value of the "multicast_session_id" field.
+func (u *TaskUpsertBulk) ClearMulticastSessionID() *TaskUpsertBulk {
+	return u.Update(func(s *TaskUpsert) {
+		s.ClearMulticastSessionID()
 	})
 }
 

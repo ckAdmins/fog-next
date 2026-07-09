@@ -8,9 +8,9 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/printer"
 	"github.com/ckAdmins/fog-next/ent/printerassoc"
+	"github.com/google/uuid"
 )
 
 // PrinterAssoc is the model entity for the PrinterAssoc schema.

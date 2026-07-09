@@ -45,6 +45,7 @@ apk \
     zstd \
     file \
     e2fsprogs-extra \
+    udpcast \
     --no-cache
 
 # build the agent

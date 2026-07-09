@@ -11,10 +11,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/auditlog"
 	"github.com/ckAdmins/fog-next/ent/predicate"
 	"github.com/ckAdmins/fog-next/ent/user"
+	"github.com/google/uuid"
 )
 
 // AuditLogQuery is the builder for querying AuditLog entities.

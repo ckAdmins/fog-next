@@ -10,10 +10,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/predicate"
 	"github.com/ckAdmins/fog-next/ent/printer"
 	"github.com/ckAdmins/fog-next/ent/printerassoc"
+	"github.com/google/uuid"
 )
 
 // PrinterAssocUpdate is the builder for updating PrinterAssoc entities.

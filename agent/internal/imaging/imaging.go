@@ -244,20 +244,30 @@ func parseSpeedFromLine(line string) int64 {
 // partcloneBin maps a filesystem label to the appropriate partclone binary.
 func partcloneBin(fs string) string {
 	switch strings.ToLower(fs) {
-	case "ext2", "ext3", "ext4":
+	case "ext2", "ext3", "ext4", "ext4dev", "extfs":
 		return "partclone.ext4"
 	case "ntfs":
 		return "partclone.ntfs"
-	case "fat16", "fat32", "vfat":
+	case "fat12", "fat16", "fat32", "vfat":
 		return "partclone.fat"
+	case "exfat":
+		return "partclone.exfat"
 	case "xfs":
 		return "partclone.xfs"
 	case "btrfs":
 		return "partclone.btrfs"
+	case "f2fs":
+		return "partclone.f2fs"
+	case "hfsplus", "hfs+":
+		return "partclone.hfs+"
 	default:
 		return "partclone.dd"
 	}
 }
+
+// PartcloneBin is the public equivalent of partcloneBin.
+// It maps a filesystem label to the appropriate partclone binary.
+func PartcloneBin(fs string) string { return partcloneBin(fs) }
 
 // CanShrink reports whether the filesystem type can be non-destructively
 // shrunk before capture to produce a smaller image.

@@ -10,11 +10,11 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/image"
 	"github.com/ckAdmins/fog-next/ent/imagetype"
 	"github.com/ckAdmins/fog-next/ent/ostype"
 	"github.com/ckAdmins/fog-next/ent/storagegroup"
+	"github.com/google/uuid"
 )
 
 // Image is the model entity for the Image schema.

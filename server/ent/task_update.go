@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/agentlog"
 	"github.com/ckAdmins/fog-next/ent/host"
 	"github.com/ckAdmins/fog-next/ent/image"
@@ -20,6 +19,7 @@ import (
 	"github.com/ckAdmins/fog-next/ent/storagegroup"
 	"github.com/ckAdmins/fog-next/ent/storagenode"
 	"github.com/ckAdmins/fog-next/ent/task"
+	"github.com/google/uuid"
 )
 
 // TaskUpdate is the builder for updating Task entities.
@@ -148,6 +148,26 @@ func (_u *TaskUpdate) SetNillableStorageGroupID(v *uuid.UUID) *TaskUpdate {
 // ClearStorageGroupID clears the value of the "storage_group_id" field.
 func (_u *TaskUpdate) ClearStorageGroupID() *TaskUpdate {
 	_u.mutation.ClearStorageGroupID()
+	return _u
+}
+
+// SetMulticastSessionID sets the "multicast_session_id" field.
+func (_u *TaskUpdate) SetMulticastSessionID(v uuid.UUID) *TaskUpdate {
+	_u.mutation.SetMulticastSessionID(v)
+	return _u
+}
+
+// SetNillableMulticastSessionID sets the "multicast_session_id" field if the given value is not nil.
+func (_u *TaskUpdate) SetNillableMulticastSessionID(v *uuid.UUID) *TaskUpdate {
+	if v != nil {
+		_u.SetMulticastSessionID(*v)
+	}
+	return _u
+}
+
+// ClearMulticastSessionID clears the value of the "multicast_session_id" field.
+func (_u *TaskUpdate) ClearMulticastSessionID() *TaskUpdate {
+	_u.mutation.ClearMulticastSessionID()
 	return _u
 }
 
@@ -520,6 +540,12 @@ func (_u *TaskUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if value, ok := _u.mutation.State(); ok {
 		_spec.SetField(task.FieldState, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.MulticastSessionID(); ok {
+		_spec.SetField(task.FieldMulticastSessionID, field.TypeUUID, value)
+	}
+	if _u.mutation.MulticastSessionIDCleared() {
+		_spec.ClearField(task.FieldMulticastSessionID, field.TypeUUID)
 	}
 	if value, ok := _u.mutation.IsGroup(); ok {
 		_spec.SetField(task.FieldIsGroup, field.TypeBool, value)
@@ -895,6 +921,26 @@ func (_u *TaskUpdateOne) SetNillableStorageGroupID(v *uuid.UUID) *TaskUpdateOne 
 // ClearStorageGroupID clears the value of the "storage_group_id" field.
 func (_u *TaskUpdateOne) ClearStorageGroupID() *TaskUpdateOne {
 	_u.mutation.ClearStorageGroupID()
+	return _u
+}
+
+// SetMulticastSessionID sets the "multicast_session_id" field.
+func (_u *TaskUpdateOne) SetMulticastSessionID(v uuid.UUID) *TaskUpdateOne {
+	_u.mutation.SetMulticastSessionID(v)
+	return _u
+}
+
+// SetNillableMulticastSessionID sets the "multicast_session_id" field if the given value is not nil.
+func (_u *TaskUpdateOne) SetNillableMulticastSessionID(v *uuid.UUID) *TaskUpdateOne {
+	if v != nil {
+		_u.SetMulticastSessionID(*v)
+	}
+	return _u
+}
+
+// ClearMulticastSessionID clears the value of the "multicast_session_id" field.
+func (_u *TaskUpdateOne) ClearMulticastSessionID() *TaskUpdateOne {
+	_u.mutation.ClearMulticastSessionID()
 	return _u
 }
 
@@ -1297,6 +1343,12 @@ func (_u *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) {
 	}
 	if value, ok := _u.mutation.State(); ok {
 		_spec.SetField(task.FieldState, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.MulticastSessionID(); ok {
+		_spec.SetField(task.FieldMulticastSessionID, field.TypeUUID, value)
+	}
+	if _u.mutation.MulticastSessionIDCleared() {
+		_spec.ClearField(task.FieldMulticastSessionID, field.TypeUUID)
 	}
 	if value, ok := _u.mutation.IsGroup(); ok {
 		_spec.SetField(task.FieldIsGroup, field.TypeBool, value)

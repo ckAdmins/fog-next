@@ -45,6 +45,11 @@ run = [
     "rm -f pixie/output/bzImage pixie/output/init.xz",
 ]
 
+[tasks.dev]
+description = "Run the fog server in dev mode with env vars set"
+dir = "server"
+run = "go run ./cmd/fog serve -c ../config.example.yaml"
+
 [tasks.run]
 description = "Run the fog server in dev mode"
 dir = "server"

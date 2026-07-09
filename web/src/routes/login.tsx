@@ -5,13 +5,6 @@ import * as z from "zod";
 import { RouteError } from "@/components/app/route-error";
 import { Button } from "@/components/ui/button";
 import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
-import {
 	Field,
 	FieldDescription,
 	FieldError,
@@ -58,19 +51,26 @@ function LoginPage() {
 
 	return (
 		<div className="flex min-h-screen items-center justify-center bg-background p-4">
-			<Card className="w-full max-w-sm">
-				<CardHeader>
-					<CardTitle>FOG Next</CardTitle>
-					<CardDescription>Sign in to your account</CardDescription>
-				</CardHeader>
-				<CardContent>
+			<div className="flex w-full max-w-sm flex-col items-center gap-8">
+				<div className="flex flex-col items-center gap-1.5">
+					<span className="font-heading text-3xl font-light tracking-[0.3em] text-foreground">
+						FOG
+					</span>
+					<span className="text-xs font-medium tracking-[0.12em] text-muted-foreground">
+						NETWORK BOOT & IMAGING
+					</span>
+				</div>
+
+				<div className="w-full border-t border-border/40" />
+
+				<div className="w-full">
 					<form
 						onSubmit={(e) => {
 							e.preventDefault();
 							void form.handleSubmit();
 						}}
 					>
-						<FieldGroup>
+						<FieldGroup className="gap-4">
 							<form.Field name="username">
 								{(field) => {
 									const isInvalid =
@@ -128,18 +128,18 @@ function LoginPage() {
 										className="w-full"
 										disabled={isSubmitting}
 									>
-										{isSubmitting ? "Signing in…" : "Sign in"}
+										{isSubmitting ? "Signing in\u2026" : "Sign in"}
 									</Button>
 								)}
 							</form.Subscribe>
 						</FieldGroup>
 					</form>
 
-					<FieldDescription className="mt-3 text-center">
-						Use your FOG administrator credentials.
+					<FieldDescription className="mt-4 text-center text-[11px]">
+						Use your FOG administrator credentials to continue.
 					</FieldDescription>
-				</CardContent>
-			</Card>
+				</div>
+			</div>
 		</div>
 	);
 }

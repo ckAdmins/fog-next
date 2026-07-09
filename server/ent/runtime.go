@@ -5,7 +5,6 @@ package ent
 import (
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/agentlog"
 	"github.com/ckAdmins/fog-next/ent/auditlog"
 	"github.com/ckAdmins/fog-next/ent/globalsetting"
@@ -35,6 +34,7 @@ import (
 	"github.com/ckAdmins/fog-next/ent/storagenode"
 	"github.com/ckAdmins/fog-next/ent/task"
 	"github.com/ckAdmins/fog-next/ent/user"
+	"github.com/google/uuid"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -403,10 +403,14 @@ func init() {
 	multicastsessionDescName := multicastsessionFields[1].Descriptor()
 	// multicastsession.DefaultName holds the default value on creation for the name field.
 	multicastsession.DefaultName = multicastsessionDescName.Default.(string)
-	// multicastsessionDescInterface is the schema descriptor for interface field.
-	multicastsessionDescInterface := multicastsessionFields[5].Descriptor()
-	// multicastsession.DefaultInterface holds the default value on creation for the interface field.
-	multicastsession.DefaultInterface = multicastsessionDescInterface.Default.(string)
+	// multicastsessionDescPortbase is the schema descriptor for portbase field.
+	multicastsessionDescPortbase := multicastsessionFields[4].Descriptor()
+	// multicastsession.DefaultPortbase holds the default value on creation for the portbase field.
+	multicastsession.DefaultPortbase = multicastsessionDescPortbase.Default.(int)
+	// multicastsessionDescCurrentPart is the schema descriptor for current_part field.
+	multicastsessionDescCurrentPart := multicastsessionFields[5].Descriptor()
+	// multicastsession.DefaultCurrentPart holds the default value on creation for the current_part field.
+	multicastsession.DefaultCurrentPart = multicastsessionDescCurrentPart.Default.(int)
 	// multicastsessionDescClientCount is the schema descriptor for client_count field.
 	multicastsessionDescClientCount := multicastsessionFields[6].Descriptor()
 	// multicastsession.DefaultClientCount holds the default value on creation for the client_count field.
@@ -744,39 +748,39 @@ func init() {
 	// task.DefaultName holds the default value on creation for the name field.
 	task.DefaultName = taskDescName.Default.(string)
 	// taskDescIsGroup is the schema descriptor for is_group field.
-	taskDescIsGroup := taskFields[8].Descriptor()
+	taskDescIsGroup := taskFields[9].Descriptor()
 	// task.DefaultIsGroup holds the default value on creation for the is_group field.
 	task.DefaultIsGroup = taskDescIsGroup.Default.(bool)
 	// taskDescIsForced is the schema descriptor for is_forced field.
-	taskDescIsForced := taskFields[9].Descriptor()
+	taskDescIsForced := taskFields[10].Descriptor()
 	// task.DefaultIsForced holds the default value on creation for the is_forced field.
 	task.DefaultIsForced = taskDescIsForced.Default.(bool)
 	// taskDescIsShutdown is the schema descriptor for is_shutdown field.
-	taskDescIsShutdown := taskFields[10].Descriptor()
+	taskDescIsShutdown := taskFields[11].Descriptor()
 	// task.DefaultIsShutdown holds the default value on creation for the is_shutdown field.
 	task.DefaultIsShutdown = taskDescIsShutdown.Default.(bool)
 	// taskDescPercentComplete is the schema descriptor for percent_complete field.
-	taskDescPercentComplete := taskFields[11].Descriptor()
+	taskDescPercentComplete := taskFields[12].Descriptor()
 	// task.DefaultPercentComplete holds the default value on creation for the percent_complete field.
 	task.DefaultPercentComplete = taskDescPercentComplete.Default.(int)
 	// taskDescBitsPerMinute is the schema descriptor for bits_per_minute field.
-	taskDescBitsPerMinute := taskFields[12].Descriptor()
+	taskDescBitsPerMinute := taskFields[13].Descriptor()
 	// task.DefaultBitsPerMinute holds the default value on creation for the bits_per_minute field.
 	task.DefaultBitsPerMinute = taskDescBitsPerMinute.Default.(int64)
 	// taskDescBytesTransferred is the schema descriptor for bytes_transferred field.
-	taskDescBytesTransferred := taskFields[13].Descriptor()
+	taskDescBytesTransferred := taskFields[14].Descriptor()
 	// task.DefaultBytesTransferred holds the default value on creation for the bytes_transferred field.
 	task.DefaultBytesTransferred = taskDescBytesTransferred.Default.(int64)
 	// taskDescCreatedAt is the schema descriptor for created_at field.
-	taskDescCreatedAt := taskFields[17].Descriptor()
+	taskDescCreatedAt := taskFields[18].Descriptor()
 	// task.DefaultCreatedAt holds the default value on creation for the created_at field.
 	task.DefaultCreatedAt = taskDescCreatedAt.Default.(func() time.Time)
 	// taskDescCreatedBy is the schema descriptor for created_by field.
-	taskDescCreatedBy := taskFields[18].Descriptor()
+	taskDescCreatedBy := taskFields[19].Descriptor()
 	// task.DefaultCreatedBy holds the default value on creation for the created_by field.
 	task.DefaultCreatedBy = taskDescCreatedBy.Default.(string)
 	// taskDescUpdatedAt is the schema descriptor for updated_at field.
-	taskDescUpdatedAt := taskFields[19].Descriptor()
+	taskDescUpdatedAt := taskFields[20].Descriptor()
 	// task.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	task.DefaultUpdatedAt = taskDescUpdatedAt.Default.(func() time.Time)
 	// task.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

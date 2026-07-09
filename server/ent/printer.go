@@ -9,8 +9,8 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/printer"
+	"github.com/google/uuid"
 )
 
 // Printer is the model entity for the Printer schema.

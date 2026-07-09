@@ -9,10 +9,10 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/image"
 	"github.com/ckAdmins/fog-next/ent/multicastsession"
 	"github.com/ckAdmins/fog-next/ent/storagenode"
+	"github.com/google/uuid"
 )
 
 // MulticastSession is the model entity for the MulticastSession schema.
@@ -25,11 +25,11 @@ type MulticastSession struct {
 	// ImageID holds the value of the "image_id" field.
 	ImageID uuid.UUID `json:"imageId"`
 	// StorageNodeID holds the value of the "storage_node_id" field.
-	StorageNodeID uuid.UUID `json:"storageNodeId"`
-	// Port holds the value of the "port" field.
-	Port int `json:"port"`
-	// Interface holds the value of the "interface" field.
-	Interface string `json:"interface"`
+	StorageNodeID *uuid.UUID `json:"storageNodeId,omitempty"`
+	// Portbase holds the value of the "portbase" field.
+	Portbase int `json:"portbase"`
+	// CurrentPart holds the value of the "current_part" field.
+	CurrentPart int `json:"currentPart"`
 	// ClientCount holds the value of the "client_count" field.
 	ClientCount int `json:"clientCount"`
 	// State holds the value of the "state" field.
@@ -84,13 +84,15 @@ func (*MulticastSession) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case multicastsession.FieldPort, multicastsession.FieldClientCount:
+		case multicastsession.FieldStorageNodeID:
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
+		case multicastsession.FieldPortbase, multicastsession.FieldCurrentPart, multicastsession.FieldClientCount:
 			values[i] = new(sql.NullInt64)
-		case multicastsession.FieldName, multicastsession.FieldInterface, multicastsession.FieldState:
+		case multicastsession.FieldName, multicastsession.FieldState:
 			values[i] = new(sql.NullString)
 		case multicastsession.FieldStartedAt, multicastsession.FieldCompletedAt, multicastsession.FieldCreatedAt:
 			values[i] = new(sql.NullTime)
-		case multicastsession.FieldID, multicastsession.FieldImageID, multicastsession.FieldStorageNodeID:
+		case multicastsession.FieldID, multicastsession.FieldImageID:
 			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -126,22 +128,23 @@ func (_m *MulticastSession) assignValues(columns []string, values []any) error {
 				_m.ImageID = *value
 			}
 		case multicastsession.FieldStorageNodeID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
+			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field storage_node_id", values[i])
-			} else if value != nil {
-				_m.StorageNodeID = *value
+			} else if value.Valid {
+				_m.StorageNodeID = new(uuid.UUID)
+				*_m.StorageNodeID = *value.S.(*uuid.UUID)
 			}
-		case multicastsession.FieldPort:
+		case multicastsession.FieldPortbase:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field port", values[i])
+				return fmt.Errorf("unexpected type %T for field portbase", values[i])
 			} else if value.Valid {
-				_m.Port = int(value.Int64)
+				_m.Portbase = int(value.Int64)
 			}
-		case multicastsession.FieldInterface:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field interface", values[i])
+		case multicastsession.FieldCurrentPart:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field current_part", values[i])
 			} else if value.Valid {
-				_m.Interface = value.String
+				_m.CurrentPart = int(value.Int64)
 			}
 		case multicastsession.FieldClientCount:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -227,14 +230,16 @@ func (_m *MulticastSession) String() string {
 	builder.WriteString("image_id=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ImageID))
 	builder.WriteString(", ")
-	builder.WriteString("storage_node_id=")
-	builder.WriteString(fmt.Sprintf("%v", _m.StorageNodeID))
+	if v := _m.StorageNodeID; v != nil {
+		builder.WriteString("storage_node_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
-	builder.WriteString("port=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Port))
+	builder.WriteString("portbase=")
+	builder.WriteString(fmt.Sprintf("%v", _m.Portbase))
 	builder.WriteString(", ")
-	builder.WriteString("interface=")
-	builder.WriteString(_m.Interface)
+	builder.WriteString("current_part=")
+	builder.WriteString(fmt.Sprintf("%v", _m.CurrentPart))
 	builder.WriteString(", ")
 	builder.WriteString("client_count=")
 	builder.WriteString(fmt.Sprintf("%v", _m.ClientCount))

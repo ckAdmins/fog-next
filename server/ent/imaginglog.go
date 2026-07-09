@@ -9,11 +9,11 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/host"
 	"github.com/ckAdmins/fog-next/ent/image"
 	"github.com/ckAdmins/fog-next/ent/imaginglog"
 	"github.com/ckAdmins/fog-next/ent/task"
+	"github.com/google/uuid"
 )
 
 // ImagingLog is the model entity for the ImagingLog schema.

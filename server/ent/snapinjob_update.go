@@ -11,11 +11,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/host"
 	"github.com/ckAdmins/fog-next/ent/predicate"
 	"github.com/ckAdmins/fog-next/ent/snapinjob"
 	"github.com/ckAdmins/fog-next/ent/snapintask"
+	"github.com/google/uuid"
 )
 
 // SnapinJobUpdate is the builder for updating SnapinJob entities.

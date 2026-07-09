@@ -11,10 +11,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/group"
 	"github.com/ckAdmins/fog-next/ent/groupmember"
 	"github.com/ckAdmins/fog-next/ent/host"
+	"github.com/google/uuid"
 )
 
 // GroupMemberCreate is the builder for creating a GroupMember entity.

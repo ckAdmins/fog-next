@@ -9,13 +9,13 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/host"
 	"github.com/ckAdmins/fog-next/ent/image"
 	"github.com/ckAdmins/fog-next/ent/imaginglog"
 	"github.com/ckAdmins/fog-next/ent/storagegroup"
 	"github.com/ckAdmins/fog-next/ent/storagenode"
 	"github.com/ckAdmins/fog-next/ent/task"
+	"github.com/google/uuid"
 )
 
 // Task is the model entity for the Task schema.
@@ -37,6 +37,8 @@ type Task struct {
 	StorageNodeID *uuid.UUID `json:"storageNodeId,omitempty"`
 	// StorageGroupID holds the value of the "storage_group_id" field.
 	StorageGroupID *uuid.UUID `json:"storageGroupId,omitempty"`
+	// MulticastSessionID holds the value of the "multicast_session_id" field.
+	MulticastSessionID *uuid.UUID `json:"multicastSessionId,omitempty"`
 	// IsGroup holds the value of the "is_group" field.
 	IsGroup bool `json:"isGroup"`
 	// IsForced holds the value of the "is_forced" field.
@@ -156,7 +158,7 @@ func (*Task) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case task.FieldImageID, task.FieldStorageNodeID, task.FieldStorageGroupID:
+		case task.FieldImageID, task.FieldStorageNodeID, task.FieldStorageGroupID, task.FieldMulticastSessionID:
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case task.FieldIsGroup, task.FieldIsForced, task.FieldIsShutdown:
 			values[i] = new(sql.NullBool)
@@ -233,6 +235,13 @@ func (_m *Task) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.StorageGroupID = new(uuid.UUID)
 				*_m.StorageGroupID = *value.S.(*uuid.UUID)
+			}
+		case task.FieldMulticastSessionID:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field multicast_session_id", values[i])
+			} else if value.Valid {
+				_m.MulticastSessionID = new(uuid.UUID)
+				*_m.MulticastSessionID = *value.S.(*uuid.UUID)
 			}
 		case task.FieldIsGroup:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -399,6 +408,11 @@ func (_m *Task) String() string {
 	builder.WriteString(", ")
 	if v := _m.StorageGroupID; v != nil {
 		builder.WriteString("storage_group_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.MulticastSessionID; v != nil {
+		builder.WriteString("multicast_session_id=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")

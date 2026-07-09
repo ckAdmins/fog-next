@@ -30,6 +30,8 @@ func Dispatch(ctx context.Context, client *fogapi.Client, resp *fogapi.Handshake
 	switch resp.Action {
 	case "deploy", "debug_deploy":
 		return Deploy(ctx, client, resp, p)
+	case "multicast":
+		return Multicast(ctx, client, resp, p)
 	case "capture", "debug_capture":
 		return Capture(ctx, client, resp, p)
 	case "wipe":
@@ -530,6 +532,264 @@ func Wipe(ctx context.Context, client *fogapi.Client, resp *fogapi.HandshakeResp
 }
 
 // ------------------------------------------------------------------
+// Multicast — restore image via UDP multicast
+// ------------------------------------------------------------------
+
+func Multicast(ctx context.Context, client *fogapi.Client, resp *fogapi.HandshakeResponse, p *tea.Program) error {
+	slog.Info("action: multicast", "imageId", resp.ImageID, "parts", resp.PartCount)
+
+	targetDisk, err := disk.Primary()
+	if err != nil {
+		return reportFail(ctx, client, resp.TaskID, "primary disk detection failed: "+err.Error())
+	}
+
+	isResizable := resp.ImageType == "resizable"
+	fixedSet := make(map[int]bool)
+	for _, n := range resp.FixedSizePartitions {
+		fixedSet[n] = true
+	}
+
+	targetDiskBytes := uint64(disk.SysfsSize(targetDisk))
+
+	if p != nil {
+		tui.SendMsg(p, tui.DiskMsg{Device: targetDisk, SizeBytes: targetDiskBytes})
+		tui.SendMsg(p, tui.PhaseMsg("Multicast: restoring partition table..."))
+	}
+
+	ptable, _, err := client.DownloadPart(ctx, resp.ImageID, 0, 0)
+	if err != nil {
+		return reportFail(ctx, client, resp.TaskID, "partition table download failed: "+err.Error())
+	}
+	defer ptable.Close()
+	tableBytes, err := readAll(ptable)
+	if err != nil {
+		return reportFail(ctx, client, resp.TaskID, "reading partition table: "+err.Error())
+	}
+	if err := partition.Restore(targetDisk, tableBytes); err != nil {
+		return reportFail(ctx, client, resp.TaskID, "restoring partition table: "+err.Error())
+	}
+
+	partNums := make([]int, resp.PartCount)
+	for i := 0; i < resp.PartCount; i++ {
+		partNums[i] = partNumFromMeta(resp.PartNumbers, i)
+	}
+	if err := disk.WaitForPartitions(targetDisk, partNums, 10*time.Second); err != nil {
+		return reportFail(ctx, client, resp.TaskID, "partition devices not ready: "+err.Error())
+	}
+
+	if !isResizable && targetDiskBytes > 0 {
+		if mismatchErr := partition.CheckSize(targetDisk, tableBytes, int64(targetDiskBytes)); mismatchErr != nil {
+			return reportFail(ctx, client, resp.TaskID, "disk size mismatch: "+mismatchErr.Error())
+		}
+	}
+
+	hasProgram := p != nil
+	if hasProgram {
+		parts := make([]tui.PartStatus, resp.PartCount)
+		for i := 0; i < resp.PartCount; i++ {
+			num := partNumFromMeta(resp.PartNumbers, i)
+			dev := disk.PartitionDevice(targetDisk, num)
+			fs := "?"
+			if i < len(resp.PartTypes) {
+				fs = resp.PartTypes[i]
+			}
+			parts[i] = tui.PartStatus{Device: dev, FSType: fs, SizeBytes: 0, State: "pending"}
+		}
+		tui.SendMsg(p, tui.PartitionsMsg(parts))
+	}
+
+	var transferred int64
+	totalBytes := resp.TotalBytes
+	progressFn := makeProgressFn(ctx, client, resp.TaskID, &transferred, totalBytes)
+
+	type partState struct {
+		dev        string
+		restoredFS string
+		displayFS  string
+	}
+	restoredParts := make([]partState, resp.PartCount)
+
+	for part := 1; part <= resp.PartCount; part++ {
+		num := partNumFromMeta(resp.PartNumbers, part-1)
+		dev := disk.PartitionDevice(targetDisk, num)
+		displayFS := "?"
+		if part-1 < len(resp.PartTypes) && resp.PartTypes[part-1] != "" {
+			displayFS = resp.PartTypes[part-1]
+		}
+		slog.Info("multicast partition", "part", num, "device", dev)
+
+		if hasProgram {
+			tui.SendMsg(p, tui.PhaseMsg(fmt.Sprintf("Multicast: restoring partition %d/%d (%s)", part, resp.PartCount, dev)))
+			tui.SendMsg(p, tui.PartitionMsg{Index: part - 1, Status: tui.PartStatus{Device: dev, FSType: displayFS, SizeBytes: 0, Percent: 0, State: "active"}})
+		}
+
+		// Check if this is a swap partition from capture metadata.
+		// Swap partitions are stored as JSON sentinels, not imaged data.
+		// We can determine this from PartTypes without an HTTP download.
+		isSwap := displayFS == "swap"
+		if !isSwap && (displayFS == "?" || displayFS == "") {
+			// Unknown type — peek the first byte via HTTP to check for
+			// swap sentinel (JSON starting with '{').
+			body, _, dlErr := client.DownloadPart(ctx, resp.ImageID, part, 0)
+			if dlErr == nil {
+				peek := make([]byte, 1)
+				n, _ := io.ReadFull(body, peek)
+				body.Close()
+				if n == 1 && peek[0] == '{' {
+					isSwap = true
+				}
+			}
+		}
+
+		if isSwap {
+			// Download the swap sentinel (tiny JSON, not a full image) and recreate locally.
+			body, _, dlErr := client.DownloadPart(ctx, resp.ImageID, part, 0)
+			if dlErr != nil {
+				return reportFail(ctx, client, resp.TaskID,
+					"partition "+strconv.Itoa(part)+" swap sentinel download failed: "+dlErr.Error())
+			}
+			raw, readErr := io.ReadAll(body)
+			body.Close()
+			if readErr != nil {
+				return reportFail(ctx, client, resp.TaskID,
+					"partition "+strconv.Itoa(part)+" swap sentinel read failed: "+readErr.Error())
+			}
+			var meta partMeta
+			_ = json.Unmarshal(raw, &meta)
+			if meta.Type == "swap" {
+				slog.Info("recreating swap partition", "part", part, "device", dev, "uuid", meta.UUID)
+				if mkErr := makeSwap(dev, meta.UUID); mkErr != nil {
+					return reportFail(ctx, client, resp.TaskID,
+						"partition "+strconv.Itoa(part)+" swap creation failed: "+mkErr.Error())
+				}
+				if hasProgram {
+					tui.SendMsg(p, tui.PartitionMsg{Index: part - 1, Status: tui.PartStatus{Device: dev, FSType: "swap", SizeBytes: 0, Percent: 100, State: "skipped"}})
+				}
+				restoredParts[part-1] = partState{dev: dev, restoredFS: "swap", displayFS: "swap"}
+				continue
+			}
+		}
+
+		// Poll the server until all clients are ready for this partition.
+		portbase := 9000
+		for {
+			readyResp, readyErr := client.MulticastReady(ctx, fogapi.MulticastReadyRequest{
+				TaskID: resp.TaskID,
+				Part:   part,
+			})
+			if readyErr != nil {
+				slog.Warn("multicast ready check failed, retrying", "part", part, "err", readyErr)
+				time.Sleep(3 * time.Second)
+				continue
+			}
+			if readyResp.Action == "start" {
+				portbase = readyResp.Portbase
+				break
+			}
+			slog.Debug("multicast waiting for peers", "part", part)
+			time.Sleep(3 * time.Second)
+		}
+
+		fs := displayFS
+		if fs == "?" || fs == "" || fs == "dd" {
+			fs = detectFilesystem(dev)
+		}
+
+		// Pipeline: udp-receiver stdout → pipe → partclone stdin
+		port := portbase + (part * 100)
+		slog.Info("starting multicast restore", "part", part, "device", dev, "fs", fs, "port", port)
+
+		receiver := exec.CommandContext(ctx, "udp-receiver",
+			"--portbase", strconv.Itoa(port),
+			"--nokbd", "--nosync",
+			"--file", "-",
+		)
+		pipeR, pipeW := io.Pipe()
+		receiver.Stdout = pipeW
+		receiver.Stderr = nil
+
+		if err := receiver.Start(); err != nil {
+			pipeR.Close()
+			pipeW.Close()
+			return reportFail(ctx, client, resp.TaskID,
+				"partition "+strconv.Itoa(part)+" udp-receiver start failed: "+err.Error())
+		}
+
+		wrappedFn := progressFn
+		if hasProgram {
+			partIdx := part - 1
+			wrappedFn = func(pct int, bpm int64) {
+				progressFn(pct, bpm)
+				tui.SendMsg(p, tui.PartitionMsg{Index: partIdx, Status: tui.PartStatus{Device: dev, FSType: displayFS, SizeBytes: 0, Percent: pct, State: "active"}})
+				tui.SendMsg(p, tui.ProgressMsg{Pct: pct, DoneBytes: 0, TotalBytes: 0, SpeedBpm: uint64(bpm)})
+			}
+		}
+
+		restoreErr := imaging.Restore(ctx, dev, fs, pipeR, wrappedFn, !hasProgram)
+		pipeW.Close()
+		_ = receiver.Wait()
+		pipeR.Close()
+
+		if restoreErr != nil {
+			return reportFail(ctx, client, resp.TaskID,
+				"partition "+strconv.Itoa(part)+" restore failed: "+restoreErr.Error())
+		}
+		slog.Info("multicast partition restore complete", "part", part, "device", dev)
+
+		// Signal partition done.
+		if doneErr := client.MulticastPartDone(ctx, fogapi.MulticastPartDoneRequest{
+			TaskID: resp.TaskID,
+			Part:   part,
+		}); doneErr != nil {
+			slog.Warn("multicast part-done signal failed", "part", part, "err", doneErr)
+		}
+
+		restoredFS := probeFilesystem(dev)
+		if restoredFS == "dd" && displayFS != "?" && displayFS != "dd" {
+			slog.Warn("filesystem probe returned dd, using saved type from capture", "part", part, "detected", restoredFS, "saved", displayFS)
+			restoredFS = displayFS
+		}
+		if strings.ToLower(restoredFS) == "ntfs" {
+			imaging.NtfsFixDirty(dev)
+		}
+		restoredParts[part-1] = partState{dev: dev, restoredFS: restoredFS, displayFS: displayFS}
+
+		if hasProgram {
+			tui.SendMsg(p, tui.PartitionMsg{Index: part - 1, Status: tui.PartStatus{Device: dev, FSType: displayFS, SizeBytes: 0, Percent: 100, State: "done"}})
+		}
+	}
+
+	if isResizable {
+		if err := partition.ExpandLast(targetDisk); err != nil {
+			slog.Warn("expand last partition table entry failed (non-fatal)", "err", err)
+		}
+		for part := 1; part <= resp.PartCount; part++ {
+			num := partNumFromMeta(resp.PartNumbers, part-1)
+			if fixedSet[num] {
+				continue
+			}
+			ps := restoredParts[part-1]
+			if ps.restoredFS == "" || ps.restoredFS == "swap" {
+				continue
+			}
+			slog.Info("expanding filesystem after multicast deploy", "part", num, "device", ps.dev, "fs", ps.restoredFS)
+			if expErr := imaging.Expand(ctx, ps.dev, ps.restoredFS); expErr != nil {
+				slog.Warn("filesystem expand failed (non-fatal)", "part", num, "err", expErr)
+			}
+		}
+	}
+
+	if hasProgram {
+		tui.SendMsg(p, tui.PhaseMsg("Multicast: complete"))
+	}
+
+	return client.Complete(ctx, fogapi.CompleteRequest{
+		TaskID:  resp.TaskID,
+		Success: true,
+	})
+}
+
+// ------------------------------------------------------------------
 // Debug — print banner and return.
 // ------------------------------------------------------------------
 
@@ -735,10 +995,14 @@ func parseFileFSType(line string) string {
 		return "btrfs"
 	case strings.Contains(line, "fat"), strings.Contains(line, "vfat"):
 		return "vfat"
+	case strings.Contains(line, "exfat"):
+		return "exfat"
 	case strings.Contains(line, "swap"):
 		return "swap"
 	case strings.Contains(line, "f2fs"):
 		return "f2fs"
+	case strings.Contains(line, "hfs"):
+		return "hfsplus"
 	}
 	return ""
 }

@@ -86,11 +86,12 @@ func runServe(_ *cobra.Command, _ []string) error {
 	}()
 
 	// Background services
+	mcastMgr := services.NewMulticastManager(cfg, client)
 	mgr := services.New(
 		services.NewTaskScheduler(cfg, client),
 		services.NewImageReplicator(cfg, client),
 		services.NewSnapinReplicator(cfg, client),
-		services.NewMulticastManager(cfg, client),
+		mcastMgr,
 		services.NewPingHosts(cfg, client),
 		services.NewImageSize(cfg, client),
 		services.NewSnapinHash(cfg, client),
@@ -98,7 +99,7 @@ func runServe(_ *cobra.Command, _ []string) error {
 	go mgr.Run(ctx)
 
 	// HTTP API server
-	srv := api.New(cfg, client)
+	srv := api.New(cfg, client).WithMulticastCoordinator(mcastMgr)
 	errCh := make(chan error, 1)
 	go func() {
 		slog.Info("fog server starting",

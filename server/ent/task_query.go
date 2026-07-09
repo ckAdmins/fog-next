@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/agentlog"
 	"github.com/ckAdmins/fog-next/ent/host"
 	"github.com/ckAdmins/fog-next/ent/image"
@@ -21,6 +20,7 @@ import (
 	"github.com/ckAdmins/fog-next/ent/storagegroup"
 	"github.com/ckAdmins/fog-next/ent/storagenode"
 	"github.com/ckAdmins/fog-next/ent/task"
+	"github.com/google/uuid"
 )
 
 // TaskQuery is the builder for querying Task entities.

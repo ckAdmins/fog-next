@@ -31,6 +31,14 @@ type Server struct {
 	router  *chi.Mux
 	http    *http.Server
 	https   *http.Server
+	mc      any // set via WithMulticastCoordinator before Start
+}
+
+// WithMulticastCoordinator injects the multicast coordinator into the boot API.
+// Must be called before Start.
+func (s *Server) WithMulticastCoordinator(mc any) *Server {
+	s.mc = mc
+	return s
 }
 
 // New creates a configured Server ready to serve. It uses the
@@ -119,6 +127,9 @@ func (s *Server) buildRouter() *chi.Mux {
 		// Unauthenticated endpoints (handshake and register are public).
 		bootRL := middleware.NewRateLimiter(5, 10)
 		bootAPIH := handlers.NewBootAPI(s.cfg, s.db, s.hub)
+		if s.mc != nil {
+			bootAPIH.WithMulticastCoordinator(s.mc)
+		}
 		r.With(bootRL.Handler).Post("/boot/handshake", bootAPIH.Handshake)
 		r.With(bootRL.Handler).Post("/boot/register", bootAPIH.Register)
 		// Boot-token-authenticated endpoints.
@@ -128,6 +139,8 @@ func (s *Server) buildRouter() *chi.Mux {
 			r.Post("/boot/complete", bootAPIH.Complete)
 			r.Post("/boot/logs", bootAPIH.Logs)
 			r.Post("/boot/images/meta", bootAPIH.ImageMeta)
+			r.Post("/boot/multicast/ready", bootAPIH.MulticastReady)
+			r.Post("/boot/multicast/part-done", bootAPIH.MulticastPartDone)
 			r.Route("/boot/images/{id}", func(r chi.Router) {
 				r.Get("/download", bootAPIH.Download)
 				r.Put("/upload", bootAPIH.Upload)
@@ -204,6 +217,15 @@ func (s *Server) buildRouter() *chi.Mux {
 					r.Put("/", snapH.Update)
 					r.Delete("/", snapH.Delete)
 					r.Post("/upload", snapH.Upload)
+				})
+			})
+
+			mcastH := handlers.NewMulticastSessions(s.db)
+			r.Route("/multicast-sessions", func(r chi.Router) {
+				r.Post("/", mcastH.Create)
+				r.Get("/", mcastH.List)
+				r.Route("/{id}", func(r chi.Router) {
+					r.Get("/", mcastH.Get)
 				})
 			})
 

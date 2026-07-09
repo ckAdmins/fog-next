@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/agentlog"
 	"github.com/ckAdmins/fog-next/ent/groupmember"
 	"github.com/ckAdmins/fog-next/ent/host"
@@ -24,6 +23,7 @@ import (
 	"github.com/ckAdmins/fog-next/ent/snapinassoc"
 	"github.com/ckAdmins/fog-next/ent/snapinjob"
 	"github.com/ckAdmins/fog-next/ent/task"
+	"github.com/google/uuid"
 )
 
 // HostCreate is the builder for creating a Host entity.

@@ -358,15 +358,15 @@ var (
 	MulticastSessionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "name", Type: field.TypeString, Default: ""},
-		{Name: "port", Type: field.TypeInt},
-		{Name: "interface", Type: field.TypeString, Default: ""},
+		{Name: "portbase", Type: field.TypeInt, Default: 9000},
+		{Name: "current_part", Type: field.TypeInt, Default: 0},
 		{Name: "client_count", Type: field.TypeInt, Default: 0},
 		{Name: "state", Type: field.TypeString, Default: "pending"},
 		{Name: "started_at", Type: field.TypeTime, Nullable: true},
 		{Name: "completed_at", Type: field.TypeTime, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "image_id", Type: field.TypeUUID},
-		{Name: "storage_node_id", Type: field.TypeUUID},
+		{Name: "storage_node_id", Type: field.TypeUUID, Nullable: true},
 	}
 	// MulticastSessionsTable holds the schema information for the "multicast_sessions" table.
 	MulticastSessionsTable = &schema.Table{
@@ -384,7 +384,7 @@ var (
 				Symbol:     "multicast_sessions_storage_nodes_multicast_sessions",
 				Columns:    []*schema.Column{MulticastSessionsColumns[10]},
 				RefColumns: []*schema.Column{StorageNodesColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.SetNull,
 			},
 		},
 	}
@@ -674,6 +674,7 @@ var (
 		{Name: "name", Type: field.TypeString, Default: ""},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"deploy", "capture", "multicast", "debug_deploy", "debug_capture", "memtest", "wipe", "disk_test", "av_scan", "snapin_install"}},
 		{Name: "state", Type: field.TypeEnum, Enums: []string{"queued", "active", "complete", "failed", "canceled"}, Default: "queued"},
+		{Name: "multicast_session_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "is_group", Type: field.TypeBool, Default: false},
 		{Name: "is_forced", Type: field.TypeBool, Default: false},
 		{Name: "is_shutdown", Type: field.TypeBool, Default: false},
@@ -699,25 +700,25 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "tasks_hosts_tasks",
-				Columns:    []*schema.Column{TasksColumns[16]},
+				Columns:    []*schema.Column{TasksColumns[17]},
 				RefColumns: []*schema.Column{HostsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "tasks_images_tasks",
-				Columns:    []*schema.Column{TasksColumns[17]},
+				Columns:    []*schema.Column{TasksColumns[18]},
 				RefColumns: []*schema.Column{ImagesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "tasks_storage_groups_tasks",
-				Columns:    []*schema.Column{TasksColumns[18]},
+				Columns:    []*schema.Column{TasksColumns[19]},
 				RefColumns: []*schema.Column{StorageGroupsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "tasks_storage_nodes_tasks",
-				Columns:    []*schema.Column{TasksColumns[19]},
+				Columns:    []*schema.Column{TasksColumns[20]},
 				RefColumns: []*schema.Column{StorageNodesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

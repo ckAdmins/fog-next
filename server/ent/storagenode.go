@@ -9,9 +9,9 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/storagegroup"
 	"github.com/ckAdmins/fog-next/ent/storagenode"
+	"github.com/google/uuid"
 )
 
 // StorageNode is the model entity for the StorageNode schema.

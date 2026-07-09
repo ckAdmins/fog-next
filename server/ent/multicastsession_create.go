@@ -12,10 +12,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/image"
 	"github.com/ckAdmins/fog-next/ent/multicastsession"
 	"github.com/ckAdmins/fog-next/ent/storagenode"
+	"github.com/google/uuid"
 )
 
 // MulticastSessionCreate is the builder for creating a MulticastSession entity.
@@ -52,22 +52,38 @@ func (_c *MulticastSessionCreate) SetStorageNodeID(v uuid.UUID) *MulticastSessio
 	return _c
 }
 
-// SetPort sets the "port" field.
-func (_c *MulticastSessionCreate) SetPort(v int) *MulticastSessionCreate {
-	_c.mutation.SetPort(v)
-	return _c
-}
-
-// SetInterface sets the "interface" field.
-func (_c *MulticastSessionCreate) SetInterface(v string) *MulticastSessionCreate {
-	_c.mutation.SetInterface(v)
-	return _c
-}
-
-// SetNillableInterface sets the "interface" field if the given value is not nil.
-func (_c *MulticastSessionCreate) SetNillableInterface(v *string) *MulticastSessionCreate {
+// SetNillableStorageNodeID sets the "storage_node_id" field if the given value is not nil.
+func (_c *MulticastSessionCreate) SetNillableStorageNodeID(v *uuid.UUID) *MulticastSessionCreate {
 	if v != nil {
-		_c.SetInterface(*v)
+		_c.SetStorageNodeID(*v)
+	}
+	return _c
+}
+
+// SetPortbase sets the "portbase" field.
+func (_c *MulticastSessionCreate) SetPortbase(v int) *MulticastSessionCreate {
+	_c.mutation.SetPortbase(v)
+	return _c
+}
+
+// SetNillablePortbase sets the "portbase" field if the given value is not nil.
+func (_c *MulticastSessionCreate) SetNillablePortbase(v *int) *MulticastSessionCreate {
+	if v != nil {
+		_c.SetPortbase(*v)
+	}
+	return _c
+}
+
+// SetCurrentPart sets the "current_part" field.
+func (_c *MulticastSessionCreate) SetCurrentPart(v int) *MulticastSessionCreate {
+	_c.mutation.SetCurrentPart(v)
+	return _c
+}
+
+// SetNillableCurrentPart sets the "current_part" field if the given value is not nil.
+func (_c *MulticastSessionCreate) SetNillableCurrentPart(v *int) *MulticastSessionCreate {
+	if v != nil {
+		_c.SetCurrentPart(*v)
 	}
 	return _c
 }
@@ -205,9 +221,13 @@ func (_c *MulticastSessionCreate) defaults() {
 		v := multicastsession.DefaultName
 		_c.mutation.SetName(v)
 	}
-	if _, ok := _c.mutation.Interface(); !ok {
-		v := multicastsession.DefaultInterface
-		_c.mutation.SetInterface(v)
+	if _, ok := _c.mutation.Portbase(); !ok {
+		v := multicastsession.DefaultPortbase
+		_c.mutation.SetPortbase(v)
+	}
+	if _, ok := _c.mutation.CurrentPart(); !ok {
+		v := multicastsession.DefaultCurrentPart
+		_c.mutation.SetCurrentPart(v)
 	}
 	if _, ok := _c.mutation.ClientCount(); !ok {
 		v := multicastsession.DefaultClientCount
@@ -235,14 +255,11 @@ func (_c *MulticastSessionCreate) check() error {
 	if _, ok := _c.mutation.ImageID(); !ok {
 		return &ValidationError{Name: "image_id", err: errors.New(`ent: missing required field "MulticastSession.image_id"`)}
 	}
-	if _, ok := _c.mutation.StorageNodeID(); !ok {
-		return &ValidationError{Name: "storage_node_id", err: errors.New(`ent: missing required field "MulticastSession.storage_node_id"`)}
+	if _, ok := _c.mutation.Portbase(); !ok {
+		return &ValidationError{Name: "portbase", err: errors.New(`ent: missing required field "MulticastSession.portbase"`)}
 	}
-	if _, ok := _c.mutation.Port(); !ok {
-		return &ValidationError{Name: "port", err: errors.New(`ent: missing required field "MulticastSession.port"`)}
-	}
-	if _, ok := _c.mutation.Interface(); !ok {
-		return &ValidationError{Name: "interface", err: errors.New(`ent: missing required field "MulticastSession.interface"`)}
+	if _, ok := _c.mutation.CurrentPart(); !ok {
+		return &ValidationError{Name: "current_part", err: errors.New(`ent: missing required field "MulticastSession.current_part"`)}
 	}
 	if _, ok := _c.mutation.ClientCount(); !ok {
 		return &ValidationError{Name: "client_count", err: errors.New(`ent: missing required field "MulticastSession.client_count"`)}
@@ -255,9 +272,6 @@ func (_c *MulticastSessionCreate) check() error {
 	}
 	if len(_c.mutation.ImageIDs()) == 0 {
 		return &ValidationError{Name: "image", err: errors.New(`ent: missing required edge "MulticastSession.image"`)}
-	}
-	if len(_c.mutation.StorageNodeIDs()) == 0 {
-		return &ValidationError{Name: "storage_node", err: errors.New(`ent: missing required edge "MulticastSession.storage_node"`)}
 	}
 	return nil
 }
@@ -299,13 +313,13 @@ func (_c *MulticastSessionCreate) createSpec() (*MulticastSession, *sqlgraph.Cre
 		_spec.SetField(multicastsession.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := _c.mutation.Port(); ok {
-		_spec.SetField(multicastsession.FieldPort, field.TypeInt, value)
-		_node.Port = value
+	if value, ok := _c.mutation.Portbase(); ok {
+		_spec.SetField(multicastsession.FieldPortbase, field.TypeInt, value)
+		_node.Portbase = value
 	}
-	if value, ok := _c.mutation.Interface(); ok {
-		_spec.SetField(multicastsession.FieldInterface, field.TypeString, value)
-		_node.Interface = value
+	if value, ok := _c.mutation.CurrentPart(); ok {
+		_spec.SetField(multicastsession.FieldCurrentPart, field.TypeInt, value)
+		_node.CurrentPart = value
 	}
 	if value, ok := _c.mutation.ClientCount(); ok {
 		_spec.SetField(multicastsession.FieldClientCount, field.TypeInt, value)
@@ -358,7 +372,7 @@ func (_c *MulticastSessionCreate) createSpec() (*MulticastSession, *sqlgraph.Cre
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.StorageNodeID = nodes[0]
+		_node.StorageNodeID = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -449,33 +463,45 @@ func (u *MulticastSessionUpsert) UpdateStorageNodeID() *MulticastSessionUpsert {
 	return u
 }
 
-// SetPort sets the "port" field.
-func (u *MulticastSessionUpsert) SetPort(v int) *MulticastSessionUpsert {
-	u.Set(multicastsession.FieldPort, v)
+// ClearStorageNodeID clears the value of the "storage_node_id" field.
+func (u *MulticastSessionUpsert) ClearStorageNodeID() *MulticastSessionUpsert {
+	u.SetNull(multicastsession.FieldStorageNodeID)
 	return u
 }
 
-// UpdatePort sets the "port" field to the value that was provided on create.
-func (u *MulticastSessionUpsert) UpdatePort() *MulticastSessionUpsert {
-	u.SetExcluded(multicastsession.FieldPort)
+// SetPortbase sets the "portbase" field.
+func (u *MulticastSessionUpsert) SetPortbase(v int) *MulticastSessionUpsert {
+	u.Set(multicastsession.FieldPortbase, v)
 	return u
 }
 
-// AddPort adds v to the "port" field.
-func (u *MulticastSessionUpsert) AddPort(v int) *MulticastSessionUpsert {
-	u.Add(multicastsession.FieldPort, v)
+// UpdatePortbase sets the "portbase" field to the value that was provided on create.
+func (u *MulticastSessionUpsert) UpdatePortbase() *MulticastSessionUpsert {
+	u.SetExcluded(multicastsession.FieldPortbase)
 	return u
 }
 
-// SetInterface sets the "interface" field.
-func (u *MulticastSessionUpsert) SetInterface(v string) *MulticastSessionUpsert {
-	u.Set(multicastsession.FieldInterface, v)
+// AddPortbase adds v to the "portbase" field.
+func (u *MulticastSessionUpsert) AddPortbase(v int) *MulticastSessionUpsert {
+	u.Add(multicastsession.FieldPortbase, v)
 	return u
 }
 
-// UpdateInterface sets the "interface" field to the value that was provided on create.
-func (u *MulticastSessionUpsert) UpdateInterface() *MulticastSessionUpsert {
-	u.SetExcluded(multicastsession.FieldInterface)
+// SetCurrentPart sets the "current_part" field.
+func (u *MulticastSessionUpsert) SetCurrentPart(v int) *MulticastSessionUpsert {
+	u.Set(multicastsession.FieldCurrentPart, v)
+	return u
+}
+
+// UpdateCurrentPart sets the "current_part" field to the value that was provided on create.
+func (u *MulticastSessionUpsert) UpdateCurrentPart() *MulticastSessionUpsert {
+	u.SetExcluded(multicastsession.FieldCurrentPart)
+	return u
+}
+
+// AddCurrentPart adds v to the "current_part" field.
+func (u *MulticastSessionUpsert) AddCurrentPart(v int) *MulticastSessionUpsert {
+	u.Add(multicastsession.FieldCurrentPart, v)
 	return u
 }
 
@@ -638,38 +664,52 @@ func (u *MulticastSessionUpsertOne) UpdateStorageNodeID() *MulticastSessionUpser
 	})
 }
 
-// SetPort sets the "port" field.
-func (u *MulticastSessionUpsertOne) SetPort(v int) *MulticastSessionUpsertOne {
+// ClearStorageNodeID clears the value of the "storage_node_id" field.
+func (u *MulticastSessionUpsertOne) ClearStorageNodeID() *MulticastSessionUpsertOne {
 	return u.Update(func(s *MulticastSessionUpsert) {
-		s.SetPort(v)
+		s.ClearStorageNodeID()
 	})
 }
 
-// AddPort adds v to the "port" field.
-func (u *MulticastSessionUpsertOne) AddPort(v int) *MulticastSessionUpsertOne {
+// SetPortbase sets the "portbase" field.
+func (u *MulticastSessionUpsertOne) SetPortbase(v int) *MulticastSessionUpsertOne {
 	return u.Update(func(s *MulticastSessionUpsert) {
-		s.AddPort(v)
+		s.SetPortbase(v)
 	})
 }
 
-// UpdatePort sets the "port" field to the value that was provided on create.
-func (u *MulticastSessionUpsertOne) UpdatePort() *MulticastSessionUpsertOne {
+// AddPortbase adds v to the "portbase" field.
+func (u *MulticastSessionUpsertOne) AddPortbase(v int) *MulticastSessionUpsertOne {
 	return u.Update(func(s *MulticastSessionUpsert) {
-		s.UpdatePort()
+		s.AddPortbase(v)
 	})
 }
 
-// SetInterface sets the "interface" field.
-func (u *MulticastSessionUpsertOne) SetInterface(v string) *MulticastSessionUpsertOne {
+// UpdatePortbase sets the "portbase" field to the value that was provided on create.
+func (u *MulticastSessionUpsertOne) UpdatePortbase() *MulticastSessionUpsertOne {
 	return u.Update(func(s *MulticastSessionUpsert) {
-		s.SetInterface(v)
+		s.UpdatePortbase()
 	})
 }
 
-// UpdateInterface sets the "interface" field to the value that was provided on create.
-func (u *MulticastSessionUpsertOne) UpdateInterface() *MulticastSessionUpsertOne {
+// SetCurrentPart sets the "current_part" field.
+func (u *MulticastSessionUpsertOne) SetCurrentPart(v int) *MulticastSessionUpsertOne {
 	return u.Update(func(s *MulticastSessionUpsert) {
-		s.UpdateInterface()
+		s.SetCurrentPart(v)
+	})
+}
+
+// AddCurrentPart adds v to the "current_part" field.
+func (u *MulticastSessionUpsertOne) AddCurrentPart(v int) *MulticastSessionUpsertOne {
+	return u.Update(func(s *MulticastSessionUpsert) {
+		s.AddCurrentPart(v)
+	})
+}
+
+// UpdateCurrentPart sets the "current_part" field to the value that was provided on create.
+func (u *MulticastSessionUpsertOne) UpdateCurrentPart() *MulticastSessionUpsertOne {
+	return u.Update(func(s *MulticastSessionUpsert) {
+		s.UpdateCurrentPart()
 	})
 }
 
@@ -1010,38 +1050,52 @@ func (u *MulticastSessionUpsertBulk) UpdateStorageNodeID() *MulticastSessionUpse
 	})
 }
 
-// SetPort sets the "port" field.
-func (u *MulticastSessionUpsertBulk) SetPort(v int) *MulticastSessionUpsertBulk {
+// ClearStorageNodeID clears the value of the "storage_node_id" field.
+func (u *MulticastSessionUpsertBulk) ClearStorageNodeID() *MulticastSessionUpsertBulk {
 	return u.Update(func(s *MulticastSessionUpsert) {
-		s.SetPort(v)
+		s.ClearStorageNodeID()
 	})
 }
 
-// AddPort adds v to the "port" field.
-func (u *MulticastSessionUpsertBulk) AddPort(v int) *MulticastSessionUpsertBulk {
+// SetPortbase sets the "portbase" field.
+func (u *MulticastSessionUpsertBulk) SetPortbase(v int) *MulticastSessionUpsertBulk {
 	return u.Update(func(s *MulticastSessionUpsert) {
-		s.AddPort(v)
+		s.SetPortbase(v)
 	})
 }
 
-// UpdatePort sets the "port" field to the value that was provided on create.
-func (u *MulticastSessionUpsertBulk) UpdatePort() *MulticastSessionUpsertBulk {
+// AddPortbase adds v to the "portbase" field.
+func (u *MulticastSessionUpsertBulk) AddPortbase(v int) *MulticastSessionUpsertBulk {
 	return u.Update(func(s *MulticastSessionUpsert) {
-		s.UpdatePort()
+		s.AddPortbase(v)
 	})
 }
 
-// SetInterface sets the "interface" field.
-func (u *MulticastSessionUpsertBulk) SetInterface(v string) *MulticastSessionUpsertBulk {
+// UpdatePortbase sets the "portbase" field to the value that was provided on create.
+func (u *MulticastSessionUpsertBulk) UpdatePortbase() *MulticastSessionUpsertBulk {
 	return u.Update(func(s *MulticastSessionUpsert) {
-		s.SetInterface(v)
+		s.UpdatePortbase()
 	})
 }
 
-// UpdateInterface sets the "interface" field to the value that was provided on create.
-func (u *MulticastSessionUpsertBulk) UpdateInterface() *MulticastSessionUpsertBulk {
+// SetCurrentPart sets the "current_part" field.
+func (u *MulticastSessionUpsertBulk) SetCurrentPart(v int) *MulticastSessionUpsertBulk {
 	return u.Update(func(s *MulticastSessionUpsert) {
-		s.UpdateInterface()
+		s.SetCurrentPart(v)
+	})
+}
+
+// AddCurrentPart adds v to the "current_part" field.
+func (u *MulticastSessionUpsertBulk) AddCurrentPart(v int) *MulticastSessionUpsertBulk {
+	return u.Update(func(s *MulticastSessionUpsert) {
+		s.AddCurrentPart(v)
+	})
+}
+
+// UpdateCurrentPart sets the "current_part" field to the value that was provided on create.
+func (u *MulticastSessionUpsertBulk) UpdateCurrentPart() *MulticastSessionUpsertBulk {
+	return u.Update(func(s *MulticastSessionUpsert) {
+		s.UpdateCurrentPart()
 	})
 }
 

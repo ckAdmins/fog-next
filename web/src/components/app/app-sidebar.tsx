@@ -1,5 +1,5 @@
 import type { Icon } from "@phosphor-icons/react";
-import { Gear, SignOut, WifiX } from "@phosphor-icons/react";
+import { SignOut, Stack, WifiX } from "@phosphor-icons/react";
 import { Link, useRouter } from "@tanstack/react-router";
 import { Fragment } from "react";
 import {
@@ -53,14 +53,16 @@ export function AppSidebar() {
 		<Sidebar>
 			<SidebarHeader>
 				<div className="flex items-center gap-2.5 px-2 py-1.5">
-					<div className="flex size-7 items-center justify-center rounded-md bg-primary/10">
-						<Gear className="size-4 text-primary" weight="duotone" />
+					<div className="flex size-7 items-center justify-center">
+						<Stack className="size-4 text-primary" weight="regular" />
 					</div>
 					<span className="font-heading text-sm font-semibold tracking-tight">
-						FOG Next
+						FOG
 					</span>
 				</div>
 			</SidebarHeader>
+
+			<SidebarSeparator />
 
 			<SidebarContent>
 				{visibleSections.map(([sectionName, items], idx) => (
@@ -83,7 +85,7 @@ export function AppSidebar() {
 																"bg-sidebar-accent text-sidebar-accent-foreground font-medium",
 														}}
 													>
-														<Icon weight="duotone" />
+														<Icon weight="regular" />
 														<span>{label}</span>
 														<kbd className="ml-auto hidden font-mono text-[9px] text-sidebar-foreground/30 group-hover/menu-button:text-sidebar-foreground/50 sm:inline-flex">
 															g {shortcut}
@@ -110,14 +112,14 @@ export function AppSidebar() {
 				<SidebarMenu>
 					<SidebarMenuItem>
 						<SidebarMenuButton onClick={handleLogout}>
-							<SignOut />
+							<SignOut weight="regular" />
 							<span>Sign out</span>
 						</SidebarMenuButton>
 					</SidebarMenuItem>
 					<SidebarMenuItem>
 						<div className="flex items-center gap-2 px-2 py-1">
 							<kbd className="inline-flex h-5 select-none items-center rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground/50">
-								⌘K
+								\u2318K
 							</kbd>
 							<span className="text-[10px] text-muted-foreground/50">
 								Command palette

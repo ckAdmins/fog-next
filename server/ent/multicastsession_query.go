@@ -11,11 +11,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/image"
 	"github.com/ckAdmins/fog-next/ent/multicastsession"
 	"github.com/ckAdmins/fog-next/ent/predicate"
 	"github.com/ckAdmins/fog-next/ent/storagenode"
+	"github.com/google/uuid"
 )
 
 // MulticastSessionQuery is the builder for querying MulticastSession entities.
@@ -478,7 +478,10 @@ func (_q *MulticastSessionQuery) loadStorageNode(ctx context.Context, query *Sto
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*MulticastSession)
 	for i := range nodes {
-		fk := nodes[i].StorageNodeID
+		if nodes[i].StorageNodeID == nil {
+			continue
+		}
+		fk := *nodes[i].StorageNodeID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}

@@ -7,8 +7,8 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/predicate"
+	"github.com/google/uuid"
 )
 
 // ID filters vertices based on their ID field.
@@ -79,6 +79,11 @@ func StorageNodeID(v uuid.UUID) predicate.Task {
 // StorageGroupID applies equality check predicate on the "storage_group_id" field. It's identical to StorageGroupIDEQ.
 func StorageGroupID(v uuid.UUID) predicate.Task {
 	return predicate.Task(sql.FieldEQ(FieldStorageGroupID, v))
+}
+
+// MulticastSessionID applies equality check predicate on the "multicast_session_id" field. It's identical to MulticastSessionIDEQ.
+func MulticastSessionID(v uuid.UUID) predicate.Task {
+	return predicate.Task(sql.FieldEQ(FieldMulticastSessionID, v))
 }
 
 // IsGroup applies equality check predicate on the "is_group" field. It's identical to IsGroupEQ.
@@ -354,6 +359,56 @@ func StorageGroupIDIsNil() predicate.Task {
 // StorageGroupIDNotNil applies the NotNil predicate on the "storage_group_id" field.
 func StorageGroupIDNotNil() predicate.Task {
 	return predicate.Task(sql.FieldNotNull(FieldStorageGroupID))
+}
+
+// MulticastSessionIDEQ applies the EQ predicate on the "multicast_session_id" field.
+func MulticastSessionIDEQ(v uuid.UUID) predicate.Task {
+	return predicate.Task(sql.FieldEQ(FieldMulticastSessionID, v))
+}
+
+// MulticastSessionIDNEQ applies the NEQ predicate on the "multicast_session_id" field.
+func MulticastSessionIDNEQ(v uuid.UUID) predicate.Task {
+	return predicate.Task(sql.FieldNEQ(FieldMulticastSessionID, v))
+}
+
+// MulticastSessionIDIn applies the In predicate on the "multicast_session_id" field.
+func MulticastSessionIDIn(vs ...uuid.UUID) predicate.Task {
+	return predicate.Task(sql.FieldIn(FieldMulticastSessionID, vs...))
+}
+
+// MulticastSessionIDNotIn applies the NotIn predicate on the "multicast_session_id" field.
+func MulticastSessionIDNotIn(vs ...uuid.UUID) predicate.Task {
+	return predicate.Task(sql.FieldNotIn(FieldMulticastSessionID, vs...))
+}
+
+// MulticastSessionIDGT applies the GT predicate on the "multicast_session_id" field.
+func MulticastSessionIDGT(v uuid.UUID) predicate.Task {
+	return predicate.Task(sql.FieldGT(FieldMulticastSessionID, v))
+}
+
+// MulticastSessionIDGTE applies the GTE predicate on the "multicast_session_id" field.
+func MulticastSessionIDGTE(v uuid.UUID) predicate.Task {
+	return predicate.Task(sql.FieldGTE(FieldMulticastSessionID, v))
+}
+
+// MulticastSessionIDLT applies the LT predicate on the "multicast_session_id" field.
+func MulticastSessionIDLT(v uuid.UUID) predicate.Task {
+	return predicate.Task(sql.FieldLT(FieldMulticastSessionID, v))
+}
+
+// MulticastSessionIDLTE applies the LTE predicate on the "multicast_session_id" field.
+func MulticastSessionIDLTE(v uuid.UUID) predicate.Task {
+	return predicate.Task(sql.FieldLTE(FieldMulticastSessionID, v))
+}
+
+// MulticastSessionIDIsNil applies the IsNil predicate on the "multicast_session_id" field.
+func MulticastSessionIDIsNil() predicate.Task {
+	return predicate.Task(sql.FieldIsNull(FieldMulticastSessionID))
+}
+
+// MulticastSessionIDNotNil applies the NotNil predicate on the "multicast_session_id" field.
+func MulticastSessionIDNotNil() predicate.Task {
+	return predicate.Task(sql.FieldNotNull(FieldMulticastSessionID))
 }
 
 // IsGroupEQ applies the EQ predicate on the "is_group" field.

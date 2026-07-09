@@ -11,9 +11,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/printer"
 	"github.com/ckAdmins/fog-next/ent/printerassoc"
+	"github.com/google/uuid"
 )
 
 // PrinterAssocCreate is the builder for creating a PrinterAssoc entity.

@@ -318,8 +318,8 @@ var schemaGraph = func() *sqlgraph.Schema {
 			multicastsession.FieldName:          {Type: field.TypeString, Column: multicastsession.FieldName},
 			multicastsession.FieldImageID:       {Type: field.TypeUUID, Column: multicastsession.FieldImageID},
 			multicastsession.FieldStorageNodeID: {Type: field.TypeUUID, Column: multicastsession.FieldStorageNodeID},
-			multicastsession.FieldPort:          {Type: field.TypeInt, Column: multicastsession.FieldPort},
-			multicastsession.FieldInterface:     {Type: field.TypeString, Column: multicastsession.FieldInterface},
+			multicastsession.FieldPortbase:      {Type: field.TypeInt, Column: multicastsession.FieldPortbase},
+			multicastsession.FieldCurrentPart:   {Type: field.TypeInt, Column: multicastsession.FieldCurrentPart},
 			multicastsession.FieldClientCount:   {Type: field.TypeInt, Column: multicastsession.FieldClientCount},
 			multicastsession.FieldState:         {Type: field.TypeString, Column: multicastsession.FieldState},
 			multicastsession.FieldStartedAt:     {Type: field.TypeTime, Column: multicastsession.FieldStartedAt},
@@ -572,25 +572,26 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "Task",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			task.FieldName:             {Type: field.TypeString, Column: task.FieldName},
-			task.FieldType:             {Type: field.TypeEnum, Column: task.FieldType},
-			task.FieldState:            {Type: field.TypeEnum, Column: task.FieldState},
-			task.FieldHostID:           {Type: field.TypeUUID, Column: task.FieldHostID},
-			task.FieldImageID:          {Type: field.TypeUUID, Column: task.FieldImageID},
-			task.FieldStorageNodeID:    {Type: field.TypeUUID, Column: task.FieldStorageNodeID},
-			task.FieldStorageGroupID:   {Type: field.TypeUUID, Column: task.FieldStorageGroupID},
-			task.FieldIsGroup:          {Type: field.TypeBool, Column: task.FieldIsGroup},
-			task.FieldIsForced:         {Type: field.TypeBool, Column: task.FieldIsForced},
-			task.FieldIsShutdown:       {Type: field.TypeBool, Column: task.FieldIsShutdown},
-			task.FieldPercentComplete:  {Type: field.TypeInt, Column: task.FieldPercentComplete},
-			task.FieldBitsPerMinute:    {Type: field.TypeInt64, Column: task.FieldBitsPerMinute},
-			task.FieldBytesTransferred: {Type: field.TypeInt64, Column: task.FieldBytesTransferred},
-			task.FieldScheduledAt:      {Type: field.TypeTime, Column: task.FieldScheduledAt},
-			task.FieldStartedAt:        {Type: field.TypeTime, Column: task.FieldStartedAt},
-			task.FieldCompletedAt:      {Type: field.TypeTime, Column: task.FieldCompletedAt},
-			task.FieldCreatedAt:        {Type: field.TypeTime, Column: task.FieldCreatedAt},
-			task.FieldCreatedBy:        {Type: field.TypeString, Column: task.FieldCreatedBy},
-			task.FieldUpdatedAt:        {Type: field.TypeTime, Column: task.FieldUpdatedAt},
+			task.FieldName:               {Type: field.TypeString, Column: task.FieldName},
+			task.FieldType:               {Type: field.TypeEnum, Column: task.FieldType},
+			task.FieldState:              {Type: field.TypeEnum, Column: task.FieldState},
+			task.FieldHostID:             {Type: field.TypeUUID, Column: task.FieldHostID},
+			task.FieldImageID:            {Type: field.TypeUUID, Column: task.FieldImageID},
+			task.FieldStorageNodeID:      {Type: field.TypeUUID, Column: task.FieldStorageNodeID},
+			task.FieldStorageGroupID:     {Type: field.TypeUUID, Column: task.FieldStorageGroupID},
+			task.FieldMulticastSessionID: {Type: field.TypeUUID, Column: task.FieldMulticastSessionID},
+			task.FieldIsGroup:            {Type: field.TypeBool, Column: task.FieldIsGroup},
+			task.FieldIsForced:           {Type: field.TypeBool, Column: task.FieldIsForced},
+			task.FieldIsShutdown:         {Type: field.TypeBool, Column: task.FieldIsShutdown},
+			task.FieldPercentComplete:    {Type: field.TypeInt, Column: task.FieldPercentComplete},
+			task.FieldBitsPerMinute:      {Type: field.TypeInt64, Column: task.FieldBitsPerMinute},
+			task.FieldBytesTransferred:   {Type: field.TypeInt64, Column: task.FieldBytesTransferred},
+			task.FieldScheduledAt:        {Type: field.TypeTime, Column: task.FieldScheduledAt},
+			task.FieldStartedAt:          {Type: field.TypeTime, Column: task.FieldStartedAt},
+			task.FieldCompletedAt:        {Type: field.TypeTime, Column: task.FieldCompletedAt},
+			task.FieldCreatedAt:          {Type: field.TypeTime, Column: task.FieldCreatedAt},
+			task.FieldCreatedBy:          {Type: field.TypeString, Column: task.FieldCreatedBy},
+			task.FieldUpdatedAt:          {Type: field.TypeTime, Column: task.FieldUpdatedAt},
 		},
 	}
 	graph.Nodes[27] = &sqlgraph.Node{
@@ -2819,14 +2820,14 @@ func (f *MulticastSessionFilter) WhereStorageNodeID(p entql.ValueP) {
 	f.Where(p.Field(multicastsession.FieldStorageNodeID))
 }
 
-// WherePort applies the entql int predicate on the port field.
-func (f *MulticastSessionFilter) WherePort(p entql.IntP) {
-	f.Where(p.Field(multicastsession.FieldPort))
+// WherePortbase applies the entql int predicate on the portbase field.
+func (f *MulticastSessionFilter) WherePortbase(p entql.IntP) {
+	f.Where(p.Field(multicastsession.FieldPortbase))
 }
 
-// WhereInterface applies the entql string predicate on the interface field.
-func (f *MulticastSessionFilter) WhereInterface(p entql.StringP) {
-	f.Where(p.Field(multicastsession.FieldInterface))
+// WhereCurrentPart applies the entql int predicate on the current_part field.
+func (f *MulticastSessionFilter) WhereCurrentPart(p entql.IntP) {
+	f.Where(p.Field(multicastsession.FieldCurrentPart))
 }
 
 // WhereClientCount applies the entql int predicate on the client_count field.
@@ -4091,6 +4092,11 @@ func (f *TaskFilter) WhereStorageNodeID(p entql.ValueP) {
 // WhereStorageGroupID applies the entql [16]byte predicate on the storage_group_id field.
 func (f *TaskFilter) WhereStorageGroupID(p entql.ValueP) {
 	f.Where(p.Field(task.FieldStorageGroupID))
+}
+
+// WhereMulticastSessionID applies the entql [16]byte predicate on the multicast_session_id field.
+func (f *TaskFilter) WhereMulticastSessionID(p entql.ValueP) {
+	f.Where(p.Field(task.FieldMulticastSessionID))
 }
 
 // WhereIsGroup applies the entql bool predicate on the is_group field.

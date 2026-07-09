@@ -75,6 +75,8 @@ func (Task) Fields() []ent.Field {
 			StructTag(`json:"storageNodeId,omitempty"`),
 		field.UUID("storage_group_id", uuid.UUID{}).Optional().Nillable().
 			StructTag(`json:"storageGroupId,omitempty"`),
+		field.UUID("multicast_session_id", uuid.UUID{}).Optional().Nillable().
+			StructTag(`json:"multicastSessionId,omitempty"`),
 		field.Bool("is_group").Default(false).
 			StructTag(`json:"isGroup"`),
 		field.Bool("is_forced").Default(false).

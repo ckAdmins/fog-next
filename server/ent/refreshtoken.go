@@ -9,9 +9,9 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/refreshtoken"
 	"github.com/ckAdmins/fog-next/ent/user"
+	"github.com/google/uuid"
 )
 
 // RefreshToken is the model entity for the RefreshToken schema.

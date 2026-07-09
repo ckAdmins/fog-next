@@ -12,12 +12,12 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/multicastsession"
 	"github.com/ckAdmins/fog-next/ent/predicate"
 	"github.com/ckAdmins/fog-next/ent/storagegroup"
 	"github.com/ckAdmins/fog-next/ent/storagenode"
 	"github.com/ckAdmins/fog-next/ent/task"
+	"github.com/google/uuid"
 )
 
 // StorageNodeQuery is the builder for querying StorageNode entities.
@@ -593,9 +593,12 @@ func (_q *StorageNodeQuery) loadMulticastSessions(ctx context.Context, query *Mu
 	}
 	for _, n := range neighbors {
 		fk := n.StorageNodeID
-		node, ok := nodeids[fk]
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "storage_node_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "storage_node_id" returned %v for node %v`, fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "storage_node_id" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

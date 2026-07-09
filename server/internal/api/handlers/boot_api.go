@@ -28,6 +28,13 @@ import (
 	"github.com/ckAdmins/fog-next/internal/ws"
 )
 
+// multicastCoordinator is the interface the MulticastManager implements.
+// Defined here at the consumer to avoid importing the services package.
+type multicastCoordinator interface {
+	SignalReady(sessionID, taskID uuid.UUID, part int) (action string, portbase int, err error)
+	SignalPartDone(sessionID, taskID uuid.UUID, part int) error
+}
+
 // imagePartitions is the JSONB shape stored in Image.Partitions.
 type imagePartitions struct {
 	PartCount           int      `json:"partCount"`
@@ -44,6 +51,7 @@ cfg        *config.Config
 db         *ent.Client
 hub        *ws.Hub
 httpClient *http.Client
+mc         multicastCoordinator
 }
 
 func NewBootAPI(cfg *config.Config, db *ent.Client, hub *ws.Hub) *BootAPI {
@@ -55,6 +63,15 @@ httpClient: &http.Client{
 Timeout: 0, // no timeout — image streams can be large
 },
 }
+}
+
+// WithMulticastCoordinator sets the multicast coordinator for agent-facing endpoints.
+// Accepts any so callers in the api package don't need to import handlers types.
+func (h *BootAPI) WithMulticastCoordinator(mc any) *BootAPI {
+	if c, ok := mc.(multicastCoordinator); ok {
+		h.mc = c
+	}
+	return h
 }
 
 // ------------------------------------------------------------------
@@ -384,6 +401,112 @@ SetDuration(duration).
 Exec(r.Context())
 
 response.NoContent(w)
+}
+
+// ------------------------------------------------------------------
+// MulticastReady — POST /fog/api/v1/boot/multicast/ready  (boot-token auth)
+// ------------------------------------------------------------------
+
+type multicastReadyRequest struct {
+	TaskID string `json:"taskId"`
+	Part   int    `json:"part"`
+}
+
+type multicastReadyResponse struct {
+	Action   string `json:"action"`   // "start" or "wait"
+	Portbase int    `json:"portbase"` // UDP portbase to use when action is "start"
+}
+
+func (h *BootAPI) MulticastReady(w http.ResponseWriter, r *http.Request) {
+	claims := middleware.BootClaimsFrom(r.Context())
+	if claims == nil {
+		response.Unauthorized(w)
+		return
+	}
+	if h.mc == nil {
+		response.InternalError(w)
+		return
+	}
+
+	var req multicastReadyRequest
+	if !response.Decode(w, r, &req) {
+		return
+	}
+
+	taskID, err := uuid.Parse(req.TaskID)
+	if err != nil || taskID != claims.TaskID {
+		response.BadRequest(w, "task ID mismatch")
+		return
+	}
+
+	task, err := h.db.Task.Get(r.Context(), taskID)
+	if err != nil {
+		response.NotFound(w, "task")
+		return
+	}
+	if task.MulticastSessionID == nil {
+		response.BadRequest(w, "task is not part of a multicast session")
+		return
+	}
+
+	action, portbase, err := h.mc.SignalReady(*task.MulticastSessionID, taskID, req.Part)
+	if err != nil {
+		slog.Error("multicast ready signal failed", "task", taskID, "error", err)
+		response.InternalError(w)
+		return
+	}
+
+	response.OK(w, multicastReadyResponse{Action: action, Portbase: portbase})
+}
+
+// ------------------------------------------------------------------
+// MulticastPartDone — POST /fog/api/v1/boot/multicast/part-done  (boot-token auth)
+// ------------------------------------------------------------------
+
+type multicastPartDoneRequest struct {
+	TaskID string `json:"taskId"`
+	Part   int    `json:"part"`
+}
+
+func (h *BootAPI) MulticastPartDone(w http.ResponseWriter, r *http.Request) {
+	claims := middleware.BootClaimsFrom(r.Context())
+	if claims == nil {
+		response.Unauthorized(w)
+		return
+	}
+	if h.mc == nil {
+		response.InternalError(w)
+		return
+	}
+
+	var req multicastPartDoneRequest
+	if !response.Decode(w, r, &req) {
+		return
+	}
+
+	taskID, err := uuid.Parse(req.TaskID)
+	if err != nil || taskID != claims.TaskID {
+		response.BadRequest(w, "task ID mismatch")
+		return
+	}
+
+	task, err := h.db.Task.Get(r.Context(), taskID)
+	if err != nil {
+		response.NotFound(w, "task")
+		return
+	}
+	if task.MulticastSessionID == nil {
+		response.BadRequest(w, "task is not part of a multicast session")
+		return
+	}
+
+	if err := h.mc.SignalPartDone(*task.MulticastSessionID, taskID, req.Part); err != nil {
+		slog.Error("multicast part-done signal failed", "task", taskID, "error", err)
+		response.InternalError(w)
+		return
+	}
+
+	response.NoContent(w)
 }
 
 // ------------------------------------------------------------------

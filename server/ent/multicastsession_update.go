@@ -11,11 +11,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/image"
 	"github.com/ckAdmins/fog-next/ent/multicastsession"
 	"github.com/ckAdmins/fog-next/ent/predicate"
 	"github.com/ckAdmins/fog-next/ent/storagenode"
+	"github.com/google/uuid"
 )
 
 // MulticastSessionUpdate is the builder for updating MulticastSession entities.
@@ -73,38 +73,51 @@ func (_u *MulticastSessionUpdate) SetNillableStorageNodeID(v *uuid.UUID) *Multic
 	return _u
 }
 
-// SetPort sets the "port" field.
-func (_u *MulticastSessionUpdate) SetPort(v int) *MulticastSessionUpdate {
-	_u.mutation.ResetPort()
-	_u.mutation.SetPort(v)
+// ClearStorageNodeID clears the value of the "storage_node_id" field.
+func (_u *MulticastSessionUpdate) ClearStorageNodeID() *MulticastSessionUpdate {
+	_u.mutation.ClearStorageNodeID()
 	return _u
 }
 
-// SetNillablePort sets the "port" field if the given value is not nil.
-func (_u *MulticastSessionUpdate) SetNillablePort(v *int) *MulticastSessionUpdate {
+// SetPortbase sets the "portbase" field.
+func (_u *MulticastSessionUpdate) SetPortbase(v int) *MulticastSessionUpdate {
+	_u.mutation.ResetPortbase()
+	_u.mutation.SetPortbase(v)
+	return _u
+}
+
+// SetNillablePortbase sets the "portbase" field if the given value is not nil.
+func (_u *MulticastSessionUpdate) SetNillablePortbase(v *int) *MulticastSessionUpdate {
 	if v != nil {
-		_u.SetPort(*v)
+		_u.SetPortbase(*v)
 	}
 	return _u
 }
 
-// AddPort adds value to the "port" field.
-func (_u *MulticastSessionUpdate) AddPort(v int) *MulticastSessionUpdate {
-	_u.mutation.AddPort(v)
+// AddPortbase adds value to the "portbase" field.
+func (_u *MulticastSessionUpdate) AddPortbase(v int) *MulticastSessionUpdate {
+	_u.mutation.AddPortbase(v)
 	return _u
 }
 
-// SetInterface sets the "interface" field.
-func (_u *MulticastSessionUpdate) SetInterface(v string) *MulticastSessionUpdate {
-	_u.mutation.SetInterface(v)
+// SetCurrentPart sets the "current_part" field.
+func (_u *MulticastSessionUpdate) SetCurrentPart(v int) *MulticastSessionUpdate {
+	_u.mutation.ResetCurrentPart()
+	_u.mutation.SetCurrentPart(v)
 	return _u
 }
 
-// SetNillableInterface sets the "interface" field if the given value is not nil.
-func (_u *MulticastSessionUpdate) SetNillableInterface(v *string) *MulticastSessionUpdate {
+// SetNillableCurrentPart sets the "current_part" field if the given value is not nil.
+func (_u *MulticastSessionUpdate) SetNillableCurrentPart(v *int) *MulticastSessionUpdate {
 	if v != nil {
-		_u.SetInterface(*v)
+		_u.SetCurrentPart(*v)
 	}
+	return _u
+}
+
+// AddCurrentPart adds value to the "current_part" field.
+func (_u *MulticastSessionUpdate) AddCurrentPart(v int) *MulticastSessionUpdate {
+	_u.mutation.AddCurrentPart(v)
 	return _u
 }
 
@@ -242,9 +255,6 @@ func (_u *MulticastSessionUpdate) check() error {
 	if _u.mutation.ImageCleared() && len(_u.mutation.ImageIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "MulticastSession.image"`)
 	}
-	if _u.mutation.StorageNodeCleared() && len(_u.mutation.StorageNodeIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "MulticastSession.storage_node"`)
-	}
 	return nil
 }
 
@@ -263,14 +273,17 @@ func (_u *MulticastSessionUpdate) sqlSave(ctx context.Context) (_node int, err e
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(multicastsession.FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.Port(); ok {
-		_spec.SetField(multicastsession.FieldPort, field.TypeInt, value)
+	if value, ok := _u.mutation.Portbase(); ok {
+		_spec.SetField(multicastsession.FieldPortbase, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedPort(); ok {
-		_spec.AddField(multicastsession.FieldPort, field.TypeInt, value)
+	if value, ok := _u.mutation.AddedPortbase(); ok {
+		_spec.AddField(multicastsession.FieldPortbase, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.Interface(); ok {
-		_spec.SetField(multicastsession.FieldInterface, field.TypeString, value)
+	if value, ok := _u.mutation.CurrentPart(); ok {
+		_spec.SetField(multicastsession.FieldCurrentPart, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedCurrentPart(); ok {
+		_spec.AddField(multicastsession.FieldCurrentPart, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.ClientCount(); ok {
 		_spec.SetField(multicastsession.FieldClientCount, field.TypeInt, value)
@@ -413,38 +426,51 @@ func (_u *MulticastSessionUpdateOne) SetNillableStorageNodeID(v *uuid.UUID) *Mul
 	return _u
 }
 
-// SetPort sets the "port" field.
-func (_u *MulticastSessionUpdateOne) SetPort(v int) *MulticastSessionUpdateOne {
-	_u.mutation.ResetPort()
-	_u.mutation.SetPort(v)
+// ClearStorageNodeID clears the value of the "storage_node_id" field.
+func (_u *MulticastSessionUpdateOne) ClearStorageNodeID() *MulticastSessionUpdateOne {
+	_u.mutation.ClearStorageNodeID()
 	return _u
 }
 
-// SetNillablePort sets the "port" field if the given value is not nil.
-func (_u *MulticastSessionUpdateOne) SetNillablePort(v *int) *MulticastSessionUpdateOne {
+// SetPortbase sets the "portbase" field.
+func (_u *MulticastSessionUpdateOne) SetPortbase(v int) *MulticastSessionUpdateOne {
+	_u.mutation.ResetPortbase()
+	_u.mutation.SetPortbase(v)
+	return _u
+}
+
+// SetNillablePortbase sets the "portbase" field if the given value is not nil.
+func (_u *MulticastSessionUpdateOne) SetNillablePortbase(v *int) *MulticastSessionUpdateOne {
 	if v != nil {
-		_u.SetPort(*v)
+		_u.SetPortbase(*v)
 	}
 	return _u
 }
 
-// AddPort adds value to the "port" field.
-func (_u *MulticastSessionUpdateOne) AddPort(v int) *MulticastSessionUpdateOne {
-	_u.mutation.AddPort(v)
+// AddPortbase adds value to the "portbase" field.
+func (_u *MulticastSessionUpdateOne) AddPortbase(v int) *MulticastSessionUpdateOne {
+	_u.mutation.AddPortbase(v)
 	return _u
 }
 
-// SetInterface sets the "interface" field.
-func (_u *MulticastSessionUpdateOne) SetInterface(v string) *MulticastSessionUpdateOne {
-	_u.mutation.SetInterface(v)
+// SetCurrentPart sets the "current_part" field.
+func (_u *MulticastSessionUpdateOne) SetCurrentPart(v int) *MulticastSessionUpdateOne {
+	_u.mutation.ResetCurrentPart()
+	_u.mutation.SetCurrentPart(v)
 	return _u
 }
 
-// SetNillableInterface sets the "interface" field if the given value is not nil.
-func (_u *MulticastSessionUpdateOne) SetNillableInterface(v *string) *MulticastSessionUpdateOne {
+// SetNillableCurrentPart sets the "current_part" field if the given value is not nil.
+func (_u *MulticastSessionUpdateOne) SetNillableCurrentPart(v *int) *MulticastSessionUpdateOne {
 	if v != nil {
-		_u.SetInterface(*v)
+		_u.SetCurrentPart(*v)
 	}
+	return _u
+}
+
+// AddCurrentPart adds value to the "current_part" field.
+func (_u *MulticastSessionUpdateOne) AddCurrentPart(v int) *MulticastSessionUpdateOne {
+	_u.mutation.AddCurrentPart(v)
 	return _u
 }
 
@@ -595,9 +621,6 @@ func (_u *MulticastSessionUpdateOne) check() error {
 	if _u.mutation.ImageCleared() && len(_u.mutation.ImageIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "MulticastSession.image"`)
 	}
-	if _u.mutation.StorageNodeCleared() && len(_u.mutation.StorageNodeIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "MulticastSession.storage_node"`)
-	}
 	return nil
 }
 
@@ -633,14 +656,17 @@ func (_u *MulticastSessionUpdateOne) sqlSave(ctx context.Context) (_node *Multic
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(multicastsession.FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.Port(); ok {
-		_spec.SetField(multicastsession.FieldPort, field.TypeInt, value)
+	if value, ok := _u.mutation.Portbase(); ok {
+		_spec.SetField(multicastsession.FieldPortbase, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.AddedPort(); ok {
-		_spec.AddField(multicastsession.FieldPort, field.TypeInt, value)
+	if value, ok := _u.mutation.AddedPortbase(); ok {
+		_spec.AddField(multicastsession.FieldPortbase, field.TypeInt, value)
 	}
-	if value, ok := _u.mutation.Interface(); ok {
-		_spec.SetField(multicastsession.FieldInterface, field.TypeString, value)
+	if value, ok := _u.mutation.CurrentPart(); ok {
+		_spec.SetField(multicastsession.FieldCurrentPart, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.AddedCurrentPart(); ok {
+		_spec.AddField(multicastsession.FieldCurrentPart, field.TypeInt, value)
 	}
 	if value, ok := _u.mutation.ClientCount(); ok {
 		_spec.SetField(multicastsession.FieldClientCount, field.TypeInt, value)

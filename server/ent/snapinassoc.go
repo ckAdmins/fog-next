@@ -8,10 +8,10 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/host"
 	"github.com/ckAdmins/fog-next/ent/snapin"
 	"github.com/ckAdmins/fog-next/ent/snapinassoc"
+	"github.com/google/uuid"
 )
 
 // SnapinAssoc is the model entity for the SnapinAssoc schema.

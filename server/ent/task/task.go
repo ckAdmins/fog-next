@@ -30,6 +30,8 @@ const (
 	FieldStorageNodeID = "storage_node_id"
 	// FieldStorageGroupID holds the string denoting the storage_group_id field in the database.
 	FieldStorageGroupID = "storage_group_id"
+	// FieldMulticastSessionID holds the string denoting the multicast_session_id field in the database.
+	FieldMulticastSessionID = "multicast_session_id"
 	// FieldIsGroup holds the string denoting the is_group field in the database.
 	FieldIsGroup = "is_group"
 	// FieldIsForced holds the string denoting the is_forced field in the database.
@@ -122,6 +124,7 @@ var Columns = []string{
 	FieldImageID,
 	FieldStorageNodeID,
 	FieldStorageGroupID,
+	FieldMulticastSessionID,
 	FieldIsGroup,
 	FieldIsForced,
 	FieldIsShutdown,
@@ -274,6 +277,11 @@ func ByStorageNodeID(opts ...sql.OrderTermOption) OrderOption {
 // ByStorageGroupID orders the results by the storage_group_id field.
 func ByStorageGroupID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStorageGroupID, opts...).ToFunc()
+}
+
+// ByMulticastSessionID orders the results by the multicast_session_id field.
+func ByMulticastSessionID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMulticastSessionID, opts...).ToFunc()
 }
 
 // ByIsGroup orders the results by the is_group field.

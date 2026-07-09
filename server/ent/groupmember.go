@@ -8,10 +8,10 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/group"
 	"github.com/ckAdmins/fog-next/ent/groupmember"
 	"github.com/ckAdmins/fog-next/ent/host"
+	"github.com/google/uuid"
 )
 
 // GroupMember is the model entity for the GroupMember schema.

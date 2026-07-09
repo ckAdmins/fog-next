@@ -109,6 +109,24 @@ type CompleteRequest struct {
 	Message string `json:"message,omitempty"`
 }
 
+// MulticastReadyRequest is sent by the agent when it's ready for a partition.
+type MulticastReadyRequest struct {
+	TaskID string `json:"taskId"`
+	Part   int    `json:"part"`
+}
+
+// MulticastReadyResponse is returned by the server after readiness check.
+type MulticastReadyResponse struct {
+	Action   string `json:"action"`   // "start" or "wait"
+	Portbase int    `json:"portbase"` // UDP portbase to use
+}
+
+// MulticastPartDoneRequest is sent after a partition restore completes.
+type MulticastPartDoneRequest struct {
+	TaskID string `json:"taskId"`
+	Part   int    `json:"part"`
+}
+
 // ImageMetaRequest carries capture-time metadata the server stores alongside
 // the image so it can populate HandshakeResponse correctly during future
 // deploy tasks.
@@ -167,6 +185,21 @@ func (c *Client) SetImageMeta(ctx context.Context, req ImageMetaRequest) error {
 // Complete marks the task as finished or failed.
 func (c *Client) Complete(ctx context.Context, req CompleteRequest) error {
 	return c.post(ctx, "/complete", req, nil, true)
+}
+
+// MulticastReady polls the server to check if all clients are ready for a partition.
+// Returns the server response with action "start" or "wait".
+func (c *Client) MulticastReady(ctx context.Context, req MulticastReadyRequest) (*MulticastReadyResponse, error) {
+	var resp MulticastReadyResponse
+	if err := c.post(ctx, "/multicast/ready", req, &resp, true); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+
+// MulticastPartDone reports that the agent has finished restoring a partition.
+func (c *Client) MulticastPartDone(ctx context.Context, req MulticastPartDoneRequest) error {
+	return c.post(ctx, "/multicast/part-done", req, nil, true)
 }
 
 // SendLogs forwards a batch of log entries to fog-next.

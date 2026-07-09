@@ -9,8 +9,8 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/snapin"
+	"github.com/google/uuid"
 )
 
 // Snapin is the model entity for the Snapin schema.

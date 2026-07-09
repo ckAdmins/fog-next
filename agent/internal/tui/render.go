@@ -142,6 +142,30 @@ func (m Model) renderProgress() string {
 
 // ── partitions ───────────────────────────────────────────────────────
 
+// FSDisplayName returns a human-readable filesystem label for display in the TUI.
+// Raw/internal names like "dd", "?", or "" are mapped to descriptive strings.
+func FSDisplayName(raw string) string {
+	if raw == "" || raw == "?" {
+		return "unknown"
+	}
+	switch strings.ToLower(raw) {
+	case "dd":
+		return "raw"
+	case "hfsplus", "hfs+":
+		return "HFS+"
+	case "vfat", "fat12", "fat16", "fat32":
+		return "FAT"
+	case "ext2":
+		return "ext2"
+	case "ext3":
+		return "ext3"
+	case "ext4", "ext4dev", "extfs":
+		return "ext4"
+	default:
+		return raw
+	}
+}
+
 const maxPartRows = 16
 
 func (m Model) renderPartitions() string {
@@ -162,7 +186,7 @@ func (m Model) renderPartitions() string {
 
 func renderPartitionRow(b *strings.Builder, p PartStatus) {
 	dev := fmt.Sprintf("%-16s", p.Device)
-	fs := fmt.Sprintf("%-8s", p.FSType)
+	fs := fmt.Sprintf("%-8s", FSDisplayName(p.FSType))
 	size := fmt.Sprintf("%-10s", formatBytes(p.SizeBytes))
 
 	pct := clamp(p.Percent, 0, 100)

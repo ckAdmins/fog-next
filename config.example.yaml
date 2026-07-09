@@ -6,7 +6,7 @@
 
 server:
   # Address and port for the plain-HTTP listener.
-  http: ":80"
+  http: ":8080"
 
   # Address and port for the TLS listener (optional).
   # Leave tls_cert / tls_key empty to disable HTTPS.
@@ -15,7 +15,7 @@ server:
   tls_key: ""
 
   # Externally reachable URL — used in generated iPXE scripts.
-  base_url: "http://fog.example.com"
+  base_url: "http://192.168.122.1"
 
   # Time limit for reading request headers only. No read/write timeout is set
   # for the body so that large image uploads are never killed mid-transfer.
@@ -26,9 +26,9 @@ server:
 database:
   host: "localhost"
   port: 5432
-  name: "fog"
-  user: "fog"
-  password: "change_me"
+  name: "postgres"
+  user: "postgres"
+  password: "postgres"
   sslmode: "disable"   # disable | require | verify-full
 
   # Connection pool

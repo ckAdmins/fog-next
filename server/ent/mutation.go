@@ -12,7 +12,6 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/agentlog"
 	"github.com/ckAdmins/fog-next/ent/auditlog"
 	"github.com/ckAdmins/fog-next/ent/globalsetting"
@@ -42,6 +41,7 @@ import (
 	"github.com/ckAdmins/fog-next/ent/storagenode"
 	"github.com/ckAdmins/fog-next/ent/task"
 	"github.com/ckAdmins/fog-next/ent/user"
+	"github.com/google/uuid"
 )
 
 const (
@@ -11288,9 +11288,10 @@ type MulticastSessionMutation struct {
 	typ                 string
 	id                  *uuid.UUID
 	name                *string
-	port                *int
-	addport             *int
-	_interface          *string
+	portbase            *int
+	addportbase         *int
+	current_part        *int
+	addcurrent_part     *int
 	client_count        *int
 	addclient_count     *int
 	state               *string
@@ -11500,7 +11501,7 @@ func (m *MulticastSessionMutation) StorageNodeID() (r uuid.UUID, exists bool) {
 // OldStorageNodeID returns the old "storage_node_id" field's value of the MulticastSession entity.
 // If the MulticastSession object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MulticastSessionMutation) OldStorageNodeID(ctx context.Context) (v uuid.UUID, err error) {
+func (m *MulticastSessionMutation) OldStorageNodeID(ctx context.Context) (v *uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldStorageNodeID is only allowed on UpdateOne operations")
 	}
@@ -11514,101 +11515,134 @@ func (m *MulticastSessionMutation) OldStorageNodeID(ctx context.Context) (v uuid
 	return oldValue.StorageNodeID, nil
 }
 
+// ClearStorageNodeID clears the value of the "storage_node_id" field.
+func (m *MulticastSessionMutation) ClearStorageNodeID() {
+	m.storage_node = nil
+	m.clearedFields[multicastsession.FieldStorageNodeID] = struct{}{}
+}
+
+// StorageNodeIDCleared returns if the "storage_node_id" field was cleared in this mutation.
+func (m *MulticastSessionMutation) StorageNodeIDCleared() bool {
+	_, ok := m.clearedFields[multicastsession.FieldStorageNodeID]
+	return ok
+}
+
 // ResetStorageNodeID resets all changes to the "storage_node_id" field.
 func (m *MulticastSessionMutation) ResetStorageNodeID() {
 	m.storage_node = nil
+	delete(m.clearedFields, multicastsession.FieldStorageNodeID)
 }
 
-// SetPort sets the "port" field.
-func (m *MulticastSessionMutation) SetPort(i int) {
-	m.port = &i
-	m.addport = nil
+// SetPortbase sets the "portbase" field.
+func (m *MulticastSessionMutation) SetPortbase(i int) {
+	m.portbase = &i
+	m.addportbase = nil
 }
 
-// Port returns the value of the "port" field in the mutation.
-func (m *MulticastSessionMutation) Port() (r int, exists bool) {
-	v := m.port
+// Portbase returns the value of the "portbase" field in the mutation.
+func (m *MulticastSessionMutation) Portbase() (r int, exists bool) {
+	v := m.portbase
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldPort returns the old "port" field's value of the MulticastSession entity.
+// OldPortbase returns the old "portbase" field's value of the MulticastSession entity.
 // If the MulticastSession object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MulticastSessionMutation) OldPort(ctx context.Context) (v int, err error) {
+func (m *MulticastSessionMutation) OldPortbase(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPort is only allowed on UpdateOne operations")
+		return v, errors.New("OldPortbase is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPort requires an ID field in the mutation")
+		return v, errors.New("OldPortbase requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPort: %w", err)
+		return v, fmt.Errorf("querying old value for OldPortbase: %w", err)
 	}
-	return oldValue.Port, nil
+	return oldValue.Portbase, nil
 }
 
-// AddPort adds i to the "port" field.
-func (m *MulticastSessionMutation) AddPort(i int) {
-	if m.addport != nil {
-		*m.addport += i
+// AddPortbase adds i to the "portbase" field.
+func (m *MulticastSessionMutation) AddPortbase(i int) {
+	if m.addportbase != nil {
+		*m.addportbase += i
 	} else {
-		m.addport = &i
+		m.addportbase = &i
 	}
 }
 
-// AddedPort returns the value that was added to the "port" field in this mutation.
-func (m *MulticastSessionMutation) AddedPort() (r int, exists bool) {
-	v := m.addport
+// AddedPortbase returns the value that was added to the "portbase" field in this mutation.
+func (m *MulticastSessionMutation) AddedPortbase() (r int, exists bool) {
+	v := m.addportbase
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetPort resets all changes to the "port" field.
-func (m *MulticastSessionMutation) ResetPort() {
-	m.port = nil
-	m.addport = nil
+// ResetPortbase resets all changes to the "portbase" field.
+func (m *MulticastSessionMutation) ResetPortbase() {
+	m.portbase = nil
+	m.addportbase = nil
 }
 
-// SetInterface sets the "interface" field.
-func (m *MulticastSessionMutation) SetInterface(s string) {
-	m._interface = &s
+// SetCurrentPart sets the "current_part" field.
+func (m *MulticastSessionMutation) SetCurrentPart(i int) {
+	m.current_part = &i
+	m.addcurrent_part = nil
 }
 
-// Interface returns the value of the "interface" field in the mutation.
-func (m *MulticastSessionMutation) Interface() (r string, exists bool) {
-	v := m._interface
+// CurrentPart returns the value of the "current_part" field in the mutation.
+func (m *MulticastSessionMutation) CurrentPart() (r int, exists bool) {
+	v := m.current_part
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldInterface returns the old "interface" field's value of the MulticastSession entity.
+// OldCurrentPart returns the old "current_part" field's value of the MulticastSession entity.
 // If the MulticastSession object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MulticastSessionMutation) OldInterface(ctx context.Context) (v string, err error) {
+func (m *MulticastSessionMutation) OldCurrentPart(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldInterface is only allowed on UpdateOne operations")
+		return v, errors.New("OldCurrentPart is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldInterface requires an ID field in the mutation")
+		return v, errors.New("OldCurrentPart requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldInterface: %w", err)
+		return v, fmt.Errorf("querying old value for OldCurrentPart: %w", err)
 	}
-	return oldValue.Interface, nil
+	return oldValue.CurrentPart, nil
 }
 
-// ResetInterface resets all changes to the "interface" field.
-func (m *MulticastSessionMutation) ResetInterface() {
-	m._interface = nil
+// AddCurrentPart adds i to the "current_part" field.
+func (m *MulticastSessionMutation) AddCurrentPart(i int) {
+	if m.addcurrent_part != nil {
+		*m.addcurrent_part += i
+	} else {
+		m.addcurrent_part = &i
+	}
+}
+
+// AddedCurrentPart returns the value that was added to the "current_part" field in this mutation.
+func (m *MulticastSessionMutation) AddedCurrentPart() (r int, exists bool) {
+	v := m.addcurrent_part
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCurrentPart resets all changes to the "current_part" field.
+func (m *MulticastSessionMutation) ResetCurrentPart() {
+	m.current_part = nil
+	m.addcurrent_part = nil
 }
 
 // SetClientCount sets the "client_count" field.
@@ -11872,7 +11906,7 @@ func (m *MulticastSessionMutation) ClearStorageNode() {
 
 // StorageNodeCleared reports if the "storage_node" edge to the StorageNode entity was cleared.
 func (m *MulticastSessionMutation) StorageNodeCleared() bool {
-	return m.clearedstorage_node
+	return m.StorageNodeIDCleared() || m.clearedstorage_node
 }
 
 // StorageNodeIDs returns the "storage_node" edge IDs in the mutation.
@@ -11935,11 +11969,11 @@ func (m *MulticastSessionMutation) Fields() []string {
 	if m.storage_node != nil {
 		fields = append(fields, multicastsession.FieldStorageNodeID)
 	}
-	if m.port != nil {
-		fields = append(fields, multicastsession.FieldPort)
+	if m.portbase != nil {
+		fields = append(fields, multicastsession.FieldPortbase)
 	}
-	if m._interface != nil {
-		fields = append(fields, multicastsession.FieldInterface)
+	if m.current_part != nil {
+		fields = append(fields, multicastsession.FieldCurrentPart)
 	}
 	if m.client_count != nil {
 		fields = append(fields, multicastsession.FieldClientCount)
@@ -11970,10 +12004,10 @@ func (m *MulticastSessionMutation) Field(name string) (ent.Value, bool) {
 		return m.ImageID()
 	case multicastsession.FieldStorageNodeID:
 		return m.StorageNodeID()
-	case multicastsession.FieldPort:
-		return m.Port()
-	case multicastsession.FieldInterface:
-		return m.Interface()
+	case multicastsession.FieldPortbase:
+		return m.Portbase()
+	case multicastsession.FieldCurrentPart:
+		return m.CurrentPart()
 	case multicastsession.FieldClientCount:
 		return m.ClientCount()
 	case multicastsession.FieldState:
@@ -11999,10 +12033,10 @@ func (m *MulticastSessionMutation) OldField(ctx context.Context, name string) (e
 		return m.OldImageID(ctx)
 	case multicastsession.FieldStorageNodeID:
 		return m.OldStorageNodeID(ctx)
-	case multicastsession.FieldPort:
-		return m.OldPort(ctx)
-	case multicastsession.FieldInterface:
-		return m.OldInterface(ctx)
+	case multicastsession.FieldPortbase:
+		return m.OldPortbase(ctx)
+	case multicastsession.FieldCurrentPart:
+		return m.OldCurrentPart(ctx)
 	case multicastsession.FieldClientCount:
 		return m.OldClientCount(ctx)
 	case multicastsession.FieldState:
@@ -12043,19 +12077,19 @@ func (m *MulticastSessionMutation) SetField(name string, value ent.Value) error 
 		}
 		m.SetStorageNodeID(v)
 		return nil
-	case multicastsession.FieldPort:
+	case multicastsession.FieldPortbase:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetPort(v)
+		m.SetPortbase(v)
 		return nil
-	case multicastsession.FieldInterface:
-		v, ok := value.(string)
+	case multicastsession.FieldCurrentPart:
+		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetInterface(v)
+		m.SetCurrentPart(v)
 		return nil
 	case multicastsession.FieldClientCount:
 		v, ok := value.(int)
@@ -12100,8 +12134,11 @@ func (m *MulticastSessionMutation) SetField(name string, value ent.Value) error 
 // this mutation.
 func (m *MulticastSessionMutation) AddedFields() []string {
 	var fields []string
-	if m.addport != nil {
-		fields = append(fields, multicastsession.FieldPort)
+	if m.addportbase != nil {
+		fields = append(fields, multicastsession.FieldPortbase)
+	}
+	if m.addcurrent_part != nil {
+		fields = append(fields, multicastsession.FieldCurrentPart)
 	}
 	if m.addclient_count != nil {
 		fields = append(fields, multicastsession.FieldClientCount)
@@ -12114,8 +12151,10 @@ func (m *MulticastSessionMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *MulticastSessionMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case multicastsession.FieldPort:
-		return m.AddedPort()
+	case multicastsession.FieldPortbase:
+		return m.AddedPortbase()
+	case multicastsession.FieldCurrentPart:
+		return m.AddedCurrentPart()
 	case multicastsession.FieldClientCount:
 		return m.AddedClientCount()
 	}
@@ -12127,12 +12166,19 @@ func (m *MulticastSessionMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *MulticastSessionMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case multicastsession.FieldPort:
+	case multicastsession.FieldPortbase:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddPort(v)
+		m.AddPortbase(v)
+		return nil
+	case multicastsession.FieldCurrentPart:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCurrentPart(v)
 		return nil
 	case multicastsession.FieldClientCount:
 		v, ok := value.(int)
@@ -12149,6 +12195,9 @@ func (m *MulticastSessionMutation) AddField(name string, value ent.Value) error 
 // mutation.
 func (m *MulticastSessionMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(multicastsession.FieldStorageNodeID) {
+		fields = append(fields, multicastsession.FieldStorageNodeID)
+	}
 	if m.FieldCleared(multicastsession.FieldStartedAt) {
 		fields = append(fields, multicastsession.FieldStartedAt)
 	}
@@ -12169,6 +12218,9 @@ func (m *MulticastSessionMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *MulticastSessionMutation) ClearField(name string) error {
 	switch name {
+	case multicastsession.FieldStorageNodeID:
+		m.ClearStorageNodeID()
+		return nil
 	case multicastsession.FieldStartedAt:
 		m.ClearStartedAt()
 		return nil
@@ -12192,11 +12244,11 @@ func (m *MulticastSessionMutation) ResetField(name string) error {
 	case multicastsession.FieldStorageNodeID:
 		m.ResetStorageNodeID()
 		return nil
-	case multicastsession.FieldPort:
-		m.ResetPort()
+	case multicastsession.FieldPortbase:
+		m.ResetPortbase()
 		return nil
-	case multicastsession.FieldInterface:
-		m.ResetInterface()
+	case multicastsession.FieldCurrentPart:
+		m.ResetCurrentPart()
 		return nil
 	case multicastsession.FieldClientCount:
 		m.ResetClientCount()
@@ -21458,6 +21510,7 @@ type TaskMutation struct {
 	name                 *string
 	_type                *task.Type
 	state                *task.State
+	multicast_session_id *uuid.UUID
 	is_group             *bool
 	is_forced            *bool
 	is_shutdown          *bool
@@ -21885,6 +21938,55 @@ func (m *TaskMutation) StorageGroupIDCleared() bool {
 func (m *TaskMutation) ResetStorageGroupID() {
 	m.storage_group = nil
 	delete(m.clearedFields, task.FieldStorageGroupID)
+}
+
+// SetMulticastSessionID sets the "multicast_session_id" field.
+func (m *TaskMutation) SetMulticastSessionID(u uuid.UUID) {
+	m.multicast_session_id = &u
+}
+
+// MulticastSessionID returns the value of the "multicast_session_id" field in the mutation.
+func (m *TaskMutation) MulticastSessionID() (r uuid.UUID, exists bool) {
+	v := m.multicast_session_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMulticastSessionID returns the old "multicast_session_id" field's value of the Task entity.
+// If the Task object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TaskMutation) OldMulticastSessionID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMulticastSessionID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMulticastSessionID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMulticastSessionID: %w", err)
+	}
+	return oldValue.MulticastSessionID, nil
+}
+
+// ClearMulticastSessionID clears the value of the "multicast_session_id" field.
+func (m *TaskMutation) ClearMulticastSessionID() {
+	m.multicast_session_id = nil
+	m.clearedFields[task.FieldMulticastSessionID] = struct{}{}
+}
+
+// MulticastSessionIDCleared returns if the "multicast_session_id" field was cleared in this mutation.
+func (m *TaskMutation) MulticastSessionIDCleared() bool {
+	_, ok := m.clearedFields[task.FieldMulticastSessionID]
+	return ok
+}
+
+// ResetMulticastSessionID resets all changes to the "multicast_session_id" field.
+func (m *TaskMutation) ResetMulticastSessionID() {
+	m.multicast_session_id = nil
+	delete(m.clearedFields, task.FieldMulticastSessionID)
 }
 
 // SetIsGroup sets the "is_group" field.
@@ -22653,7 +22755,7 @@ func (m *TaskMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TaskMutation) Fields() []string {
-	fields := make([]string, 0, 19)
+	fields := make([]string, 0, 20)
 	if m.name != nil {
 		fields = append(fields, task.FieldName)
 	}
@@ -22674,6 +22776,9 @@ func (m *TaskMutation) Fields() []string {
 	}
 	if m.storage_group != nil {
 		fields = append(fields, task.FieldStorageGroupID)
+	}
+	if m.multicast_session_id != nil {
+		fields = append(fields, task.FieldMulticastSessionID)
 	}
 	if m.is_group != nil {
 		fields = append(fields, task.FieldIsGroup)
@@ -22733,6 +22838,8 @@ func (m *TaskMutation) Field(name string) (ent.Value, bool) {
 		return m.StorageNodeID()
 	case task.FieldStorageGroupID:
 		return m.StorageGroupID()
+	case task.FieldMulticastSessionID:
+		return m.MulticastSessionID()
 	case task.FieldIsGroup:
 		return m.IsGroup()
 	case task.FieldIsForced:
@@ -22780,6 +22887,8 @@ func (m *TaskMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldStorageNodeID(ctx)
 	case task.FieldStorageGroupID:
 		return m.OldStorageGroupID(ctx)
+	case task.FieldMulticastSessionID:
+		return m.OldMulticastSessionID(ctx)
 	case task.FieldIsGroup:
 		return m.OldIsGroup(ctx)
 	case task.FieldIsForced:
@@ -22861,6 +22970,13 @@ func (m *TaskMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetStorageGroupID(v)
+		return nil
+	case task.FieldMulticastSessionID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMulticastSessionID(v)
 		return nil
 	case task.FieldIsGroup:
 		v, ok := value.(bool)
@@ -23024,6 +23140,9 @@ func (m *TaskMutation) ClearedFields() []string {
 	if m.FieldCleared(task.FieldStorageGroupID) {
 		fields = append(fields, task.FieldStorageGroupID)
 	}
+	if m.FieldCleared(task.FieldMulticastSessionID) {
+		fields = append(fields, task.FieldMulticastSessionID)
+	}
 	if m.FieldCleared(task.FieldScheduledAt) {
 		fields = append(fields, task.FieldScheduledAt)
 	}
@@ -23055,6 +23174,9 @@ func (m *TaskMutation) ClearField(name string) error {
 		return nil
 	case task.FieldStorageGroupID:
 		m.ClearStorageGroupID()
+		return nil
+	case task.FieldMulticastSessionID:
+		m.ClearMulticastSessionID()
 		return nil
 	case task.FieldScheduledAt:
 		m.ClearScheduledAt()
@@ -23093,6 +23215,9 @@ func (m *TaskMutation) ResetField(name string) error {
 		return nil
 	case task.FieldStorageGroupID:
 		m.ResetStorageGroupID()
+		return nil
+	case task.FieldMulticastSessionID:
+		m.ResetMulticastSessionID()
 		return nil
 	case task.FieldIsGroup:
 		m.ResetIsGroup()

@@ -11,10 +11,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/host"
 	"github.com/ckAdmins/fog-next/ent/inventory"
 	"github.com/ckAdmins/fog-next/ent/predicate"
+	"github.com/google/uuid"
 )
 
 // InventoryUpdate is the builder for updating Inventory entities.

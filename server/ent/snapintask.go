@@ -9,10 +9,10 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/snapin"
 	"github.com/ckAdmins/fog-next/ent/snapinjob"
 	"github.com/ckAdmins/fog-next/ent/snapintask"
+	"github.com/google/uuid"
 )
 
 // SnapinTask is the model entity for the SnapinTask schema.

@@ -7,8 +7,8 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/predicate"
+	"github.com/google/uuid"
 )
 
 // ID filters vertices based on their ID field.
@@ -71,14 +71,14 @@ func StorageNodeID(v uuid.UUID) predicate.MulticastSession {
 	return predicate.MulticastSession(sql.FieldEQ(FieldStorageNodeID, v))
 }
 
-// Port applies equality check predicate on the "port" field. It's identical to PortEQ.
-func Port(v int) predicate.MulticastSession {
-	return predicate.MulticastSession(sql.FieldEQ(FieldPort, v))
+// Portbase applies equality check predicate on the "portbase" field. It's identical to PortbaseEQ.
+func Portbase(v int) predicate.MulticastSession {
+	return predicate.MulticastSession(sql.FieldEQ(FieldPortbase, v))
 }
 
-// Interface applies equality check predicate on the "interface" field. It's identical to InterfaceEQ.
-func Interface(v string) predicate.MulticastSession {
-	return predicate.MulticastSession(sql.FieldEQ(FieldInterface, v))
+// CurrentPart applies equality check predicate on the "current_part" field. It's identical to CurrentPartEQ.
+func CurrentPart(v int) predicate.MulticastSession {
+	return predicate.MulticastSession(sql.FieldEQ(FieldCurrentPart, v))
 }
 
 // ClientCount applies equality check predicate on the "client_count" field. It's identical to ClientCountEQ.
@@ -211,109 +211,94 @@ func StorageNodeIDNotIn(vs ...uuid.UUID) predicate.MulticastSession {
 	return predicate.MulticastSession(sql.FieldNotIn(FieldStorageNodeID, vs...))
 }
 
-// PortEQ applies the EQ predicate on the "port" field.
-func PortEQ(v int) predicate.MulticastSession {
-	return predicate.MulticastSession(sql.FieldEQ(FieldPort, v))
+// StorageNodeIDIsNil applies the IsNil predicate on the "storage_node_id" field.
+func StorageNodeIDIsNil() predicate.MulticastSession {
+	return predicate.MulticastSession(sql.FieldIsNull(FieldStorageNodeID))
 }
 
-// PortNEQ applies the NEQ predicate on the "port" field.
-func PortNEQ(v int) predicate.MulticastSession {
-	return predicate.MulticastSession(sql.FieldNEQ(FieldPort, v))
+// StorageNodeIDNotNil applies the NotNil predicate on the "storage_node_id" field.
+func StorageNodeIDNotNil() predicate.MulticastSession {
+	return predicate.MulticastSession(sql.FieldNotNull(FieldStorageNodeID))
 }
 
-// PortIn applies the In predicate on the "port" field.
-func PortIn(vs ...int) predicate.MulticastSession {
-	return predicate.MulticastSession(sql.FieldIn(FieldPort, vs...))
+// PortbaseEQ applies the EQ predicate on the "portbase" field.
+func PortbaseEQ(v int) predicate.MulticastSession {
+	return predicate.MulticastSession(sql.FieldEQ(FieldPortbase, v))
 }
 
-// PortNotIn applies the NotIn predicate on the "port" field.
-func PortNotIn(vs ...int) predicate.MulticastSession {
-	return predicate.MulticastSession(sql.FieldNotIn(FieldPort, vs...))
+// PortbaseNEQ applies the NEQ predicate on the "portbase" field.
+func PortbaseNEQ(v int) predicate.MulticastSession {
+	return predicate.MulticastSession(sql.FieldNEQ(FieldPortbase, v))
 }
 
-// PortGT applies the GT predicate on the "port" field.
-func PortGT(v int) predicate.MulticastSession {
-	return predicate.MulticastSession(sql.FieldGT(FieldPort, v))
+// PortbaseIn applies the In predicate on the "portbase" field.
+func PortbaseIn(vs ...int) predicate.MulticastSession {
+	return predicate.MulticastSession(sql.FieldIn(FieldPortbase, vs...))
 }
 
-// PortGTE applies the GTE predicate on the "port" field.
-func PortGTE(v int) predicate.MulticastSession {
-	return predicate.MulticastSession(sql.FieldGTE(FieldPort, v))
+// PortbaseNotIn applies the NotIn predicate on the "portbase" field.
+func PortbaseNotIn(vs ...int) predicate.MulticastSession {
+	return predicate.MulticastSession(sql.FieldNotIn(FieldPortbase, vs...))
 }
 
-// PortLT applies the LT predicate on the "port" field.
-func PortLT(v int) predicate.MulticastSession {
-	return predicate.MulticastSession(sql.FieldLT(FieldPort, v))
+// PortbaseGT applies the GT predicate on the "portbase" field.
+func PortbaseGT(v int) predicate.MulticastSession {
+	return predicate.MulticastSession(sql.FieldGT(FieldPortbase, v))
 }
 
-// PortLTE applies the LTE predicate on the "port" field.
-func PortLTE(v int) predicate.MulticastSession {
-	return predicate.MulticastSession(sql.FieldLTE(FieldPort, v))
+// PortbaseGTE applies the GTE predicate on the "portbase" field.
+func PortbaseGTE(v int) predicate.MulticastSession {
+	return predicate.MulticastSession(sql.FieldGTE(FieldPortbase, v))
 }
 
-// InterfaceEQ applies the EQ predicate on the "interface" field.
-func InterfaceEQ(v string) predicate.MulticastSession {
-	return predicate.MulticastSession(sql.FieldEQ(FieldInterface, v))
+// PortbaseLT applies the LT predicate on the "portbase" field.
+func PortbaseLT(v int) predicate.MulticastSession {
+	return predicate.MulticastSession(sql.FieldLT(FieldPortbase, v))
 }
 
-// InterfaceNEQ applies the NEQ predicate on the "interface" field.
-func InterfaceNEQ(v string) predicate.MulticastSession {
-	return predicate.MulticastSession(sql.FieldNEQ(FieldInterface, v))
+// PortbaseLTE applies the LTE predicate on the "portbase" field.
+func PortbaseLTE(v int) predicate.MulticastSession {
+	return predicate.MulticastSession(sql.FieldLTE(FieldPortbase, v))
 }
 
-// InterfaceIn applies the In predicate on the "interface" field.
-func InterfaceIn(vs ...string) predicate.MulticastSession {
-	return predicate.MulticastSession(sql.FieldIn(FieldInterface, vs...))
+// CurrentPartEQ applies the EQ predicate on the "current_part" field.
+func CurrentPartEQ(v int) predicate.MulticastSession {
+	return predicate.MulticastSession(sql.FieldEQ(FieldCurrentPart, v))
 }
 
-// InterfaceNotIn applies the NotIn predicate on the "interface" field.
-func InterfaceNotIn(vs ...string) predicate.MulticastSession {
-	return predicate.MulticastSession(sql.FieldNotIn(FieldInterface, vs...))
+// CurrentPartNEQ applies the NEQ predicate on the "current_part" field.
+func CurrentPartNEQ(v int) predicate.MulticastSession {
+	return predicate.MulticastSession(sql.FieldNEQ(FieldCurrentPart, v))
 }
 
-// InterfaceGT applies the GT predicate on the "interface" field.
-func InterfaceGT(v string) predicate.MulticastSession {
-	return predicate.MulticastSession(sql.FieldGT(FieldInterface, v))
+// CurrentPartIn applies the In predicate on the "current_part" field.
+func CurrentPartIn(vs ...int) predicate.MulticastSession {
+	return predicate.MulticastSession(sql.FieldIn(FieldCurrentPart, vs...))
 }
 
-// InterfaceGTE applies the GTE predicate on the "interface" field.
-func InterfaceGTE(v string) predicate.MulticastSession {
-	return predicate.MulticastSession(sql.FieldGTE(FieldInterface, v))
+// CurrentPartNotIn applies the NotIn predicate on the "current_part" field.
+func CurrentPartNotIn(vs ...int) predicate.MulticastSession {
+	return predicate.MulticastSession(sql.FieldNotIn(FieldCurrentPart, vs...))
 }
 
-// InterfaceLT applies the LT predicate on the "interface" field.
-func InterfaceLT(v string) predicate.MulticastSession {
-	return predicate.MulticastSession(sql.FieldLT(FieldInterface, v))
+// CurrentPartGT applies the GT predicate on the "current_part" field.
+func CurrentPartGT(v int) predicate.MulticastSession {
+	return predicate.MulticastSession(sql.FieldGT(FieldCurrentPart, v))
 }
 
-// InterfaceLTE applies the LTE predicate on the "interface" field.
-func InterfaceLTE(v string) predicate.MulticastSession {
-	return predicate.MulticastSession(sql.FieldLTE(FieldInterface, v))
+// CurrentPartGTE applies the GTE predicate on the "current_part" field.
+func CurrentPartGTE(v int) predicate.MulticastSession {
+	return predicate.MulticastSession(sql.FieldGTE(FieldCurrentPart, v))
 }
 
-// InterfaceContains applies the Contains predicate on the "interface" field.
-func InterfaceContains(v string) predicate.MulticastSession {
-	return predicate.MulticastSession(sql.FieldContains(FieldInterface, v))
+// CurrentPartLT applies the LT predicate on the "current_part" field.
+func CurrentPartLT(v int) predicate.MulticastSession {
+	return predicate.MulticastSession(sql.FieldLT(FieldCurrentPart, v))
 }
 
-// InterfaceHasPrefix applies the HasPrefix predicate on the "interface" field.
-func InterfaceHasPrefix(v string) predicate.MulticastSession {
-	return predicate.MulticastSession(sql.FieldHasPrefix(FieldInterface, v))
-}
-
-// InterfaceHasSuffix applies the HasSuffix predicate on the "interface" field.
-func InterfaceHasSuffix(v string) predicate.MulticastSession {
-	return predicate.MulticastSession(sql.FieldHasSuffix(FieldInterface, v))
-}
-
-// InterfaceEqualFold applies the EqualFold predicate on the "interface" field.
-func InterfaceEqualFold(v string) predicate.MulticastSession {
-	return predicate.MulticastSession(sql.FieldEqualFold(FieldInterface, v))
-}
-
-// InterfaceContainsFold applies the ContainsFold predicate on the "interface" field.
-func InterfaceContainsFold(v string) predicate.MulticastSession {
-	return predicate.MulticastSession(sql.FieldContainsFold(FieldInterface, v))
+// CurrentPartLTE applies the LTE predicate on the "current_part" field.
+func CurrentPartLTE(v int) predicate.MulticastSession {
+	return predicate.MulticastSession(sql.FieldLTE(FieldCurrentPart, v))
 }
 
 // ClientCountEQ applies the EQ predicate on the "client_count" field.

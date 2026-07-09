@@ -8,8 +8,8 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/ostype"
+	"github.com/google/uuid"
 )
 
 // OSType is the model entity for the OSType schema.

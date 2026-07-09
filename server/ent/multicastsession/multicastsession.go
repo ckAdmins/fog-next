@@ -21,10 +21,10 @@ const (
 	FieldImageID = "image_id"
 	// FieldStorageNodeID holds the string denoting the storage_node_id field in the database.
 	FieldStorageNodeID = "storage_node_id"
-	// FieldPort holds the string denoting the port field in the database.
-	FieldPort = "port"
-	// FieldInterface holds the string denoting the interface field in the database.
-	FieldInterface = "interface"
+	// FieldPortbase holds the string denoting the portbase field in the database.
+	FieldPortbase = "portbase"
+	// FieldCurrentPart holds the string denoting the current_part field in the database.
+	FieldCurrentPart = "current_part"
 	// FieldClientCount holds the string denoting the client_count field in the database.
 	FieldClientCount = "client_count"
 	// FieldState holds the string denoting the state field in the database.
@@ -63,8 +63,8 @@ var Columns = []string{
 	FieldName,
 	FieldImageID,
 	FieldStorageNodeID,
-	FieldPort,
-	FieldInterface,
+	FieldPortbase,
+	FieldCurrentPart,
 	FieldClientCount,
 	FieldState,
 	FieldStartedAt,
@@ -85,8 +85,10 @@ func ValidColumn(column string) bool {
 var (
 	// DefaultName holds the default value on creation for the "name" field.
 	DefaultName string
-	// DefaultInterface holds the default value on creation for the "interface" field.
-	DefaultInterface string
+	// DefaultPortbase holds the default value on creation for the "portbase" field.
+	DefaultPortbase int
+	// DefaultCurrentPart holds the default value on creation for the "current_part" field.
+	DefaultCurrentPart int
 	// DefaultClientCount holds the default value on creation for the "client_count" field.
 	DefaultClientCount int
 	// DefaultState holds the default value on creation for the "state" field.
@@ -120,14 +122,14 @@ func ByStorageNodeID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStorageNodeID, opts...).ToFunc()
 }
 
-// ByPort orders the results by the port field.
-func ByPort(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldPort, opts...).ToFunc()
+// ByPortbase orders the results by the portbase field.
+func ByPortbase(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPortbase, opts...).ToFunc()
 }
 
-// ByInterface orders the results by the interface field.
-func ByInterface(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldInterface, opts...).ToFunc()
+// ByCurrentPart orders the results by the current_part field.
+func ByCurrentPart(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCurrentPart, opts...).ToFunc()
 }
 
 // ByClientCount orders the results by the client_count field.

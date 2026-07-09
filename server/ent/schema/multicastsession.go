@@ -30,12 +30,12 @@ func (MulticastSession) Fields() []ent.Field {
 			StructTag(`json:"name"`),
 		field.UUID("image_id", uuid.UUID{}).
 			StructTag(`json:"imageId"`),
-		field.UUID("storage_node_id", uuid.UUID{}).
-			StructTag(`json:"storageNodeId"`),
-		field.Int("port").
-			StructTag(`json:"port"`),
-		field.String("interface").Default("").
-			StructTag(`json:"interface"`),
+		field.UUID("storage_node_id", uuid.UUID{}).Optional().Nillable().
+			StructTag(`json:"storageNodeId,omitempty"`),
+		field.Int("portbase").Default(9000).
+			StructTag(`json:"portbase"`),
+		field.Int("current_part").Default(0).
+			StructTag(`json:"currentPart"`),
 		field.Int("client_count").Default(0).
 			StructTag(`json:"clientCount"`),
 		field.String("state").Default("pending").
@@ -52,6 +52,6 @@ func (MulticastSession) Fields() []ent.Field {
 func (MulticastSession) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("image", Image.Type).Ref("multicast_sessions").Field("image_id").Unique().Required(),
-		edge.From("storage_node", StorageNode.Type).Ref("multicast_sessions").Field("storage_node_id").Unique().Required(),
+		edge.From("storage_node", StorageNode.Type).Ref("multicast_sessions").Field("storage_node_id").Unique(),
 	}
 }

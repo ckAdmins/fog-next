@@ -10,11 +10,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/host"
 	"github.com/ckAdmins/fog-next/ent/predicate"
 	"github.com/ckAdmins/fog-next/ent/snapin"
 	"github.com/ckAdmins/fog-next/ent/snapinassoc"
+	"github.com/google/uuid"
 )
 
 // SnapinAssocUpdate is the builder for updating SnapinAssoc entities.

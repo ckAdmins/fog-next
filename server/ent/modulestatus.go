@@ -8,9 +8,9 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/module"
 	"github.com/ckAdmins/fog-next/ent/modulestatus"
+	"github.com/google/uuid"
 )
 
 // ModuleStatus is the model entity for the ModuleStatus schema.

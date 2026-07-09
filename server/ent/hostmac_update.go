@@ -10,10 +10,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 	"github.com/ckAdmins/fog-next/ent/host"
 	"github.com/ckAdmins/fog-next/ent/hostmac"
 	"github.com/ckAdmins/fog-next/ent/predicate"
+	"github.com/google/uuid"
 )
 
 // HostMACUpdate is the builder for updating HostMAC entities.
