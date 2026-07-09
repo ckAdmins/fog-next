@@ -77,3 +77,4 @@ run = [
     "curl -fsSL -o ${IPXE_DIR}/ipxe.efi https://boot.ipxe.org/x86_64-efi/ipxe.efi",
     "curl -fsSL -o ${IPXE_DIR}/arm64-efi/snponly.efi https://boot.ipxe.org/x86_64-efi/snponly.efi",
 ]
+
